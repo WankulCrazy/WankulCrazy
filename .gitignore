@@ -1,0 +1,17 @@
+*/node_modules/*
+/WankulCrazy_JSONConverter/textures/*
+*/.vscode/*
+*/.vs/*
+.vs/*
+*/.idea/*
+*/.DS_Store/*
+*/.git/*
+*/.gitignore/*
+*/.gitattributes/*
+*/.gitmodules/*
+*/.gitkeep/*
+*/.gitlab-ci.yml/*
+*/.gitlab
+/WankulCrazyPlugin/data/*
+/WankulCrazyPlugin/obj/*
+/WankulCrazyPlugin/bin/*

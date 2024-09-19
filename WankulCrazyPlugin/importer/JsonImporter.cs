@@ -1,0 +1,102 @@
+﻿using UnityEngine;
+using System.IO;
+using System.Collections.Generic;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using BepInEx.Logging;
+
+namespace WankulCrazyPlugin;
+public class JsonImporter
+{
+
+    public static void ImportJson()
+    {
+        string pluginPath = Application.dataPath + "/../BepInEx/plugins";
+        Plugin.Logger.LogInfo("Plugin path: " + pluginPath);
+        string path = pluginPath + "/data/formated_wankul_cards.json";
+
+        string jsonContent = File.ReadAllText(path);
+
+        try
+        {
+            JObject jsonObject = JObject.Parse(jsonContent);
+            List<CardData> cards = DeserializeCards(jsonObject);
+
+            if (cards.Count > 0)
+            {
+                CreateCardsData(cards);
+                CardsData cardsData = CardsData.Instance;
+                Plugin.Logger.LogInfo("Cards data loaded: " + cardsData.cards.Count + " cards");
+            }
+            else
+            {
+                Plugin.Logger.LogError("Failed to deserialize JSON: cards list is empty");
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Plugin.Logger.LogError("Failed to deserialize JSON: " + ex.Message);
+        }
+
+    }
+
+    private static List<CardData> DeserializeCards(JObject jsonObject)
+    {
+        List<CardData> cards = [];
+
+        JToken wankulsToken = jsonObject["wankuls"];
+        if (wankulsToken != null)
+        {
+            List<WankulCardData> wankuls = wankulsToken.ToObject<List<WankulCardData>>(new JsonSerializer
+            {
+                TypeNameHandling = TypeNameHandling.Auto
+            });
+            cards.AddRange(wankuls);
+        }
+
+        JToken terrainsToken = jsonObject["terrains"];
+        if (terrainsToken != null)
+        {
+            List<TerrainCardData> terrains = terrainsToken.ToObject<List<TerrainCardData>>(new JsonSerializer
+            {
+                TypeNameHandling = TypeNameHandling.Auto
+            });
+            cards.AddRange(terrains);
+        }
+
+        return cards;
+    }
+
+    private static void CreateCardsData(List<CardData> cards)
+    {
+        CardsData cardsData = CardsData.Instance;
+
+        cardsData.cards = cards;
+        foreach (var card in cardsData.cards)
+        {
+            if (!string.IsNullOrEmpty(card.TexturePath))
+            {
+                string pluginPath = Application.dataPath + "/../BepInEx/plugins";
+                string dataPath = pluginPath + "/data/";
+                string texturepath = dataPath + card.TexturePath;
+                Texture2D texture = LoadTexture(texturepath);
+                if (texture != null)
+                {
+                    card.Texture = texture;
+                }
+                else
+                {
+                    Plugin.Logger.LogError("Failed to load texture: " + texturepath);
+                }
+            }
+        }
+    }
+
+    private static Texture2D LoadTexture(string path)
+    {
+        byte[] bytes = System.IO.File.ReadAllBytes(path);
+        Texture2D texture = new Texture2D(2, 2);
+        texture.LoadImage(bytes);
+        return texture;
+    }
+}
