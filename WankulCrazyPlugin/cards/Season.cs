@@ -1,6 +1,6 @@
 ﻿namespace WankulCrazyPlugin
 {
-    public enum ESeason
+    public enum Season
     {
         S01,
         S02,

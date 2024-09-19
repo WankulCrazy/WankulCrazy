@@ -45,6 +45,5 @@
   
   <ItemGroup>
     <Folder Include="importer\" />
-    <Folder Include="patch\" />
   </ItemGroup>
 </Project>

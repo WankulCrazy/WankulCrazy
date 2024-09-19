@@ -10,18 +10,9 @@ public class ReplacingAllCards
 
     private static int cardIndex = 0; // Changed to static
 
-    static bool Start_patch(TitleScreen __instance)
-    {
-        Plugin.Logger.LogInfo("Harmony Loaded and functionning");
-        // Import JSON data
-        JsonImporter.ImportJson();
-        Plugin.Logger.LogInfo("JSON data imported");
-        return true;
-    }
-
     static void SetCardUI_patch(CardUI __instance)
     {
-        CardsData cardsData = CardsData.Instance;
+        WankulCardsData cardsData = WankulCardsData.Instance;
         if (cardsData == null)
         {
             Plugin.Logger.LogError("CardsData singleton instance is null in SetCardUI_patch");
@@ -42,7 +33,7 @@ public class ReplacingAllCards
         Plugin.Logger.LogInfo("Count is : " + cardCount);
         Plugin.Logger.LogInfo("Index is : " + cardIndex);
 
-        CardData cardData = cardsData.cards[cardIndex];
+        WankulCardData cardData = cardsData.cards[cardIndex];
         cardIndex++;
 
         Sprite cardSprite = Sprite.Create(cardData.Texture, new Rect(0, 0, cardData.Texture.width, cardData.Texture.height), Vector2.zero);

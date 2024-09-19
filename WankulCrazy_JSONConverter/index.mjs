@@ -86,6 +86,35 @@ async function resizeImage(imageBuffer) {
     .toBuffer();
 }
 
+function getTxDrop(txDrop) {
+    switch (txDrop) {
+        case "10%":
+            return 10/100;
+        case "45%":
+            return 45/100;
+        case "30%":
+            return 30/100;
+        case "2.24%":
+            return 2.24/100;
+        case "1.60%":
+            return 1.60/100;
+        case "0.80%":
+            return 0.80/100;
+        case "0.28%":
+            return 0.28/100;
+        case "0.08%":
+            return 0.08/100;
+        case "5% des boosters":
+            return 0.01/100;
+        case "":
+            return 0.1/100;
+        case "N/A":
+            return 0;
+        default:
+            return -1;
+    }
+}
+
 async function main() {
     const input = await fsPromises.readFile('wankul_cards.json', 'utf8');
     const parsed = JSON.parse(input);
@@ -95,7 +124,7 @@ async function main() {
         wankuls : [],
         terrains : [],
     };
-    for (const card of cards) {
+    for (const [index, card] of cards.entries()) {
         await new Promise(resolve => setTimeout(resolve, 50));
         const response = await fetch(card.image);
         const buffer = await response.arrayBuffer();
@@ -105,6 +134,7 @@ async function main() {
         await fsPromises.writeFile(imagePath, resizedBuffer);
         if (card.rarity.id == 1) {
             const formatedCard = {
+                Index: index,
                 Number: card.number,
                 Title: card.title,
                 Artist: card.artist.name,
@@ -114,10 +144,12 @@ async function main() {
                 LosingEffect: card.tLosingEffect,
                 SpecialEffect: card.tSpecialEffect,
                 TexturePath: imagePath,
+                Drop: getTxDrop(card.rarity.txDrop),
             };
             formatedCards.terrains.push(formatedCard);
         } else {
             const formatedCard = {
+                Index: index,
                 Number: card.number,
                 Title: card.title,
                 Artist: card.artist.name,
@@ -131,6 +163,7 @@ async function main() {
                 Quote: card.quote,
                 Rarity: getRarityEnum(card.rarity.accronym),
                 TexturePath: imagePath,
+                Drop: getTxDrop(card.rarity.txDrop),
             };
             formatedCards.wankuls.push(formatedCard);
         }

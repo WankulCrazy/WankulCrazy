@@ -1,7 +1,7 @@
 ﻿namespace WankulCrazyPlugin
 {
     [System.Serializable]
-    public class TerrainCardData : CardData
+    public class TerrainCardData : WankulCardData
     {
         public string WinningEffect;
 

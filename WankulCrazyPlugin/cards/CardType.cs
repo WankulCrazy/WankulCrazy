@@ -1,8 +1,8 @@
 ﻿namespace WankulCrazyPlugin
 {
-    public enum ECardType
+    public enum CardType
     {
         Terrain,
-        Wankul,
+        Effigy,
     }
 }

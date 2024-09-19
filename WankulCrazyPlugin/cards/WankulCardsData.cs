@@ -3,14 +3,14 @@ using UnityEngine;
 
 namespace WankulCrazyPlugin
 {
-    public class CardsData : MonoBehaviour
+    public class WankulCardsData : MonoBehaviour
     {
         // Instance unique du singleton
-        private static CardsData _instance;
+        private static WankulCardsData _instance;
         private static readonly object _lock = new object();
 
         // Propriété pour accéder à l'instance unique
-        public static CardsData Instance
+        public static WankulCardsData Instance
         {
             get
             {
@@ -19,14 +19,14 @@ namespace WankulCrazyPlugin
                     if (_instance == null)
                     {
                         // Chercher une instance existante dans la scène
-                        _instance = FindObjectOfType<CardsData>();
+                        _instance = FindObjectOfType<WankulCardsData>();
 
                         // Si aucune instance n'est trouvée, en créer une nouvelle
                         if (_instance == null)
                         {
                             GameObject singletonObject = new GameObject();
-                            _instance = singletonObject.AddComponent<CardsData>();
-                            singletonObject.name = typeof(CardsData).ToString() + " (Singleton)";
+                            _instance = singletonObject.AddComponent<WankulCardsData>();
+                            singletonObject.name = typeof(WankulCardsData).ToString() + " (Singleton)";
                             DontDestroyOnLoad(singletonObject);
                             Debug.Log("CardsData singleton instance created");
                         }
@@ -45,10 +45,10 @@ namespace WankulCrazyPlugin
         }
 
         // Constructeur privé pour empêcher la création d'instances supplémentaires
-        private CardsData() { }
+        private WankulCardsData() { }
 
         // Liste des cartes
-        public List<CardData> cards = new List<CardData>();
+        public List<WankulCardData> cards = new List<WankulCardData>();
 
         // Méthode appelée à la destruction de l'objet
         private void OnDestroy()

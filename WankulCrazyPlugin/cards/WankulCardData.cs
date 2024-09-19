@@ -1,20 +1,25 @@
-﻿namespace WankulCrazyPlugin
+﻿using UnityEngine;
+
+namespace WankulCrazyPlugin
 {
-    [System.Serializable]
-    public class WankulCardData : CardData
+    public class WankulCardData
     {
-        public string Effigy;
+        public int Index;
 
-        public int Force;
+        public string Number;
 
-        public int Cost;
+        public string Title;
 
-        public string Rules;
+        public string Artist;
 
-        public string Combo;
+        public CardType CardType;
 
-        public string Quote;
+        public Season Season;
 
-        public ERarity Rarity;
+        public float Drop;
+
+        public string TexturePath;
+
+        public Texture2D Texture;
     }
 }

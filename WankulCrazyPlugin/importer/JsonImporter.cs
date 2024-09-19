@@ -20,12 +20,12 @@ public class JsonImporter
         try
         {
             JObject jsonObject = JObject.Parse(jsonContent);
-            List<CardData> cards = DeserializeCards(jsonObject);
+            List<WankulCardData> cards = DeserializeCards(jsonObject);
 
             if (cards.Count > 0)
             {
                 CreateCardsData(cards);
-                CardsData cardsData = CardsData.Instance;
+                WankulCardsData cardsData = WankulCardsData.Instance;
                 Plugin.Logger.LogInfo("Cards data loaded: " + cardsData.cards.Count + " cards");
             }
             else
@@ -40,14 +40,14 @@ public class JsonImporter
 
     }
 
-    private static List<CardData> DeserializeCards(JObject jsonObject)
+    private static List<WankulCardData> DeserializeCards(JObject jsonObject)
     {
-        List<CardData> cards = [];
+        List<WankulCardData> cards = [];
 
         JToken wankulsToken = jsonObject["wankuls"];
         if (wankulsToken != null)
         {
-            List<WankulCardData> wankuls = wankulsToken.ToObject<List<WankulCardData>>(new JsonSerializer
+            List<EffigyCardData> wankuls = wankulsToken.ToObject<List<EffigyCardData>>(new JsonSerializer
             {
                 TypeNameHandling = TypeNameHandling.Auto
             });
@@ -67,9 +67,9 @@ public class JsonImporter
         return cards;
     }
 
-    private static void CreateCardsData(List<CardData> cards)
+    private static void CreateCardsData(List<WankulCardData> cards)
     {
-        CardsData cardsData = CardsData.Instance;
+        WankulCardsData cardsData = WankulCardsData.Instance;
 
         cardsData.cards = cards;
         foreach (var card in cardsData.cards)

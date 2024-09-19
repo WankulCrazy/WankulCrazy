@@ -1,6 +1,6 @@
 ﻿namespace WankulCrazyPlugin
 {
-    public enum ERarity
+    public enum Rarity
     {
         C, // Common
         UC, // Uncommon
