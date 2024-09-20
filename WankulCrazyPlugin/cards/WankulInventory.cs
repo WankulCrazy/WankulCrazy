@@ -48,10 +48,20 @@ namespace WankulCrazyPlugin.cards
 
         public static WankulCardData DropCard()
         {
-            List<WankulCardData> cards = WankulCardsData.Instance.cards;
+            List<WankulCardData> allCards = WankulCardsData.Instance.cards;
+            Dictionary<string, WankulCardData> associatedCards = WankulCardsData.Instance.association;
+
+            // Filtrer les cartes déjà associées
+            List<WankulCardData> availableCards = allCards.FindAll(card => !associatedCards.ContainsValue(card));
+
+            if (availableCards.Count == 0)
+            {
+                Plugin.Logger.LogError("No available cards to drop");
+                return null;
+            }
 
             float totalDropChance = 0f;
-            foreach (var card in cards)
+            foreach (var card in availableCards)
             {
                 totalDropChance += card.Drop;
             }
@@ -59,7 +69,7 @@ namespace WankulCrazyPlugin.cards
             float randomValue = UnityEngine.Random.Range(0f, totalDropChance);
             float cumulativeDropChance = 0f;
 
-            foreach (var card in cards)
+            foreach (var card in availableCards)
             {
                 cumulativeDropChance += card.Drop;
                 if (randomValue <= cumulativeDropChance)
@@ -85,14 +95,25 @@ namespace WankulCrazyPlugin.cards
             Plugin.Logger.LogInfo("CardOpening");
             for (int i = 0; i < ___m_RolledCardDataList.Count; i++)
             {
-                Plugin.Logger.LogInfo("CardOpening: " + ___m_RolledCardDataList[i].monsterType);
+                CardData inGameCard = ___m_RolledCardDataList[i];
+                WankulCardData card = wankulCardsData.GetFromMonster(inGameCard);
+                if (card == null)
+                {
+                    card = DropCard();
+                    if (card != null)
+                    {
+                        wankulCardsData.SetFromMonster(inGameCard, card);
+                    }
+                }
 
-                WankulCardData card = DropCard();
+
                 if (card != null)
                 {
-                    Plugin.Logger.LogInfo("CardOpening: " + card.Title);
+                    Plugin.Logger.LogInfo("Card dropped : " + card.Title + " for : " + inGameCard.monsterType);
                     AddCard(card);
-                    wankulCardsData.SetFromMonster(___m_RolledCardDataList[i].monsterType, card);
+                } else
+                {
+                    Plugin.Logger.LogError("Failed to drop a card");
                 }
             }
         }

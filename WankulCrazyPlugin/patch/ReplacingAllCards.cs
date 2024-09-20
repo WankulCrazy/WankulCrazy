@@ -14,15 +14,8 @@ public class ReplacingAllCards
     static void SetCardUI_patch(CardData cardData, CardUI __instance)
     {
         WankulCardsData cardsData = WankulCardsData.Instance;
-        if (cardsData == null)
-        {
-            Plugin.Logger.LogError("CardsData singleton instance is null in SetCardUI_patch");
-            return;
-        }
 
-        Plugin.Logger.LogInfo("Setting card UI");
-
-        WankulCardData wankulCardData = cardsData.GetFromMonster(cardData.monsterType);
+        WankulCardData wankulCardData = cardsData.GetFromMonster(cardData);
 
         __instance.m_CardBGImage.sprite = wankulCardData.Sprite;
 
@@ -31,55 +24,63 @@ public class ReplacingAllCards
         __instance.m_MonsterMaskImage.gameObject.SetActive(false);
         __instance.m_RarityImage.gameObject.SetActive(false);
         __instance.m_AncientArtifactImage.gameObject.SetActive(false);
-
-        __instance.m_NumberText.text = "";
-        __instance.m_NumberText.enabled = false;
         __instance.m_NumberText.gameObject.SetActive(false);
-
-        __instance.m_MonsterNameText.text = "";
-        __instance.m_MonsterNameText.enabled = false;
         __instance.m_MonsterNameText.gameObject.SetActive(false);
-
-        __instance.m_RarityText.text = "";
-        __instance.m_RarityText.enabled = false;
         __instance.m_RarityText.gameObject.SetActive(false);
-
-        __instance.m_Stat1Text.text = "";
-        __instance.m_Stat1Text.enabled = false;
         __instance.m_Stat1Text.gameObject.SetActive(false);
-
-        __instance.m_Stat2Text.text = "";
-        __instance.m_Stat2Text.enabled = false;
         __instance.m_Stat2Text.gameObject.SetActive(false);
-
-        __instance.m_Stat3Text.text = "";
-        __instance.m_Stat3Text.enabled = false;
         __instance.m_Stat3Text.gameObject.SetActive(false);
-
-        __instance.m_Stat4Text.text = "";
-        __instance.m_Stat4Text.enabled = false;
         __instance.m_Stat4Text.gameObject.SetActive(false);
-
-        __instance.m_DescriptionText.text = "";
-        __instance.m_DescriptionText.enabled = false;
         __instance.m_DescriptionText.gameObject.SetActive(false);
-
-        __instance.m_ArtistText.text = "";
-        __instance.m_ArtistText.enabled = false;
         __instance.m_ArtistText.gameObject.SetActive(false);
-
-
-        __instance.m_FameText.text = "";
-        __instance.m_FameText.enabled = false;
         __instance.m_FameText.gameObject.SetActive(false);
-
-        __instance.m_FirstEditionText.text = "";
-        __instance.m_FirstEditionText.enabled = false;
         __instance.m_FirstEditionText.gameObject.SetActive(false);
-
-        __instance.m_ChampionText.text = "";
-        __instance.m_ChampionText.enabled = false;
         __instance.m_ChampionText.gameObject.SetActive(false);
+        __instance.m_EvoGrp.SetActive(false);
+    }
+
+    class EnterViewUpCloseState__State
+    {
+        public bool ready;
+        public CardData cardData;
+        public WankulCardData wankulCardData;
+    }
+
+    static void EnterViewUpCloseStatePrefix(out EnterViewUpCloseState__State __state,CollectionBinderFlipAnimCtrl __instance)
+    {
+        __state = new EnterViewUpCloseState__State();
+        if (!__instance.m_IsHoldingCardCloseUp && (bool)__instance.m_CurrentRaycastedInteractableCard3d)
+        {
+            __state.ready = true;
+            __state.cardData = __instance.m_CurrentRaycastedInteractableCard3d.m_Card3dUI.m_CardUI.GetCardData();
+            __state.wankulCardData = WankulCardsData.Instance.GetFromMonster(__state.cardData);
+        }
+        else
+        {
+            __state.ready = false;
+        }
+    }
+
+    static void EnterViewUpCloseStatePostfix(EnterViewUpCloseState__State __state, CollectionBinderFlipAnimCtrl __instance)
+    {
+        if (__state.ready)
+        {
+            Plugin.Logger.LogInfo("EnterViewUpCloseState");
+            Plugin.Logger.LogInfo("WankulCard Title : " + __state.wankulCardData.Title);
+
+            if (__state.wankulCardData is EffigyCardData) {
+                EffigyCardData effigyCard = (EffigyCardData)__state.wankulCardData;
+                Plugin.Logger.LogInfo("WankulCard FullRarityName : " + effigyCard.Rarity);
+            } else
+            {
+                Plugin.Logger.LogInfo("WankulCard FullRarityName : Terrain");
+            }
+
+            __instance.m_CollectionBinderUI.m_CardNameText.text = "Wankul";
+            __instance.m_CollectionBinderUI.m_CardFullRarityNameText.text = "Wankul";
+            Plugin.Logger.LogInfo("CardName : " + __instance.m_CollectionBinderUI.m_CardNameText.text);
+            Plugin.Logger.LogInfo("CardFullRarityName : " + __instance.m_CollectionBinderUI.m_CardFullRarityNameText.text);
+        }
     }
 
 }

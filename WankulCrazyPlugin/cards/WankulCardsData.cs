@@ -50,16 +50,25 @@ namespace WankulCrazyPlugin
         // Liste des cartes
         public List<WankulCardData> cards = new List<WankulCardData>();
 
-        public Dictionary<EMonsterType, WankulCardData> association = [];
+        public Dictionary<string, WankulCardData> association = [];
 
-        public WankulCardData GetFromMonster(EMonsterType type)
+        public WankulCardData GetFromMonster(CardData monster)
         {
-            return association[type];
+            string key = monster.monsterType.ToString() + "_" + monster.borderType.ToString();
+            if (association.TryGetValue(key, out WankulCardData card))
+            {
+                return card;
+            }
+            else
+            {
+                return null;
+            }
         }
 
-        public void SetFromMonster(EMonsterType type, WankulCardData card)
+        public void SetFromMonster(CardData monster, WankulCardData card)
         {
-            association[type] = card;
+            string key = monster.monsterType.ToString() + "_" + monster.borderType.ToString();
+            association[key] = card;
         }
 
         // Méthode appelée à la destruction de l'objet
