@@ -11,7 +11,7 @@ namespace WankulCrazyPlugin.utils
     {
         public static void SaveCardsAssociations()
         {
-            Dictionary<string, WankulCardData> assocations = WankulCardsData.Instance.association;
+            Dictionary<string, WankulCardData> associations = WankulCardsData.Instance.association;
             string pluginPath = Application.dataPath + "/../BepInEx/plugins";
 
             int saveIndex = CGameManager.Instance.m_CurrentSaveLoadSlotSelectedIndex;
@@ -21,7 +21,7 @@ namespace WankulCrazyPlugin.utils
             string path = pluginPath + "/data/save_" + saveIndex + ".json";
 
             Dictionary<string, int> knewAssociations = new Dictionary<string, int>();
-            foreach (var assocation in assocations)
+            foreach (var assocation in associations)
             {
                 knewAssociations.Add(assocation.Key, assocation.Value.Index);
             }

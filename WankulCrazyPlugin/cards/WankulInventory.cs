@@ -70,6 +70,21 @@ namespace WankulCrazyPlugin.cards
             return null;
         }
 
+        public static WankulCardData randFromPackType(ECollectionPackType packType)
+        {
+            List<WankulCardData> allCards = WankulCardsData.Instance.cards;
+            Dictionary<string, WankulCardData> associatedCards = WankulCardsData.Instance.association;
+
+            // Filtrer les cartes déjà associées
+            List<WankulCardData> availableCards = allCards.FindAll(card => !associatedCards.ContainsValue(card));
+            List<WankulCardData> seasonalCard =
+                availableCards.FindAll(card => card.Season == ConvertPackTypeToSeason(packType));
+
+            int randomValue = UnityEngine.Random.Range(0, availableCards.Count);
+            
+            return availableCards[randomValue];
+        }
+
         public static void AddCard(WankulCardData card)
         {
             Instance.cards.Add(card);
