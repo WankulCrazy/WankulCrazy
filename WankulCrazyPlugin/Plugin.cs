@@ -5,6 +5,7 @@ using System.Reflection;
 using UnityEngine.Rendering;
 using WankulCrazyPlugin.cards;
 using WankulCrazyPlugin.patch;
+using WankulCrazyPlugin.utils;
 
 namespace WankulCrazyPlugin;
 
@@ -37,6 +38,14 @@ public class Plugin : BaseUnityPlugin
         MethodInfo original_CardOpening = AccessTools.Method(typeof(CardOpeningSequence), "GetPackContent");
         MethodInfo patch_CardOpening = AccessTools.Method(typeof(WankulInventory), "CardOpening");
         harmony.Patch(original_CardOpening, postfix: new HarmonyMethod(patch_CardOpening));
+
+        MethodInfo original_save= AccessTools.Method(typeof(CSaveLoad), "Save");
+        MethodInfo patch_save = AccessTools.Method(typeof(SavesManager), "SaveCardsAssociations");
+        harmony.Patch(original_save, postfix: new HarmonyMethod(patch_save));
+
+        MethodInfo original_load = AccessTools.Method(typeof(CSaveLoad), "Save");
+        MethodInfo patch_load = AccessTools.Method(typeof(SavesManager), "LoadCardsAssociations");
+        harmony.Patch(original_load, postfix: new HarmonyMethod(patch_load));
     }
 
 }
