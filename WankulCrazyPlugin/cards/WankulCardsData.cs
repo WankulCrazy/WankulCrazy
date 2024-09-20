@@ -50,6 +50,18 @@ namespace WankulCrazyPlugin
         // Liste des cartes
         public List<WankulCardData> cards = new List<WankulCardData>();
 
+        public Dictionary<EMonsterType, WankulCardData> association = [];
+
+        public WankulCardData GetFromMonster(EMonsterType type)
+        {
+            return association[type];
+        }
+
+        public void SetFromMonster(EMonsterType type, WankulCardData card)
+        {
+            association[type] = card;
+        }
+
         // Méthode appelée à la destruction de l'objet
         private void OnDestroy()
         {

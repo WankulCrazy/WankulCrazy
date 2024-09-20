@@ -88,6 +88,16 @@ public class JsonImporter
                 {
                     Plugin.Logger.LogError("Failed to load texture: " + texturepath);
                 }
+
+                Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
+                if (sprite != null)
+                {
+                    card.Sprite = sprite;
+                }
+                else
+                {
+                    Plugin.Logger.LogError("Failed to create sprite: " + texturepath);
+                }
             }
         }
     }

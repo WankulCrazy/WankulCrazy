@@ -21,5 +21,7 @@ namespace WankulCrazyPlugin
         public string TexturePath;
 
         public Texture2D Texture;
+
+        public Sprite Sprite;
     }
 }

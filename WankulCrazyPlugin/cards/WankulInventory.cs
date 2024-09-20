@@ -74,33 +74,27 @@ namespace WankulCrazyPlugin.cards
             return null;
         }
 
-        public static List<WankulCardData> DropCards(int count)
-        {
-            List<WankulCardData> droppedCards = new List<WankulCardData>();
-            for (int i = 0; i < count; i++)
-            {
-                WankulCardData card = DropCard();
-                if (card != null)
-                {
-                    droppedCards.Add(card);
-                }
-            }
-            return droppedCards;
-        }
-
         public static void AddCard(WankulCardData card)
         {
-            _instance.cards.Add(card);
+            Instance.cards.Add(card);
         }
 
         public static void CardOpening(List<CardData> ___m_RolledCardDataList)
         {
+            WankulCardsData wankulCardsData = WankulCardsData.Instance;
+            Plugin.Logger.LogInfo("CardOpening");
             for (int i = 0; i < ___m_RolledCardDataList.Count; i++)
             {
                 Plugin.Logger.LogInfo("CardOpening: " + ___m_RolledCardDataList[i].monsterType);
+
+                WankulCardData card = DropCard();
+                if (card != null)
+                {
+                    Plugin.Logger.LogInfo("CardOpening: " + card.Title);
+                    AddCard(card);
+                    wankulCardsData.SetFromMonster(___m_RolledCardDataList[i].monsterType, card);
+                }
             }
-            DropCards(7);
-            Plugin.Logger.LogInfo("CardOpening");
         }
     }
 }
