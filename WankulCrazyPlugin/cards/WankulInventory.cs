@@ -46,22 +46,46 @@ namespace WankulCrazyPlugin.cards
 
         List<WankulCardData> cards = [];
 
-        public static WankulCardData DropCard()
+        public static Season ConvertPackTypeToSeason(ECollectionPackType packType)
+        {
+            switch (packType)
+            {
+                case ECollectionPackType.BasicCardPack:
+                case ECollectionPackType.DestinyBasicCardPack:
+                    return Season.S01;
+                
+                case ECollectionPackType.RareCardPack:
+                    case ECollectionPackType.DestinyRareCardPack:
+                    return Season.S02;
+                
+                case ECollectionPackType.EpicCardPack:
+                    case ECollectionPackType.DestinyEpicCardPack:
+                    return Season.S03;
+                
+                default:
+                    return Season.HS;
+            }
+            
+        }
+        
+        public static WankulCardData DropCard(ECollectionPackType packType)
         {
             List<WankulCardData> allCards = WankulCardsData.Instance.cards;
             Dictionary<string, WankulCardData> associatedCards = WankulCardsData.Instance.association;
 
             // Filtrer les cartes déjà associées
             List<WankulCardData> availableCards = allCards.FindAll(card => !associatedCards.ContainsValue(card));
+            List<WankulCardData> seasonalCard =
+                availableCards.FindAll(card => card.Season == ConvertPackTypeToSeason(packType));
 
-            if (availableCards.Count == 0)
+            if (seasonalCard.Count == 0)
             {
                 Plugin.Logger.LogError("No available cards to drop");
                 return null;
             }
-
+            
             float totalDropChance = 0f;
-            foreach (var card in availableCards)
+            foreach (var card in seasonalCard)
             {
                 totalDropChance += card.Drop;
             }
@@ -69,12 +93,12 @@ namespace WankulCrazyPlugin.cards
             float randomValue = UnityEngine.Random.Range(0f, totalDropChance);
             float cumulativeDropChance = 0f;
 
-            foreach (var card in availableCards)
+            foreach (var card in seasonalCard)
             {
                 cumulativeDropChance += card.Drop;
                 if (randomValue <= cumulativeDropChance)
                 {
-                    Plugin.Logger.LogInfo($"Dropped card: {card.Title}");
+                    Plugin.Logger.LogInfo($"Dropped card: {card.Title} from season {card.Season}");
                     return card;
                 }
             }
@@ -89,8 +113,9 @@ namespace WankulCrazyPlugin.cards
             Instance.cards.Add(card);
         }
 
-        public static void CardOpening(List<CardData> ___m_RolledCardDataList)
+        public static void CardOpening(List<CardData> ___m_RolledCardDataList, ECollectionPackType ___m_CollectionPackType)
         {
+            Plugin.Logger.LogInfo("You Draw card from a type" + ___m_CollectionPackType.ToString());
             WankulCardsData wankulCardsData = WankulCardsData.Instance;
             Plugin.Logger.LogInfo("CardOpening");
             for (int i = 0; i < ___m_RolledCardDataList.Count; i++)
@@ -99,10 +124,11 @@ namespace WankulCrazyPlugin.cards
                 WankulCardData card = wankulCardsData.GetFromMonster(inGameCard);
                 if (card == null)
                 {
-                    card = DropCard();
+                    card = DropCard(___m_CollectionPackType);
                     if (card != null)
                     {
                         wankulCardsData.SetFromMonster(inGameCard, card);
+                        Plugin.Logger.LogInfo(card.Season);
                     }
                 }
 
