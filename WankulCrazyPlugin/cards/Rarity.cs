@@ -1,4 +1,4 @@
-﻿namespace WankulCrazyPlugin
+﻿namespace WankulCrazyPlugin.cards
 {
     public enum Rarity
     {

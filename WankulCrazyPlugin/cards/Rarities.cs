@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace WankulCrazyPlugin
+namespace WankulCrazyPlugin.cards
 {
     public static class RaritiesContainer
     {
