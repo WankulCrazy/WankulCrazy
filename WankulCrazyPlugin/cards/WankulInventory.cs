@@ -1,49 +1,11 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using WankulCrazyPlugin.utils;
 
 namespace WankulCrazyPlugin.cards
 {
-    public class WankulInventory : MonoBehaviour
+    public class WankulInventory : Singleton<WankulInventory>
     {
-        private static WankulInventory _instance;
-        private static readonly object _lock = new object();
-        public static WankulInventory Instance
-        {
-            get
-            {
-                lock (_lock)
-                {
-                    if (_instance == null)
-                    {
-                        // Chercher une instance existante dans la scène
-                        _instance = Object.FindObjectOfType<WankulInventory>();
-
-                        // Si aucune instance n'est trouvée, en créer une nouvelle
-                        if (_instance == null)
-                        {
-                            GameObject singletonObject = new GameObject();
-                            _instance = singletonObject.AddComponent<WankulInventory>();
-                            singletonObject.name = typeof(WankulInventory).ToString() + " (Singleton)";
-                            DontDestroyOnLoad(singletonObject);
-                            Debug.Log("CardsData singleton instance created");
-                        }
-                        else
-                        {
-                            Debug.Log("CardsData singleton instance found in scene");
-                        }
-                    }
-                    else
-                    {
-                        Debug.Log("CardsData singleton instance already exists");
-                    }
-                    return _instance;
-                }
-            }
-        }
-
-        // Constructeur privé pour empêcher la création d'instances supplémentaires
-        private WankulInventory() { }
-
         List<WankulCardData> cards = [];
 
         public static WankulCardData DropCard()

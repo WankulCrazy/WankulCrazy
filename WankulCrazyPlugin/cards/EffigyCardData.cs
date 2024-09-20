@@ -1,4 +1,4 @@
-﻿namespace WankulCrazyPlugin
+﻿namespace WankulCrazyPlugin.cards
 {
     [System.Serializable]
     public class EffigyCardData : WankulCardData

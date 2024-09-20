@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace WankulCrazyPlugin
+namespace WankulCrazyPlugin.cards
 {
     public class WankulCardData
     {

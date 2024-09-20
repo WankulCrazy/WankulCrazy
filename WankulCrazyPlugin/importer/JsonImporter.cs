@@ -4,8 +4,9 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using BepInEx.Logging;
+using WankulCrazyPlugin.cards;
 
-namespace WankulCrazyPlugin;
+namespace WankulCrazyPlugin.importer;
 public class JsonImporter
 {
 

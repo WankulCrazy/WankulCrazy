@@ -4,8 +4,9 @@ using HarmonyLib;
 using UnityEngine.UIElements;
 using Logger = HarmonyLib.Tools.Logger;
 using System.Threading;
+using WankulCrazyPlugin.cards;
 
-namespace WankulCrazyPlugin;
+namespace WankulCrazyPlugin.patch;
 public class ReplacingCards
 {
 

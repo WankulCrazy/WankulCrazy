@@ -3,6 +3,7 @@ using BepInEx.Logging;
 using HarmonyLib;
 using UnityEngine.UIElements;
 using Logger = HarmonyLib.Tools.Logger;
+using WankulCrazyPlugin.importer;
 
 namespace WankulCrazyPlugin.patch;
 
