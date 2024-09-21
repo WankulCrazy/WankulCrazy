@@ -18,8 +18,10 @@ public class ReplacingCards
         CardData gameCardData = cardData;
         WankulCardsData cardsData = WankulCardsData.Instance;
 
-        WankulCardData wankulCardData = cardsData.GetFromMonster(gameCardData);
+        WankulCardData wankulCardData = cardsData.GetFromMonster(gameCardData, false);
 
+        Plugin.Logger.LogInfo("Setting card UI for " + wankulCardData);
+        Plugin.Logger.LogInfo("Setting card UI for " + wankulCardData.Title);
         try
         {
             __instance.m_CardBGImage.sprite = wankulCardData.Sprite;
@@ -28,10 +30,15 @@ public class ReplacingCards
         {
             Plugin.Logger.LogError("Error setting m_CardBGImage sprite: " + e);
             Plugin.Logger.LogInfo("Setting m_CardBorderImage instead");
-            __instance.m_CardBorderImage.sprite = wankulCardData.Sprite;
+            if (__instance.m_CardBorderImage != null)
+            {
+                __instance.m_CardBorderImage.sprite = wankulCardData.Sprite;
+            }
+            else
+            {
+                Plugin.Logger.LogError("m_CardBorderImage is null");
+            }
         }
-
-        Plugin.Logger.LogInfo("SUCCESSS NO BUG HERE");
 
         if (__instance.m_MonsterImage != null)
         {
@@ -203,7 +210,7 @@ public class ReplacingCards
         {
             __state.ready = true;
             __state.cardData = __instance.m_CurrentRaycastedInteractableCard3d.m_Card3dUI.m_CardUI.GetCardData();
-            __state.wankulCardData = WankulCardsData.Instance.GetFromMonster(__state.cardData);
+            __state.wankulCardData = WankulCardsData.Instance.GetFromMonster(__state.cardData, false);
         }
         else
         {

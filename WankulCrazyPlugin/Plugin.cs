@@ -44,34 +44,18 @@ public class Plugin : BaseUnityPlugin
         MethodInfo patch_save = AccessTools.Method(typeof(SavesManager), "SaveCardsAssociations");
         harmony.Patch(original_save, postfix: new HarmonyMethod(patch_save));
 
-        MethodInfo original_load = AccessTools.Method(typeof(CSaveLoad), "Save");
+        MethodInfo original_load = AccessTools.Method(typeof(CSaveLoad), "Load");
         MethodInfo patch_load = AccessTools.Method(typeof(SavesManager), "LoadCardsAssociations");
         harmony.Patch(original_load, postfix: new HarmonyMethod(patch_load));
 
         // Récupère la méthode originale à patcher en spécifiant les paramètres (ici sans paramètres)
         MethodInfo originalMethod1 = AccessTools.Method(typeof(CPlayerData), "GetCardMarketPrice", new[] { typeof(CardData) });
         MethodInfo patchMethod1 = AccessTools.Method(typeof(WankulCardsData), nameof(WankulCardsData.Postfix_GetCardMarketPrice_CardData));
-
-        if (originalMethod1 != null && patchMethod1 != null)
-        {
-            harmony.Patch(originalMethod1, postfix: new HarmonyMethod(patchMethod1));
-        }
-        else
-        {
-            Logger.LogError("Impossible de trouver les méthodes pour patcher GetCardMarketPrice(CardData).");
-        }
+        harmony.Patch(originalMethod1, postfix: new HarmonyMethod(patchMethod1));
 
         MethodInfo originalMethod2 = AccessTools.Method(typeof(CPlayerData), "GetCardMarketPrice", new[] { typeof(int), typeof(ECardExpansionType), typeof(bool) });
         MethodInfo patchMethod2 = AccessTools.Method(typeof(WankulCardsData), nameof(WankulCardsData.Postfix_GetCardMarketPrice_ThreeParams));
-
-        if (originalMethod2 != null && patchMethod2 != null)
-        {
-            harmony.Patch(originalMethod2, postfix: new HarmonyMethod(patchMethod2));
-        }
-        else
-        {
-            Logger.LogError("Impossible de trouver les méthodes pour patcher GetCardMarketPrice(int, ECardExpansionType, bool).");
-        }
+        harmony.Patch(originalMethod2, postfix: new HarmonyMethod(patchMethod2));
     }
 
 }

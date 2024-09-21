@@ -11,6 +11,7 @@ namespace WankulCrazyPlugin.utils
     {
         public static void SaveCardsAssociations()
         {
+            Plugin.Logger.LogInfo("Saving cards associations");
             Dictionary<string, WankulCardData> associations = WankulCardsData.Instance.association;
             string pluginPath = Application.dataPath + "/../BepInEx/plugins";
 
@@ -21,9 +22,10 @@ namespace WankulCrazyPlugin.utils
             string path = pluginPath + "/data/save_" + saveIndex + ".json";
 
             Dictionary<string, int> knewAssociations = new Dictionary<string, int>();
-            foreach (var assocation in associations)
+            foreach (var association in associations)
             {
-                knewAssociations.Add(assocation.Key, assocation.Value.Index);
+                Plugin.Logger.LogInfo("Saving association: " + association.Key + " => " + association.Value.Index);
+                knewAssociations.Add(association.Key, association.Value.Index);
             }
             string json = JsonConvert.SerializeObject(knewAssociations);
             System.IO.File.WriteAllText(path, json);
@@ -31,6 +33,7 @@ namespace WankulCrazyPlugin.utils
 
         public static void LoadCardsAssociations()
         {
+            Plugin.Logger.LogInfo("Loading cards associations");
             string pluginPath = Application.dataPath + "/../BepInEx/plugins";
 
             int saveIndex = CGameManager.Instance.m_CurrentSaveLoadSlotSelectedIndex;
@@ -38,6 +41,8 @@ namespace WankulCrazyPlugin.utils
             Plugin.Logger.LogInfo("Save index: " + saveIndex);
 
             string path = pluginPath + "/data/save_" + saveIndex + ".json";
+
+            Plugin.Logger.LogInfo("Path: " + path);
 
             if (!System.IO.File.Exists(path))
             {
@@ -49,6 +54,7 @@ namespace WankulCrazyPlugin.utils
 
             foreach (var association in associations)
             {
+                Plugin.Logger.LogInfo("Loading association: " + association.Key + " => " + association.Value);
                 WankulCardData card = WankulCardsData.Instance.cards.Find(card => card.Index == association.Value);
                 WankulCardsData.Instance.association[association.Key] = card;
             }

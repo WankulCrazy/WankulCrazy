@@ -76,13 +76,18 @@ namespace WankulCrazyPlugin.cards
             Dictionary<string, WankulCardData> associatedCards = WankulCardsData.Instance.association;
 
             // Filtrer les cartes déjà associées
-            List<WankulCardData> availableCards = allCards.FindAll(card => !associatedCards.ContainsValue(card));
+            Season season = ConvertPackTypeToSeason(packType);
             List<WankulCardData> seasonalCard =
-                availableCards.FindAll(card => card.Season == ConvertPackTypeToSeason(packType));
+                allCards.FindAll(card => card.Season == season);
 
-            int randomValue = UnityEngine.Random.Range(0, availableCards.Count);
-            
-            return availableCards[randomValue];
+            if (seasonalCard.Count == 0)
+            {
+                seasonalCard = allCards;
+            }
+
+            int randomValue = UnityEngine.Random.Range(0, seasonalCard.Count);
+
+            return seasonalCard[randomValue];
         }
 
         public static void AddCard(WankulCardData card)
@@ -92,20 +97,17 @@ namespace WankulCrazyPlugin.cards
 
         public static void CardOpening(List<CardData> ___m_RolledCardDataList, ECollectionPackType ___m_CollectionPackType)
         {
-            Plugin.Logger.LogInfo("You Draw card from a type" + ___m_CollectionPackType.ToString());
             WankulCardsData wankulCardsData = WankulCardsData.Instance;
-            Plugin.Logger.LogInfo("CardOpening");
             for (int i = 0; i < ___m_RolledCardDataList.Count; i++)
             {
                 CardData inGameCard = ___m_RolledCardDataList[i];
-                WankulCardData card = wankulCardsData.GetFromMonster(inGameCard);
+                WankulCardData card = wankulCardsData.GetFromMonster(inGameCard, true);
                 if (card == null)
                 {
                     card = DropCard(___m_CollectionPackType);
                     if (card != null)
                     {
                         wankulCardsData.SetFromMonster(inGameCard, card);
-                        Plugin.Logger.LogInfo(card.Season);
                     }
                 }
 

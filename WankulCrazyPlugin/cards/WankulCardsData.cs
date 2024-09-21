@@ -11,67 +11,65 @@ namespace WankulCrazyPlugin.cards
         public List<WankulCardData> cards = [];
         public Dictionary<string, WankulCardData> association = [];
 
-        public WankulCardData GetFromMonster(CardData monster)
+        public WankulCardData GetFromMonster(CardData monster, bool allowNull)
         {
             ECardExpansionType expansionType = monster.expansionType;
             MonsterData monsterData = InventoryBase.GetMonsterData(monster.monsterType);
             EElementIndex elementIndex = monsterData.ElementIndex;
             ERarity rarity = monsterData.Rarity;
 
-            string key = monster.monsterType.ToString() + "_" + monster.borderType.ToString() + "_" + expansionType.ToString() + "_" + elementIndex.ToString() + "_" + rarity.ToString();
+            string key = $"{monster.monsterType}_{monster.borderType}_{expansionType}_{elementIndex}_{rarity}";
+
+            // Vérification de l'association déjà existante
             if (association.TryGetValue(key, out WankulCardData card))
             {
                 return card;
             }
-            else
+            else if (allowNull)
             {
-                ECollectionPackType packType = ECollectionPackType.BasicCardPack;
-
-                if (expansionType == ECardExpansionType.Tetramon)
-                {
-                    if (rarity == ERarity.Common)
-                    {
-                        packType = ECollectionPackType.BasicCardPack;
-                    }
-                    else if (rarity == ERarity.Rare)
-                    {
-                        packType = ECollectionPackType.RareCardPack;
-                    }
-                    else if (rarity == ERarity.Epic)
-                    {
-                        packType = ECollectionPackType.EpicCardPack;
-                    }
-                    else if (rarity == ERarity.Legendary)
-                    {
-                        packType = ECollectionPackType.LegendaryCardPack;
-                    }
-                }
-                else if (expansionType == ECardExpansionType.Destiny)
-                {
-                    if (rarity == ERarity.Common)
-                    {
-                        packType = ECollectionPackType.DestinyBasicCardPack;
-                    }
-                    else if (rarity == ERarity.Rare)
-                    {
-                        packType = ECollectionPackType.DestinyRareCardPack;
-                    }
-                    else if (rarity == ERarity.Epic)
-                    {
-                        packType = ECollectionPackType.DestinyEpicCardPack;
-                    }
-                    else if (rarity == ERarity.Legendary)
-                    {
-                        packType = ECollectionPackType.DestinyLegendaryCardPack;
-                    }
-                }
-
-                Plugin.Logger.LogInfo($"Random card from pack type: {packType}");
-                WankulCardData wankulCardData = WankulInventory.randFromPackType(packType);
-                association[key] = wankulCardData;
-
-                return wankulCardData;
+                // dans les drop on peut avoir des cartes qui ne sont pas dans l'association
+                return null;
             }
+
+            // Si pas trouvé dans l'association, déterminer le pack de carte
+            ECollectionPackType packType = ECollectionPackType.BasicCardPack;
+
+            switch (expansionType)
+            {
+                case ECardExpansionType.Tetramon:
+                    packType = rarity switch
+                    {
+                        ERarity.Common => ECollectionPackType.BasicCardPack,
+                        ERarity.Rare => ECollectionPackType.RareCardPack,
+                        ERarity.Epic => ECollectionPackType.EpicCardPack,
+                        ERarity.Legendary => ECollectionPackType.LegendaryCardPack,
+                        _ => packType
+                    };
+                    break;
+
+                case ECardExpansionType.Destiny:
+                    packType = rarity switch
+                    {
+                        ERarity.Common => ECollectionPackType.DestinyBasicCardPack,
+                        ERarity.Rare => ECollectionPackType.DestinyRareCardPack,
+                        ERarity.Epic => ECollectionPackType.DestinyEpicCardPack,
+                        ERarity.Legendary => ECollectionPackType.DestinyLegendaryCardPack,
+                        _ => packType
+                    };
+                    break;
+                    // Ajouter d'autres types d'extensions ici si nécessaire
+            }
+
+            // Sélection aléatoire d'une carte si elle n'a pas été trouvée dans l'association
+            WankulCardData wankulCardData = WankulInventory.randFromPackType(packType);
+
+            // On ne stocke pas dans l'association pour de futures drops
+            //if (wankulCardData != null)
+            //{
+            //    association[key] = wankulCardData;
+            //}
+
+            return wankulCardData;
         }
 
         public void SetFromMonster(CardData monster, WankulCardData card)
@@ -90,7 +88,7 @@ namespace WankulCrazyPlugin.cards
         public static void Postfix_GetCardMarketPrice_CardData(CardData cardData, ref float __result)
         {
             WankulCardsData wankulCardsData = WankulCardsData.Instance;
-            WankulCardData wankulCardData = wankulCardsData.GetFromMonster(cardData);
+            WankulCardData wankulCardData = wankulCardsData.GetFromMonster(cardData, false);
 
             if (wankulCardData != null)
             {
@@ -103,7 +101,7 @@ namespace WankulCrazyPlugin.cards
         }
 
         // Patch pour la méthode avec trois paramètres
-        public static void Postfix_GetCardMarketPrice_ThreeParams(int index, ECardExpansionType expansionType, bool isDestiny, ref float __result)
+        public static void Postfix_GetCardMarketPrice_ThreeParams(ECardExpansionType expansionType, ref float __result)
         {
             float variation = Random.Range(-0.3f, 0.3f);
             float marketPrice = 20f; // Valeur par défaut
@@ -137,7 +135,6 @@ namespace WankulCrazyPlugin.cards
                 knewAssociations.Add(association.Key, association.Value.Title);
             }
             string json = JsonConvert.SerializeObject(knewAssociations);
-            Plugin.Logger.LogInfo("DEBUG display all cards association: \n" + json);
         }
     }
 }
