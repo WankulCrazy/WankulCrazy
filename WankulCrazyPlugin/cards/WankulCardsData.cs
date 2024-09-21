@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
@@ -10,6 +11,7 @@ namespace WankulCrazyPlugin.cards
     {
         public List<WankulCardData> cards = [];
         public Dictionary<string, WankulCardData> association = [];
+
 
         public WankulCardData GetFromMonster(CardData monster, bool allowNull)
         {
@@ -64,12 +66,51 @@ namespace WankulCrazyPlugin.cards
             WankulCardData wankulCardData = WankulInventory.randFromPackType(packType);
 
             // On ne stocke pas dans l'association pour de futures drops
-            //if (wankulCardData != null)
-            //{
-            //    association[key] = wankulCardData;
-            //}
+            if (wankulCardData != null)
+            {
+                association[key] = wankulCardData;
+            }
 
             return wankulCardData;
+        }
+
+        public CardData GetCardDataFromWankulCardData(WankulCardData card)
+        {
+            foreach (var entry in association)
+            {
+                if (entry.Value.Index == card.Index)
+                {
+                    return GetCardDataFromKey(entry.Key);
+                }
+            }
+            return null;
+        }
+
+        public CardData GetCardDataFromKey(string key)
+        {
+            // Découper la clé en utilisant l'underscore comme séparateur
+            string[] parts = key.Split('_');
+
+            if (parts.Length != 5)
+            {
+                Debug.LogError("La clé ne contient pas le bon nombre de parties.");
+                return null;
+            }
+
+            // Extraire les valeurs
+            EMonsterType monsterType = (EMonsterType)Enum.Parse(typeof(EMonsterType), parts[0]);
+            ECardBorderType borderType = (ECardBorderType)Enum.Parse(typeof(ECardBorderType), parts[1]);
+            ECardExpansionType expansionType = (ECardExpansionType)Enum.Parse(typeof(ECardExpansionType), parts[2]);
+            EElementIndex elementIndex = (EElementIndex)Enum.Parse(typeof(EElementIndex), parts[3]);
+            ERarity rarity = (ERarity)Enum.Parse(typeof(ERarity), parts[4]);
+
+            // Récupérer les données du monstre
+            CardData cardData = new CardData();
+            cardData.monsterType = monsterType;
+            cardData.borderType = borderType;
+            cardData.expansionType = expansionType;
+
+            return cardData;
         }
 
         public void SetFromMonster(CardData monster, WankulCardData card)
@@ -80,7 +121,14 @@ namespace WankulCrazyPlugin.cards
             ERarity rarity = monsterData.Rarity;
 
             string key = monster.monsterType.ToString() + "_" + monster.borderType.ToString() + "_" + expansionType.ToString() + "_" + elementIndex.ToString() + "_" + rarity.ToString();
-            association[key] = card;
+            if (association[key] == null)
+            {
+                association[key] = card;
+            }
+            else
+            {
+                Debug.LogError("La carte existe déjà dans l'association.");
+            }
         }
 
 
@@ -103,7 +151,7 @@ namespace WankulCrazyPlugin.cards
         // Patch pour la méthode avec trois paramètres
         public static void Postfix_GetCardMarketPrice_ThreeParams(ECardExpansionType expansionType, ref float __result)
         {
-            float variation = Random.Range(-0.3f, 0.3f);
+            float variation = UnityEngine.Random.Range(-0.3f, 0.3f);
             float marketPrice = 20f; // Valeur par défaut
 
             switch (expansionType)

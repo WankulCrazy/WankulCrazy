@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.UIElements;
 using WankulCrazyPlugin.utils;
@@ -34,12 +35,10 @@ namespace WankulCrazyPlugin.cards
         public static WankulCardData DropCard(ECollectionPackType packType)
         {
             List<WankulCardData> allCards = WankulCardsData.Instance.cards;
-            Dictionary<string, WankulCardData> associatedCards = WankulCardsData.Instance.association;
 
             // Filtrer les cartes déjà associées
-            List<WankulCardData> availableCards = allCards.FindAll(card => !associatedCards.ContainsValue(card));
             List<WankulCardData> seasonalCard =
-                availableCards.FindAll(card => card.Season == ConvertPackTypeToSeason(packType));
+                allCards.FindAll(card => card.Season == ConvertPackTypeToSeason(packType));
 
             if (seasonalCard.Count == 0)
             {
@@ -74,7 +73,6 @@ namespace WankulCrazyPlugin.cards
         public static WankulCardData randFromPackType(ECollectionPackType packType)
         {
             List<WankulCardData> allCards = WankulCardsData.Instance.cards;
-            Dictionary<string, WankulCardData> associatedCards = WankulCardsData.Instance.association;
 
             // Filtrer les cartes déjà associées
             Season season = ConvertPackTypeToSeason(packType);
@@ -83,7 +81,8 @@ namespace WankulCrazyPlugin.cards
 
             if (seasonalCard.Count == 0)
             {
-                seasonalCard = allCards;
+                Plugin.Logger.LogError("No available cards to drop");
+                return null;
             }
 
             int randomValue = UnityEngine.Random.Range(0, seasonalCard.Count);
@@ -96,40 +95,58 @@ namespace WankulCrazyPlugin.cards
             Instance.cards.Add(card);
         }
 
-        public static void CardOpening(List<CardData> ___m_RolledCardDataList, ECollectionPackType ___m_CollectionPackType)
+        public static void CardOpening(List<CardData> ___m_RolledCardDataList, List<float> ___m_CardValueList, ECollectionPackType ___m_CollectionPackType)
         {
             WankulCardsData wankulCardsData = WankulCardsData.Instance;
+            ___m_CardValueList.Clear();
             for (int i = 0; i < ___m_RolledCardDataList.Count; i++)
             {
                 CardData inGameCard = ___m_RolledCardDataList[i];
-                WankulCardData card = wankulCardsData.GetFromMonster(inGameCard, true);
-                if (card == null)
+                WankulCardData card = DropCard(___m_CollectionPackType);
+                WankulCardData associatedCard = wankulCardsData.GetFromMonster(inGameCard, true);
+
+                if (associatedCard != null)
                 {
-                    card = DropCard(___m_CollectionPackType);
-                    if (card != null)
-                    {
-                        inGameCard.isFoil = false;
-                        inGameCard.isChampionCard = false;
-                        if (card is EffigyCardData)
-                        {
-                            EffigyCardData effigyCard = (EffigyCardData)card;
-
-                            if (effigyCard.Rarity >= Rarity.UR1)
-                            {
-                                inGameCard.isFoil = true;
-                            }
-
-                        }
-                        wankulCardsData.SetFromMonster(inGameCard, card);
-                    }
+                    inGameCard = wankulCardsData.GetCardDataFromWankulCardData(associatedCard);
+                    ___m_RolledCardDataList[i] = inGameCard;
                 }
 
+                if (card != null)
+                {
+                    inGameCard.isFoil = false;
+                    inGameCard.isChampionCard = false;
+                    if (card is EffigyCardData)
+                    {
+                        EffigyCardData effigyCard = (EffigyCardData)card;
+
+                        if (effigyCard.Rarity >= Rarity.UR1)
+                        {
+                            inGameCard.isFoil = true;
+                        }
+                    }
+
+                    ECardExpansionType expansionType = inGameCard.expansionType;
+                    MonsterData monsterData = InventoryBase.GetMonsterData(inGameCard.monsterType);
+                    EElementIndex elementIndex = monsterData.ElementIndex;
+                    ERarity rarity = monsterData.Rarity;
+
+                    string key = inGameCard.monsterType.ToString() + "_" + inGameCard.borderType.ToString() + "_" + expansionType.ToString() + "_" + elementIndex.ToString() + "_" + rarity.ToString();
+                    Plugin.Logger.LogInfo($"Card dropped : {card.Index}-{card.Title} for : {key}");
+                    wankulCardsData.SetFromMonster(inGameCard, card);
+                }
+                else
+                {
+                    Plugin.Logger.LogError("Failed to drop a card");
+                }
 
                 if (card != null)
                 {
                     Plugin.Logger.LogInfo("Card dropped : " + card.Title + " for : " + inGameCard.monsterType);
                     AddCard(card);
-                } else
+
+                    ___m_CardValueList.Add(card.MarketPrice);
+                }
+                else
                 {
                     Plugin.Logger.LogError("Failed to drop a card");
                 }

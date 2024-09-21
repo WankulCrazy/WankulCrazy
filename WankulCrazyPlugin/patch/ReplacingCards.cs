@@ -5,6 +5,8 @@ using UnityEngine.UIElements;
 using Logger = HarmonyLib.Tools.Logger;
 using System.Threading;
 using WankulCrazyPlugin.cards;
+using Newtonsoft.Json;
+using System.CodeDom.Compiler;
 
 namespace WankulCrazyPlugin.patch;
 public class ReplacingCards
@@ -39,6 +41,11 @@ public class ReplacingCards
         WankulCardsData cardsData = WankulCardsData.Instance;
 
         WankulCardData wankulCardData = cardsData.GetFromMonster(gameCardData, false);
+
+        if (__instance.m_NormalGrp != null)
+        {
+            __instance.m_NormalGrp.SetActive(true);
+        }
 
         gameCardData.isFoil = false;
         gameCardData.isChampionCard = false;
@@ -275,15 +282,25 @@ public class ReplacingCards
         if (__state.ready)
         {
             WankulCardData wankulCardData = __state.wankulCardData;
-            if (__state.wankulCardData is EffigyCardData) {
-                EffigyCardData effigyCard = (EffigyCardData)__state.wankulCardData;
-                __instance.m_CollectionBinderUI.m_CardFullRarityNameText.text = RaritiesContainer.Rarities[effigyCard.Rarity];
+            CardData inGameCard = __state.cardData;
+            ECardExpansionType expansionType = inGameCard.expansionType;
+            MonsterData monsterData = InventoryBase.GetMonsterData(inGameCard.monsterType);
+            EElementIndex elementIndex = monsterData.ElementIndex;
+            ERarity rarity = monsterData.Rarity;
+
+            string key = inGameCard.monsterType.ToString() + "_" + inGameCard.borderType.ToString() + "_" + expansionType.ToString() + "_" + elementIndex.ToString() + "_" + rarity.ToString();
+            string json = JsonConvert.SerializeObject(inGameCard, Formatting.Indented );
+            Plugin.Logger.LogInfo("EnterViewUpCloseStatePostfix : " + json);
+
+            if (__state.wankulCardData is EffigyCardData effigyCard)
+            {
+                __instance.m_CollectionBinderUI.m_CardFullRarityNameText.text = RaritiesContainer.Rarities[effigyCard.Rarity] + "\n" + key + "\n" + json;
                 __instance.m_CollectionBinderUI.m_CardNameText.text = effigyCard.Title + "\n" + effigyCard.Effigy;
             }
             else
             {
                 Plugin.Logger.LogInfo("WankulCard FullRarityName : Terrain");
-                __instance.m_CollectionBinderUI.m_CardFullRarityNameText.text = "Terrain";
+                __instance.m_CollectionBinderUI.m_CardFullRarityNameText.text = "Terrain" + "\n" + key + "\n" + json;
                 __instance.m_CollectionBinderUI.m_CardNameText.text = wankulCardData.Title;
             }
 
