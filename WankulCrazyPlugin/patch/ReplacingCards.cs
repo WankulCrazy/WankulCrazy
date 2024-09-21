@@ -11,14 +11,48 @@ public class ReplacingCards
 {
 
 
-    // ...
-
-    static void SetCardUI(CardData cardData, CardUI __instance)
+    static void SetCardUIPrefix(CardData cardData)
     {
         CardData gameCardData = cardData;
         WankulCardsData cardsData = WankulCardsData.Instance;
 
         WankulCardData wankulCardData = cardsData.GetFromMonster(gameCardData, false);
+
+        gameCardData.isFoil = false;
+        gameCardData.isChampionCard = false;
+
+        if (wankulCardData is EffigyCardData)
+        {
+            EffigyCardData effigyCard = (EffigyCardData)wankulCardData;
+
+            if (effigyCard.Rarity >= Rarity.UR1)
+            {
+                gameCardData.isFoil = true;
+            }
+
+        }
+    }
+
+    static void SetCardUIPostFix(CardData cardData, CardUI __instance)
+    {
+        CardData gameCardData = cardData;
+        WankulCardsData cardsData = WankulCardsData.Instance;
+
+        WankulCardData wankulCardData = cardsData.GetFromMonster(gameCardData, false);
+
+        gameCardData.isFoil = false;
+        gameCardData.isChampionCard = false;
+
+        if (wankulCardData is EffigyCardData)
+        {
+            EffigyCardData effigyCard = (EffigyCardData)wankulCardData;
+
+            if (effigyCard.Rarity >= Rarity.UR1)
+            {
+                gameCardData.isFoil = true;
+            }
+
+        }
 
         Plugin.Logger.LogInfo("Setting card UI for " + wankulCardData);
         Plugin.Logger.LogInfo("Setting card UI for " + wankulCardData.Title);
@@ -38,6 +72,24 @@ public class ReplacingCards
             {
                 Plugin.Logger.LogError("m_CardBorderImage is null");
             }
+        }
+
+        if (__instance.m_FullArtGrp != null)
+        {
+            __instance.m_FullArtGrp.gameObject.SetActive(false);
+        }
+        else
+        {
+            Plugin.Logger.LogError("m_MonsterImage is null");
+        }
+
+        if (__instance.m_GhostCard != null)
+        {
+            __instance.m_GhostCard.gameObject.SetActive(false);
+        }
+        else
+        {
+            Plugin.Logger.LogError("m_MonsterImage is null");
         }
 
         if (__instance.m_MonsterImage != null)

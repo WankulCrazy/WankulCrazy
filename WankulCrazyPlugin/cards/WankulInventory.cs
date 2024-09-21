@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 using WankulCrazyPlugin.utils;
 
 namespace WankulCrazyPlugin.cards
@@ -107,6 +108,18 @@ namespace WankulCrazyPlugin.cards
                     card = DropCard(___m_CollectionPackType);
                     if (card != null)
                     {
+                        inGameCard.isFoil = false;
+                        inGameCard.isChampionCard = false;
+                        if (card is EffigyCardData)
+                        {
+                            EffigyCardData effigyCard = (EffigyCardData)card;
+
+                            if (effigyCard.Rarity >= Rarity.UR1)
+                            {
+                                inGameCard.isFoil = true;
+                            }
+
+                        }
                         wankulCardsData.SetFromMonster(inGameCard, card);
                     }
                 }

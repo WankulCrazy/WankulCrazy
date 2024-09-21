@@ -27,9 +27,11 @@ public class Plugin : BaseUnityPlugin
         MethodInfo patch_start = AccessTools.Method(typeof(GameStarting), "Start");
         harmony.Patch(original_start, new HarmonyMethod(patch_start));
 
+
         MethodInfo original_setcardui = AccessTools.Method(typeof(CardUI), "SetCardUI");
-        MethodInfo patch_setcardui = AccessTools.Method(typeof(ReplacingCards), "SetCardUI");
-        harmony.Patch(original_setcardui, postfix: new HarmonyMethod(patch_setcardui));
+        MethodInfo patch_setcarduiprefix = AccessTools.Method(typeof(ReplacingCards), "SetCardUIPrefix");
+        MethodInfo patch_setcarduipostfix = AccessTools.Method(typeof(ReplacingCards), "SetCardUIPostFix");
+        harmony.Patch(original_setcardui, prefix: new HarmonyMethod(patch_setcarduiprefix), postfix: new HarmonyMethod(patch_setcarduipostfix));
 
         MethodInfo original_closeup = AccessTools.Method(typeof(CollectionBinderFlipAnimCtrl), "EnterViewUpCloseState");
         MethodInfo patch_closeup_prefix = AccessTools.Method(typeof(ReplacingCards), "EnterViewUpCloseStatePrefix");

@@ -129,7 +129,7 @@ async function main() {
         const response = await fetch(card.image);
         const buffer = await response.arrayBuffer();
         const resizedBuffer = await resizeImage(buffer);
-        const imagePath = path.join('./textures', card.number + card.title.replaceAll('/', '') + '.png');
+        const imagePath = path.join('./textures', index + "_" + card.number + "_" + card.title.replaceAll('/', '') + '.png');
         await fsPromises.mkdir(path.dirname(imagePath), { recursive: true });
         await fsPromises.writeFile(imagePath, resizedBuffer);
         if (card.rarity.id == 1) {
