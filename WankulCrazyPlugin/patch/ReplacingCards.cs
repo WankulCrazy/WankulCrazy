@@ -346,4 +346,29 @@ public class ReplacingCards
         }
     }
 
+    public static void InitCard(int cardIndex, ECardExpansionType expansionType, CheckPricePanelUI __instance)
+    {
+        EMonsterType monsterType = CPlayerData.GetMonsterTypeFromCardSaveIndex(cardIndex, expansionType);
+        ECardBorderType borderType = (ECardBorderType)(cardIndex % CPlayerData.GetCardAmountPerMonsterType(expansionType, includeFoilCount: false));
+
+        CardData cardData = new CardData();
+        cardData.monsterType = monsterType;
+        cardData.borderType = borderType;
+        cardData.expansionType = expansionType;
+
+        WankulCardData wankulCardData = WankulCardsData.Instance.GetFromMonster(cardData, true);
+
+        if (wankulCardData != null)
+        {
+            if (wankulCardData is EffigyCardData effigyCard)
+            {
+                __instance.m_NameText.text = effigyCard.Title + "\n" + effigyCard.Effigy;
+            }
+            else
+            {
+                __instance.m_NameText.text = wankulCardData.Title + "\n" + "Terrain";
+            }
+        }
+    }
+
 }

@@ -62,6 +62,10 @@ public class Plugin : BaseUnityPlugin
         MethodInfo originalMethod2 = AccessTools.Method(typeof(CPlayerData), "GetCardMarketPrice", new[] { typeof(int), typeof(ECardExpansionType), typeof(bool) });
         MethodInfo patchMethod2 = AccessTools.Method(typeof(WankulCardsData), nameof(WankulCardsData.Postfix_GetCardMarketPrice_ThreeParams));
         harmony.Patch(originalMethod2, postfix: new HarmonyMethod(patchMethod2));
+
+        MethodInfo original_InitCardPhone = AccessTools.Method(typeof(CheckPricePanelUI), "InitCard");
+        MethodInfo patch_InitCardPhone = AccessTools.Method(typeof(ReplacingCards), "InitCard");
+        harmony.Patch(original_InitCardPhone, postfix: new HarmonyMethod(patch_InitCardPhone));
     }
 
 }
