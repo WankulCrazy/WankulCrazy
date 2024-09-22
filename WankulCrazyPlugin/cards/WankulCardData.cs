@@ -60,88 +60,88 @@ namespace WankulCrazyPlugin.cards
 
             if (Drop >= 0.9f)
             {
-                priceRangeMin = 0.1f;
-                priceRangeMax = 0.5f;
+                priceRangeMin = 0.01f;
+                priceRangeMax = 0.05f;
             }
             else if (Drop >= 0.8f)
             {
-                priceRangeMin = 0.5f;
-                priceRangeMax = 0.2f;
+                priceRangeMin = 0.05f;
+                priceRangeMax = 0.02f;
             }
             else if (Drop >= 0.7f)
             {
-                priceRangeMin = 0.2f;
-                priceRangeMax = 0.5f;
+                priceRangeMin = 0.02f;
+                priceRangeMax = 0.05f;
             }
             else if (Drop >= 0.6f)
             {
-                priceRangeMin = 0.5f;
-                priceRangeMax = 1f;
+                priceRangeMin = 0.05f;
+                priceRangeMax = 0.1f;
             }
             else if (Drop >= 0.5f)
             {
-                priceRangeMin = 1f;
-                priceRangeMax = 1.5f;
+                priceRangeMin = 0.1f;
+                priceRangeMax = 0.15f;
             }
             else if (Drop >= 0.4f)
             {
-                priceRangeMin = 1.5f;
-                priceRangeMax = 2f;
+                priceRangeMin = 0.15f;
+                priceRangeMax = 0.2f;
             }
             else if (Drop >= 0.3f)
+            {
+                priceRangeMin = 0.2f;
+                priceRangeMax = 0.25f;
+            }
+            else if (Drop >= 0.2f)
+            {
+                priceRangeMin = 0.25f;
+                priceRangeMax = 0.3f;
+            }
+            else if (Drop >= 0.1f)
+            {
+                priceRangeMin = 0.3f;
+                priceRangeMax = 0.5f;
+            }
+            else if (Drop >= 0.08f)
+            {
+                priceRangeMin = 0.5f;
+                priceRangeMax = 0.8f;
+            }
+            else if (Drop >= 0.06f)
+            {
+                priceRangeMin = 0.8f;
+                priceRangeMax = 1f;
+            }
+            else if (Drop >= 0.05f)
+            {
+                priceRangeMin = 1f;
+                priceRangeMax = 2f;
+            }
+            else if (Drop >= 0.04f)
             {
                 priceRangeMin = 2f;
                 priceRangeMax = 2.5f;
             }
-            else if (Drop >= 0.2f)
-            {
-                priceRangeMin = 2.5f;
-                priceRangeMax = 3f;
-            }
-            else if (Drop >= 0.1f)
-            {
-                priceRangeMin = 3f;
-                priceRangeMax = 5f;
-            }
-            else if (Drop >= 0.08f)
-            {
-                priceRangeMin = 5f;
-                priceRangeMax = 8f;
-            }
-            else if (Drop >= 0.06f)
-            {
-                priceRangeMin = 8f;
-                priceRangeMax = 10f;
-            }
-            else if (Drop >= 0.05f)
-            {
-                priceRangeMin = 10f;
-                priceRangeMax = 20f;
-            }
-            else if (Drop >= 0.04f)
-            {
-                priceRangeMin = 20f;
-                priceRangeMax = 25f;
-            }
             else if (Drop >= 0.03f)
             {
-                priceRangeMin = 25f;
-                priceRangeMax = 50f;
+                priceRangeMin = 4.5f;
+                priceRangeMax = 8.0f;
             }
             else if (Drop >= 0.02f)
             {
-                priceRangeMin = 50f;
-                priceRangeMax = 100f;
+                priceRangeMin = 10.0f;
+                priceRangeMax = 25.0f;
             }
             else if (Drop >= 0.01f)
             {
-                priceRangeMin = 100f;
-                priceRangeMax = 200f;
+                priceRangeMin = 100.0f;
+                priceRangeMax = 200.0f;
             }
             else
             {
-                priceRangeMin = 200f;
-                priceRangeMax = 300f;
+                priceRangeMin = 200.0f;
+                priceRangeMax = 300.0f;
             }
 
             // Calculer le prix avec la variation aléatoire (influencée par le prix max du segment)

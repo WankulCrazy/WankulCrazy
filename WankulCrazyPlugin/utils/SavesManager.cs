@@ -4,9 +4,20 @@ using System.Text;
 using WankulCrazyPlugin.cards;
 using Newtonsoft.Json;
 using UnityEngine;
+using System.Threading;
 
 namespace WankulCrazyPlugin.utils
 {
+    public class Save
+    {
+        public Dictionary<string, int> associations = [];
+        public Dictionary<int, (int WankulCardIndex, string cardkey, int amount)> wankulCards = [];
+        public Save(Dictionary<string, int> associations, Dictionary<int, (int WankulCardIndex, string cardkey, int amount)> wankulCards)
+        {
+            this.associations = associations;
+            this.wankulCards = wankulCards;
+        }
+    }
     public class SavesManager
     {
         public static void SaveCardsAssociations()
@@ -27,7 +38,17 @@ namespace WankulCrazyPlugin.utils
                 Plugin.Logger.LogInfo("Saving association: " + association.Key + " => " + association.Value.Index);
                 knewAssociations.Add(association.Key, association.Value.Index);
             }
-            string json = JsonConvert.SerializeObject(knewAssociations);
+
+            Dictionary<int, (int WankulCardIndex, string cardkey, int amount)> wankulCards = [];
+            foreach (var item in WankulInventory.Instance.wankulCards)
+            {
+                string cardkey = $"{item.Value.card.monsterType}_{item.Value.card.borderType}_{item.Value.card.expansionType}";
+                wankulCards[item.Key] = (item.Value.wankulcard.Index, cardkey, item.Value.amount);
+            }
+
+            Save save = new(knewAssociations, wankulCards);
+
+            string json = JsonConvert.SerializeObject(save);
             System.IO.File.WriteAllText(path, json);
         }
 
@@ -50,13 +71,23 @@ namespace WankulCrazyPlugin.utils
             }
 
             string json = System.IO.File.ReadAllText(path);
-            Dictionary<string, int> associations = JsonConvert.DeserializeObject<Dictionary<string, int>>(json);
+            Save save = JsonConvert.DeserializeObject<Save>(json);
 
+            Dictionary<string, int> associations = save.associations;
             foreach (var association in associations)
             {
                 Plugin.Logger.LogInfo("Loading association: " + association.Key + " => " + association.Value);
                 WankulCardData card = WankulCardsData.Instance.cards.Find(card => card.Index == association.Value);
                 WankulCardsData.Instance.association[association.Key] = card;
+            }
+
+            Dictionary<int, (int WankulCardIndex, string cardkey, int amount)> wankulCards = [];
+            foreach (var item in wankulCards)
+            {
+                WankulCardData wankulCardData =WankulCardsData.Instance.cards.Find(card => card.Index == item.Value.WankulCardIndex);
+                CardData cardData = WankulCardsData.Instance.GetCardDataFromKey(item.Value.cardkey);
+
+                WankulInventory.Instance.wankulCards[item.Key] = (wankulCardData, cardData, item.Value.amount);
             }
         }
     }
