@@ -42,7 +42,11 @@ public class Plugin : BaseUnityPlugin
         MethodInfo patch_CardOpening = AccessTools.Method(typeof(WankulInventory), "CardOpening");
         harmony.Patch(original_CardOpening, postfix: new HarmonyMethod(patch_CardOpening));
 
-        MethodInfo original_save= AccessTools.Method(typeof(CSaveLoad), "Save");
+        MethodInfo original_binderSetCard = AccessTools.Method(typeof(CollectionBinderFlipAnimCtrl), "UpdateBinderAllCardUI");
+        MethodInfo patch_binderSetCard = AccessTools.Method(typeof(ReplacingCards), "UpdateBinderAllCardUI");
+        harmony.Patch(original_binderSetCard, postfix: new HarmonyMethod(patch_binderSetCard));
+
+        MethodInfo original_save = AccessTools.Method(typeof(CSaveLoad), "Save");
         MethodInfo patch_save = AccessTools.Method(typeof(SavesManager), "SaveCardsAssociations");
         harmony.Patch(original_save, postfix: new HarmonyMethod(patch_save));
 

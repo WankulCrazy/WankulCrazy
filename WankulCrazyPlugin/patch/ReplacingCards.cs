@@ -7,19 +7,19 @@ using System.Threading;
 using WankulCrazyPlugin.cards;
 using Newtonsoft.Json;
 using System.CodeDom.Compiler;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace WankulCrazyPlugin.patch;
 public class ReplacingCards
 {
-
+    static List<int> SortedCardIndies = [];
 
     static void SetCardUIPrefix(CardData cardData)
     {
         CardData gameCardData = cardData;
         WankulCardsData cardsData = WankulCardsData.Instance;
 
-        Plugin.Logger.LogInfo("Setting " + gameCardData);
-        Plugin.Logger.LogInfo("Setting card UI for " + gameCardData.monsterType);
         WankulCardData wankulCardData = cardsData.GetFromMonster(gameCardData, false);
 
         gameCardData.isFoil = false;
@@ -63,8 +63,6 @@ public class ReplacingCards
 
         }
 
-        Plugin.Logger.LogInfo("Setting card UI for " + wankulCardData);
-        Plugin.Logger.LogInfo("Setting card UI for " + wankulCardData.Title);
         try
         {
             __instance.m_CardBGImage.sprite = wankulCardData.Sprite;
@@ -291,21 +289,60 @@ public class ReplacingCards
             ERarity rarity = monsterData.Rarity;
 
             string key = inGameCard.monsterType.ToString() + "_" + inGameCard.borderType.ToString() + "_" + expansionType.ToString() + "_" + elementIndex.ToString() + "_" + rarity.ToString();
-            string json = JsonConvert.SerializeObject(inGameCard, Formatting.Indented );
-            Plugin.Logger.LogInfo("EnterViewUpCloseStatePostfix : " + json);
 
             if (__state.wankulCardData is EffigyCardData effigyCard)
             {
-                __instance.m_CollectionBinderUI.m_CardFullRarityNameText.text = RaritiesContainer.Rarities[effigyCard.Rarity] + "\n" + key + "\n" + json;
+                __instance.m_CollectionBinderUI.m_CardFullRarityNameText.text = RaritiesContainer.Rarities[effigyCard.Rarity];
                 __instance.m_CollectionBinderUI.m_CardNameText.text = effigyCard.Title + "\n" + effigyCard.Effigy;
             }
             else
             {
                 Plugin.Logger.LogInfo("WankulCard FullRarityName : Terrain");
-                __instance.m_CollectionBinderUI.m_CardFullRarityNameText.text = "Terrain" + "\n" + key + "\n" + json;
+                __instance.m_CollectionBinderUI.m_CardFullRarityNameText.text = "Terrain";
                 __instance.m_CollectionBinderUI.m_CardNameText.text = wankulCardData.Title;
             }
 
+        }
+    }
+
+
+    public static void SortByPriceAmount()
+    {
+        SortedCardIndies.Clear();
+
+        List<WankulCardData> wankulCards = WankulInventory.Instance.wankulCards.Values.Select(x => x.wankulcard).ToList();
+
+        SortedCardIndies = wankulCards
+            .Select((card) => new { card })
+            .OrderByDescending(x => x.card.MarketPrice)
+            .Select(x => x.card.Index)
+            .ToList();
+    }
+
+    public static void UpdateBinderAllCardUI(int binderIndex, int pageIndex, ref int ___m_MaxIndex, CollectionBinderFlipAnimCtrl __instance)
+    {
+        SortByPriceAmount();
+
+        if (pageIndex <= 0 || pageIndex > ___m_MaxIndex)
+        {
+            return;
+        }
+        for (int i = 0; i < __instance.m_BinderPageGrpList[binderIndex].m_CardList.Count; i++)
+        {
+
+            int num = (pageIndex - 1) * 12 + i;
+            if (num >= SortedCardIndies.Count)
+            {
+                __instance.m_BinderPageGrpList[binderIndex].SetSingleCard(i, null, 0);
+                continue;
+            }
+            int index = SortedCardIndies[num];
+
+            var wankulCardTuple = WankulInventory.Instance.wankulCards[index];
+            WankulCardData wankulCardData = wankulCardTuple.wankulcard;
+
+            CardData cardData = WankulCardsData.Instance.GetCardDataFromWankulCardData(wankulCardData);
+            __instance.m_BinderPageGrpList[binderIndex].SetSingleCard(i, cardData, wankulCardTuple.amount);
         }
     }
 

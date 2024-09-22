@@ -16,13 +16,10 @@ namespace WankulCrazyPlugin.cards
         public WankulCardData GetFromMonster(CardData monster, bool allowNull)
         {
             ECardExpansionType expansionType = monster.expansionType;
-            Plugin.Logger.LogInfo($"GetFromMonster : yesss");
             MonsterData monsterData = InventoryBase.GetMonsterData(monster.monsterType);
-            Plugin.Logger.LogInfo($"GetFromMonster : {monster.monsterType} {monster.borderType} {expansionType}");
             ERarity rarity = monsterData.Rarity;
 
             string key = $"{monster.monsterType}_{monster.borderType}_{expansionType}";
-            Plugin.Logger.LogInfo($"GetFromMonster : yesss2");
 
             // Vérification de l'association déjà existante
             if (association.TryGetValue(key, out WankulCardData card))
@@ -34,8 +31,6 @@ namespace WankulCrazyPlugin.cards
                 // dans les drop on peut avoir des cartes qui ne sont pas dans l'association
                 return null;
             }
-
-            Plugin.Logger.LogInfo($"GetFromMonster : yesss3");
 
             // Si pas trouvé dans l'association, déterminer le pack de carte
             ECollectionPackType packType = ECollectionPackType.BasicCardPack;
@@ -121,7 +116,6 @@ namespace WankulCrazyPlugin.cards
             MonsterData monsterData = InventoryBase.GetMonsterData(monster.monsterType);
 
             string key = monster.monsterType.ToString() + "_" + monster.borderType.ToString() + "_" + expansionType.ToString();
-            Plugin.Logger.LogInfo($"SetFromMonster : {key}");
             // Vérifiez si la clé existe déjà
             if (!association.ContainsKey(key))
             {
@@ -181,7 +175,14 @@ namespace WankulCrazyPlugin.cards
                 {
                     foreach (ECardExpansionType expansion in Enum.GetValues(typeof(ECardExpansionType)))
                     {
-                        if (expansion == ECardExpansionType.None || expansion == ECardExpansionType.MAX)
+                        if (
+                            expansion == ECardExpansionType.None ||
+                            expansion == ECardExpansionType.FantasyRPG ||
+                            expansion == ECardExpansionType.CatJob ||
+                            expansion == ECardExpansionType.Ghost ||
+                            expansion == ECardExpansionType.FoodieGO ||
+                            expansion == ECardExpansionType.MAX
+                            )
                         {
                             continue;
                         }
@@ -209,10 +210,9 @@ namespace WankulCrazyPlugin.cards
                             cardData.monsterType = monster;
 
                             string key = $"{cardData.monsterType.ToString()}_{cardData.borderType.ToString()}_{cardData.expansionType.ToString()}";
-                            Plugin.Logger.LogInfo($"GetUnassciatedCardData : {key}");
-
                             if (!association.ContainsKey(key))
                             {
+                                Plugin.Logger.LogInfo($"GetUnassciatedCardData : {key}");
                                 return cardData; // Retourne le premier CardData manquant trouvé
                             }
                         }

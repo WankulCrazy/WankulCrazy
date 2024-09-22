@@ -7,9 +7,10 @@ using WankulCrazyPlugin.utils;
 
 namespace WankulCrazyPlugin.cards
 {
+
     public class WankulInventory : Singleton<WankulInventory>
     {
-        List<WankulCardData> cards = [];
+        public Dictionary<int, (WankulCardData wankulcard, CardData card, int amount)> wankulCards = [];
 
         public static Season ConvertPackTypeToSeason(ECollectionPackType packType)
         {
@@ -45,13 +46,10 @@ namespace WankulCrazyPlugin.cards
             {
                 allCards = allCards.FindAll(card => card is not TerrainCardData);
             }
-            Plugin.Logger.LogInfo($"Pack: {packType}, isTerrain: {isTerrain}, isMinRare: {isMinRare}, AllCardsCount: {allCards.Count}");
 
             // Filtrer les cartes déjà associées
             List<WankulCardData> seasonalCard =
                 allCards.FindAll(card => card.Season == ConvertPackTypeToSeason(packType));
-
-            Plugin.Logger.LogInfo($"Pack: {packType}, isTerrain: {isTerrain}, isMinRare: {isMinRare}, seasonalCard: {seasonalCard.Count}");
 
 
             if (!isTerrain && isMinRare)
@@ -70,11 +68,7 @@ namespace WankulCrazyPlugin.cards
                 seasonalCard = seasonalCard.FindAll(card =>
                     !(card is EffigyCardData effigyCard && effigyCard.Rarity >= Rarity.R)
                 );
-
-                Plugin.Logger.LogInfo($"SHOULD FILTER RARITY DOWN");
             }
-
-            Plugin.Logger.LogInfo($"Pack: {packType}, isTerrain: {isTerrain}, isMinRare: {isMinRare}, seasonalCard: {seasonalCard.Count}");
 
 
             if (seasonalCard.Count == 0)
@@ -129,9 +123,18 @@ namespace WankulCrazyPlugin.cards
             return seasonalCard[randomValue];
         }
 
-        public static void AddCard(WankulCardData card)
+        public static void AddCard(WankulCardData wankulCardData, CardData cardData)
         {
-            Instance.cards.Add(card);
+            if (!Instance.wankulCards.ContainsKey(wankulCardData.Index))
+            {
+                Instance.wankulCards[wankulCardData.Index] = (wankulCardData, cardData, 1);
+            }
+            else
+            {
+                (WankulCardData, CardData, int) inventoryWankulCard = Instance.wankulCards[wankulCardData.Index];
+                inventoryWankulCard.Item3 = inventoryWankulCard.Item3 + 1;
+                Instance.wankulCards[wankulCardData.Index] = inventoryWankulCard;
+            }
         }
 
         public static void CardOpening(List<CardData> ___m_RolledCardDataList, List<float> ___m_CardValueList, ECollectionPackType ___m_CollectionPackType)
@@ -148,20 +151,14 @@ namespace WankulCrazyPlugin.cards
 
                 if (associatedCard != null)
                 {
-                    Plugin.Logger.LogInfo("No associatedCard");
                     inGameCard = wankulCardsData.GetUnassciatedCardData();
-                    Plugin.Logger.LogInfo("Get UnassociatedCard");
-                    Plugin.Logger.LogInfo(inGameCard);
-                    Plugin.Logger.LogInfo(JsonConvert.SerializeObject(inGameCard, Formatting.Indented));
                     ___m_RolledCardDataList[i] = inGameCard;
                 }
 
                 if (wankulCard != null)
                 {
-                    Plugin.Logger.LogInfo($"YES1");
                     inGameCard.isFoil = false;
                     inGameCard.isChampionCard = false;
-                    Plugin.Logger.LogInfo($"YES2");
                     if (wankulCard is EffigyCardData)
                     {
                         EffigyCardData effigyCard = (EffigyCardData)wankulCard;
@@ -172,14 +169,10 @@ namespace WankulCrazyPlugin.cards
                         }
                     }
 
-                    Plugin.Logger.LogInfo($"YES3");
                     ECardExpansionType expansionType = inGameCard.expansionType;
                     MonsterData monsterData = InventoryBase.GetMonsterData(inGameCard.monsterType);
-                    Plugin.Logger.LogInfo($"YES4");
 
                     string key = inGameCard.monsterType.ToString() + "_" + inGameCard.borderType.ToString() + "_" + expansionType.ToString();
-                    Plugin.Logger.LogInfo($"Card dropped : {wankulCard.Index}-{wankulCard.Title} for : {key}");
-                    Plugin.Logger.LogInfo($"YES5");
                     wankulCardsData.SetFromMonster(inGameCard, wankulCard);
                 }
                 else
@@ -189,8 +182,7 @@ namespace WankulCrazyPlugin.cards
 
                 if (wankulCard != null)
                 {
-                    Plugin.Logger.LogInfo("Card dropped : " + wankulCard.Title + " for : " + inGameCard.monsterType);
-                    AddCard(wankulCard);
+                    AddCard(wankulCard, inGameCard);
 
                     ___m_CardValueList.Add(wankulCard.MarketPrice);
                 }
