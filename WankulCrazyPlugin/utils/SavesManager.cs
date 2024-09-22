@@ -76,12 +76,11 @@ namespace WankulCrazyPlugin.utils
             Dictionary<string, int> associations = save.associations;
             foreach (var association in associations)
             {
-                Plugin.Logger.LogInfo("Loading association: " + association.Key + " => " + association.Value);
                 WankulCardData card = WankulCardsData.Instance.cards.Find(card => card.Index == association.Value);
                 WankulCardsData.Instance.association[association.Key] = card;
             }
 
-            Dictionary<int, (int WankulCardIndex, string cardkey, int amount)> wankulCards = [];
+            Dictionary<int, (int WankulCardIndex, string cardkey, int amount)> wankulCards = save.wankulCards;
             foreach (var item in wankulCards)
             {
                 WankulCardData wankulCardData =WankulCardsData.Instance.cards.Find(card => card.Index == item.Value.WankulCardIndex);
