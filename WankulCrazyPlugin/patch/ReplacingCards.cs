@@ -18,6 +18,8 @@ public class ReplacingCards
         CardData gameCardData = cardData;
         WankulCardsData cardsData = WankulCardsData.Instance;
 
+        Plugin.Logger.LogInfo("Setting " + gameCardData);
+        Plugin.Logger.LogInfo("Setting card UI for " + gameCardData.monsterType);
         WankulCardData wankulCardData = cardsData.GetFromMonster(gameCardData, false);
 
         gameCardData.isFoil = false;

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -31,14 +32,50 @@ namespace WankulCrazyPlugin.cards
             }
             
         }
-        
-        public static WankulCardData DropCard(ECollectionPackType packType)
+
+        public static WankulCardData DropCard(ECollectionPackType packType, bool isTerrain = false, bool isMinRare = false)
         {
             List<WankulCardData> allCards = WankulCardsData.Instance.cards;
+
+            if (isTerrain)
+            {
+                allCards = allCards.FindAll(card => card is TerrainCardData);
+            }
+            else
+            {
+                allCards = allCards.FindAll(card => card is not TerrainCardData);
+            }
+            Plugin.Logger.LogInfo($"Pack: {packType}, isTerrain: {isTerrain}, isMinRare: {isMinRare}, AllCardsCount: {allCards.Count}");
 
             // Filtrer les cartes déjà associées
             List<WankulCardData> seasonalCard =
                 allCards.FindAll(card => card.Season == ConvertPackTypeToSeason(packType));
+
+            Plugin.Logger.LogInfo($"Pack: {packType}, isTerrain: {isTerrain}, isMinRare: {isMinRare}, seasonalCard: {seasonalCard.Count}");
+
+
+            if (!isTerrain && isMinRare)
+            {
+                List<EffigyCardData> effigyCardsData = seasonalCard
+                    .FindAll(card => card is EffigyCardData)
+                    .ConvertAll(card => (EffigyCardData)card);
+
+                seasonalCard = effigyCardsData.FindAll(card => card.Rarity >= Rarity.R)
+                    .ConvertAll(card => (WankulCardData)card);
+                ;
+            }
+            else if (!isTerrain && !isMinRare)
+            {
+                // Filtrer toutes les cartes avec une rareté inférieure à Rare, pas seulement les EffigyCardData
+                seasonalCard = seasonalCard.FindAll(card =>
+                    !(card is EffigyCardData effigyCard && effigyCard.Rarity >= Rarity.R)
+                );
+
+                Plugin.Logger.LogInfo($"SHOULD FILTER RARITY DOWN");
+            }
+
+            Plugin.Logger.LogInfo($"Pack: {packType}, isTerrain: {isTerrain}, isMinRare: {isMinRare}, seasonalCard: {seasonalCard.Count}");
+
 
             if (seasonalCard.Count == 0)
             {
@@ -60,7 +97,9 @@ namespace WankulCrazyPlugin.cards
                 cumulativeDropChance += card.Drop;
                 if (randomValue <= cumulativeDropChance)
                 {
-                    Plugin.Logger.LogInfo($"Dropped card: {card.Title} from season {card.Season}");
+                    string raritystrg = card is EffigyCardData efcard ? efcard.Rarity.ToString() : "terrain";
+
+                    Plugin.Logger.LogInfo($"Dropped card: {card.Title}, Season: {card.Season}, Rarity: {raritystrg}");
                     return card;
                 }
             }
@@ -101,23 +140,31 @@ namespace WankulCrazyPlugin.cards
             ___m_CardValueList.Clear();
             for (int i = 0; i < ___m_RolledCardDataList.Count; i++)
             {
+                bool isTerrain = i == 0;
+                bool isMinRare = i == ___m_RolledCardDataList.Count - 1;
                 CardData inGameCard = ___m_RolledCardDataList[i];
-                WankulCardData card = DropCard(___m_CollectionPackType);
-                WankulCardData associatedCard = wankulCardsData.GetFromMonster(inGameCard, true);
+                WankulCardData wankulCard = DropCard(___m_CollectionPackType, isTerrain, isMinRare);
+                CardData associatedCard = wankulCardsData.GetCardDataFromWankulCardData(wankulCard);
 
                 if (associatedCard != null)
                 {
-                    inGameCard = wankulCardsData.GetCardDataFromWankulCardData(associatedCard);
+                    Plugin.Logger.LogInfo("No associatedCard");
+                    inGameCard = wankulCardsData.GetUnassciatedCardData();
+                    Plugin.Logger.LogInfo("Get UnassociatedCard");
+                    Plugin.Logger.LogInfo(inGameCard);
+                    Plugin.Logger.LogInfo(JsonConvert.SerializeObject(inGameCard, Formatting.Indented));
                     ___m_RolledCardDataList[i] = inGameCard;
                 }
 
-                if (card != null)
+                if (wankulCard != null)
                 {
+                    Plugin.Logger.LogInfo($"YES1");
                     inGameCard.isFoil = false;
                     inGameCard.isChampionCard = false;
-                    if (card is EffigyCardData)
+                    Plugin.Logger.LogInfo($"YES2");
+                    if (wankulCard is EffigyCardData)
                     {
-                        EffigyCardData effigyCard = (EffigyCardData)card;
+                        EffigyCardData effigyCard = (EffigyCardData)wankulCard;
 
                         if (effigyCard.Rarity >= Rarity.UR1)
                         {
@@ -125,26 +172,27 @@ namespace WankulCrazyPlugin.cards
                         }
                     }
 
+                    Plugin.Logger.LogInfo($"YES3");
                     ECardExpansionType expansionType = inGameCard.expansionType;
                     MonsterData monsterData = InventoryBase.GetMonsterData(inGameCard.monsterType);
-                    EElementIndex elementIndex = monsterData.ElementIndex;
-                    ERarity rarity = monsterData.Rarity;
+                    Plugin.Logger.LogInfo($"YES4");
 
-                    string key = inGameCard.monsterType.ToString() + "_" + inGameCard.borderType.ToString() + "_" + expansionType.ToString() + "_" + elementIndex.ToString() + "_" + rarity.ToString();
-                    Plugin.Logger.LogInfo($"Card dropped : {card.Index}-{card.Title} for : {key}");
-                    wankulCardsData.SetFromMonster(inGameCard, card);
+                    string key = inGameCard.monsterType.ToString() + "_" + inGameCard.borderType.ToString() + "_" + expansionType.ToString();
+                    Plugin.Logger.LogInfo($"Card dropped : {wankulCard.Index}-{wankulCard.Title} for : {key}");
+                    Plugin.Logger.LogInfo($"YES5");
+                    wankulCardsData.SetFromMonster(inGameCard, wankulCard);
                 }
                 else
                 {
                     Plugin.Logger.LogError("Failed to drop a card");
                 }
 
-                if (card != null)
+                if (wankulCard != null)
                 {
-                    Plugin.Logger.LogInfo("Card dropped : " + card.Title + " for : " + inGameCard.monsterType);
-                    AddCard(card);
+                    Plugin.Logger.LogInfo("Card dropped : " + wankulCard.Title + " for : " + inGameCard.monsterType);
+                    AddCard(wankulCard);
 
-                    ___m_CardValueList.Add(card.MarketPrice);
+                    ___m_CardValueList.Add(wankulCard.MarketPrice);
                 }
                 else
                 {

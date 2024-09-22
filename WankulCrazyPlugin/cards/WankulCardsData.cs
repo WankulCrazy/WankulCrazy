@@ -16,11 +16,13 @@ namespace WankulCrazyPlugin.cards
         public WankulCardData GetFromMonster(CardData monster, bool allowNull)
         {
             ECardExpansionType expansionType = monster.expansionType;
+            Plugin.Logger.LogInfo($"GetFromMonster : yesss");
             MonsterData monsterData = InventoryBase.GetMonsterData(monster.monsterType);
-            EElementIndex elementIndex = monsterData.ElementIndex;
+            Plugin.Logger.LogInfo($"GetFromMonster : {monster.monsterType} {monster.borderType} {expansionType}");
             ERarity rarity = monsterData.Rarity;
 
-            string key = $"{monster.monsterType}_{monster.borderType}_{expansionType}_{elementIndex}_{rarity}";
+            string key = $"{monster.monsterType}_{monster.borderType}_{expansionType}";
+            Plugin.Logger.LogInfo($"GetFromMonster : yesss2");
 
             // Vérification de l'association déjà existante
             if (association.TryGetValue(key, out WankulCardData card))
@@ -32,6 +34,8 @@ namespace WankulCrazyPlugin.cards
                 // dans les drop on peut avoir des cartes qui ne sont pas dans l'association
                 return null;
             }
+
+            Plugin.Logger.LogInfo($"GetFromMonster : yesss3");
 
             // Si pas trouvé dans l'association, déterminer le pack de carte
             ECollectionPackType packType = ECollectionPackType.BasicCardPack;
@@ -91,7 +95,7 @@ namespace WankulCrazyPlugin.cards
             // Découper la clé en utilisant l'underscore comme séparateur
             string[] parts = key.Split('_');
 
-            if (parts.Length != 5)
+            if (parts.Length != 3)
             {
                 Debug.LogError("La clé ne contient pas le bon nombre de parties.");
                 return null;
@@ -101,8 +105,6 @@ namespace WankulCrazyPlugin.cards
             EMonsterType monsterType = (EMonsterType)Enum.Parse(typeof(EMonsterType), parts[0]);
             ECardBorderType borderType = (ECardBorderType)Enum.Parse(typeof(ECardBorderType), parts[1]);
             ECardExpansionType expansionType = (ECardExpansionType)Enum.Parse(typeof(ECardExpansionType), parts[2]);
-            EElementIndex elementIndex = (EElementIndex)Enum.Parse(typeof(EElementIndex), parts[3]);
-            ERarity rarity = (ERarity)Enum.Parse(typeof(ERarity), parts[4]);
 
             // Récupérer les données du monstre
             CardData cardData = new CardData();
@@ -117,13 +119,13 @@ namespace WankulCrazyPlugin.cards
         {
             ECardExpansionType expansionType = monster.expansionType;
             MonsterData monsterData = InventoryBase.GetMonsterData(monster.monsterType);
-            EElementIndex elementIndex = monsterData.ElementIndex;
-            ERarity rarity = monsterData.Rarity;
 
-            string key = monster.monsterType.ToString() + "_" + monster.borderType.ToString() + "_" + expansionType.ToString() + "_" + elementIndex.ToString() + "_" + rarity.ToString();
-            if (association[key] == null)
+            string key = monster.monsterType.ToString() + "_" + monster.borderType.ToString() + "_" + expansionType.ToString();
+            Plugin.Logger.LogInfo($"SetFromMonster : {key}");
+            // Vérifiez si la clé existe déjà
+            if (!association.ContainsKey(key))
             {
-                association[key] = card;
+                association[key] = card;  // Créez une nouvelle association
             }
             else
             {
@@ -171,6 +173,53 @@ namespace WankulCrazyPlugin.cards
             }
 
             __result = marketPrice; // Affecte le prix calculé à __result
+        }
+
+        public CardData GetUnassciatedCardData()
+        {
+                foreach (ECardBorderType border in Enum.GetValues(typeof(ECardBorderType)))
+                {
+                    foreach (ECardExpansionType expansion in Enum.GetValues(typeof(ECardExpansionType)))
+                    {
+                        if (expansion == ECardExpansionType.None || expansion == ECardExpansionType.MAX)
+                        {
+                            continue;
+                        }
+                        foreach (EMonsterType monster in Enum.GetValues(typeof(EMonsterType)))
+                        {
+                            if (
+                                monster == EMonsterType.EarlyPlayer ||
+                                monster == EMonsterType.None ||
+                                monster == EMonsterType.MAX ||
+                                monster == EMonsterType.Max ||
+                                monster == EMonsterType.MaxArt ||
+                                monster == EMonsterType.MAX_CATJOB ||
+                                monster == EMonsterType.MAX_FANTASYRPG ||
+                                monster == EMonsterType.MAX_MEGABOT
+                                )
+                            {
+                                continue;
+                            }
+                            // Récupérer les données du monstre
+                            MonsterData monsterData = InventoryBase.GetMonsterData(monster);
+
+                            CardData cardData = new CardData();
+                            cardData.borderType = border;
+                            cardData.expansionType = expansion;
+                            cardData.monsterType = monster;
+
+                            string key = $"{cardData.monsterType.ToString()}_{cardData.borderType.ToString()}_{cardData.expansionType.ToString()}";
+                            Plugin.Logger.LogInfo($"GetUnassciatedCardData : {key}");
+
+                            if (!association.ContainsKey(key))
+                            {
+                                return cardData; // Retourne le premier CardData manquant trouvé
+                            }
+                        }
+                    }
+
+                }
+            return null; // Si aucune CardData manquante n'est trouvée
         }
 
         public void DebugDisplayAllCardsAssociations()
