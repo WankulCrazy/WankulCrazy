@@ -1,11 +1,10 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.Threading;
 using UnityEngine;
-using UnityEngine.UIElements;
+using WankulCrazyPlugin.cards;
 using WankulCrazyPlugin.utils;
 
-namespace WankulCrazyPlugin.cards
+namespace WankulCrazyPlugin.inventory
 {
 
     public class WankulInventory : Singleton<WankulInventory>
@@ -19,19 +18,19 @@ namespace WankulCrazyPlugin.cards
                 case ECollectionPackType.BasicCardPack:
                 case ECollectionPackType.DestinyBasicCardPack:
                     return Season.S01;
-                
+
                 case ECollectionPackType.RareCardPack:
-                    case ECollectionPackType.DestinyRareCardPack:
+                case ECollectionPackType.DestinyRareCardPack:
                     return Season.S02;
-                
+
                 case ECollectionPackType.EpicCardPack:
-                    case ECollectionPackType.DestinyEpicCardPack:
+                case ECollectionPackType.DestinyEpicCardPack:
                     return Season.S03;
-                
+
                 default:
                     return Season.HS;
             }
-            
+
         }
 
         public static WankulCardData DropCard(ECollectionPackType packType, bool isTerrain = false, bool isMinRare = false)
@@ -76,14 +75,14 @@ namespace WankulCrazyPlugin.cards
                 Plugin.Logger.LogError("No available cards to drop");
                 return null;
             }
-            
+
             float totalDropChance = 0f;
             foreach (var card in seasonalCard)
             {
                 totalDropChance += card.Drop;
             }
 
-            float randomValue = UnityEngine.Random.Range(0f, totalDropChance);
+            float randomValue = Random.Range(0f, totalDropChance);
             float cumulativeDropChance = 0f;
 
             foreach (var card in seasonalCard)
@@ -118,7 +117,7 @@ namespace WankulCrazyPlugin.cards
                 return null;
             }
 
-            int randomValue = UnityEngine.Random.Range(0, seasonalCard.Count);
+            int randomValue = Random.Range(0, seasonalCard.Count);
 
             return seasonalCard[randomValue];
         }
@@ -134,61 +133,6 @@ namespace WankulCrazyPlugin.cards
                 (WankulCardData, CardData, int) inventoryWankulCard = Instance.wankulCards[wankulCardData.Index];
                 inventoryWankulCard.Item3 = inventoryWankulCard.Item3 + 1;
                 Instance.wankulCards[wankulCardData.Index] = inventoryWankulCard;
-            }
-        }
-
-        public static void CardOpening(List<CardData> ___m_RolledCardDataList, List<float> ___m_CardValueList, ECollectionPackType ___m_CollectionPackType)
-        {
-            WankulCardsData wankulCardsData = WankulCardsData.Instance;
-            ___m_CardValueList.Clear();
-            for (int i = 0; i < ___m_RolledCardDataList.Count; i++)
-            {
-                bool isTerrain = i == 0;
-                bool isMinRare = i == ___m_RolledCardDataList.Count - 1;
-                CardData inGameCard = ___m_RolledCardDataList[i];
-                WankulCardData wankulCard = DropCard(___m_CollectionPackType, isTerrain, isMinRare);
-                CardData associatedCard = wankulCardsData.GetCardDataFromWankulCardData(wankulCard);
-                Plugin.Logger.LogInfo($"Dropped Card added: {wankulCard.Title}, Market Price: {wankulCard.MarketPrice}, CardIngame: {inGameCard.monsterType}_{inGameCard.expansionType}_{inGameCard.borderType}");
-
-                if (associatedCard != null)
-                {
-                    inGameCard = wankulCardsData.GetUnassciatedCardData();
-                    ___m_RolledCardDataList[i] = inGameCard;
-                }
-                Plugin.Logger.LogInfo($"Set unassociated Card : {wankulCard.Title}, Market Price: {wankulCard.MarketPrice}, CardIngame: {inGameCard.monsterType}_{inGameCard.expansionType}_{inGameCard.borderType}");
-
-                if (wankulCard != null)
-                {
-                    inGameCard.isFoil = false;
-                    inGameCard.isChampionCard = false;
-                    if (wankulCard is EffigyCardData)
-                    {
-                        EffigyCardData effigyCard = (EffigyCardData)wankulCard;
-
-                        if (effigyCard.Rarity >= Rarity.UR1)
-                        {
-                            inGameCard.isFoil = true;
-                        }
-                    }
-
-                    wankulCardsData.SetFromMonster(inGameCard, wankulCard);
-                }
-                else
-                {
-                    Plugin.Logger.LogError("Failed to drop a card");
-                }
-
-                if (wankulCard != null)
-                {
-                    AddCard(wankulCard, inGameCard);
-
-                    ___m_CardValueList.Add(wankulCard.MarketPrice);
-                    Plugin.Logger.LogInfo($"Card added: {wankulCard.Title}, Market Price: {wankulCard.MarketPrice}");
-                }
-                else
-                {
-                    Plugin.Logger.LogError("Failed to drop a card");
-                }
             }
         }
     }

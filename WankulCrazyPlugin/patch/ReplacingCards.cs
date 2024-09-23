@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Linq;
+using WankulCrazyPlugin.inventory;
 
 namespace WankulCrazyPlugin.patch;
 public class ReplacingCards

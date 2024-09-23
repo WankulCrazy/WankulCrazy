@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using UnityEngine;
+using WankulCrazyPlugin.inventory;
 using WankulCrazyPlugin.utils;
 
 namespace WankulCrazyPlugin.cards
@@ -129,48 +129,6 @@ namespace WankulCrazyPlugin.cards
             {
                 Debug.LogError("La carte existe déjà dans l'association.");
             }
-        }
-
-
-        // Patch pour la méthode avec un paramètre CardData
-        public static void Postfix_GetCardMarketPrice_CardData(CardData cardData, ref float __result)
-        {
-            WankulCardsData wankulCardsData = WankulCardsData.Instance;
-            WankulCardData wankulCardData = wankulCardsData.GetFromMonster(cardData, false);
-
-            if (wankulCardData != null)
-            {
-                __result = wankulCardData.MarketPrice; // Utilise le prix du marché de ta carte
-            }
-            else
-            {
-                __result = 0; // Valeur par défaut si la carte n'est pas trouvée
-            }
-        }
-
-        // Patch pour la méthode avec trois paramètres
-        public static void Postfix_GetCardMarketPrice_ThreeParams(ECardExpansionType expansionType, ref float __result)
-        {
-            float variation = UnityEngine.Random.Range(-0.3f, 0.3f);
-            float marketPrice = 20f; // Valeur par défaut
-
-            switch (expansionType)
-            {
-                case ECardExpansionType.Tetramon:
-                    marketPrice = Mathf.Clamp((1 + variation) * 100f, 5f, 100f);
-                    break;
-                case ECardExpansionType.Destiny:
-                    marketPrice = Mathf.Clamp((1 + variation) * 3000f, 100f, 3000f);
-                    break;
-                case ECardExpansionType.Ghost:
-                    marketPrice = Mathf.Clamp((1 + variation) * 5000f, 1000f, 5000f);
-                    break;
-                default:
-                    marketPrice = Mathf.Clamp((1 + variation) * 100f, 5f, 100f);
-                    break;
-            }
-
-            __result = marketPrice; // Affecte le prix calculé à __result
         }
 
         public CardData GetUnassciatedCardData()

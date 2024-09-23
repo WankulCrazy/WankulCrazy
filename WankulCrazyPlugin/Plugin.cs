@@ -2,11 +2,7 @@
 using BepInEx.Logging;
 using HarmonyLib;
 using System.Reflection;
-using UnityEngine.Rendering;
-using UnityEngine.UIElements;
-using WankulCrazyPlugin.cards;
 using WankulCrazyPlugin.patch;
-using WankulCrazyPlugin.utils;
 
 namespace WankulCrazyPlugin;
 
@@ -39,7 +35,7 @@ public class Plugin : BaseUnityPlugin
         harmony.Patch(original_closeup, prefix: new HarmonyMethod(patch_closeup_prefix), postfix: new HarmonyMethod(patch_closeup_postfix));
 
         MethodInfo original_CardOpening = AccessTools.Method(typeof(CardOpeningSequence), "GetPackContent");
-        MethodInfo patch_CardOpening = AccessTools.Method(typeof(WankulInventory), "CardOpening");
+        MethodInfo patch_CardOpening = AccessTools.Method(typeof(CardOpening), "OpenBooster");
         harmony.Patch(original_CardOpening, postfix: new HarmonyMethod(patch_CardOpening));
 
         MethodInfo original_binderSetCard = AccessTools.Method(typeof(CollectionBinderFlipAnimCtrl), "UpdateBinderAllCardUI");
@@ -47,20 +43,20 @@ public class Plugin : BaseUnityPlugin
         harmony.Patch(original_binderSetCard, postfix: new HarmonyMethod(patch_binderSetCard));
 
         MethodInfo original_save = AccessTools.Method(typeof(CSaveLoad), "Save");
-        MethodInfo patch_save = AccessTools.Method(typeof(SavesManager), "SaveCardsAssociations");
+        MethodInfo patch_save = AccessTools.Method(typeof(Saves), "Save");
         harmony.Patch(original_save, postfix: new HarmonyMethod(patch_save));
 
         MethodInfo original_load = AccessTools.Method(typeof(CSaveLoad), "Load");
-        MethodInfo patch_load = AccessTools.Method(typeof(SavesManager), "LoadCardsAssociations");
+        MethodInfo patch_load = AccessTools.Method(typeof(Saves), "Load");
         harmony.Patch(original_load, postfix: new HarmonyMethod(patch_load));
 
         // Récupère la méthode originale à patcher en spécifiant les paramètres (ici sans paramètres)
         MethodInfo originalMethod1 = AccessTools.Method(typeof(CPlayerData), "GetCardMarketPrice", new[] { typeof(CardData) });
-        MethodInfo patchMethod1 = AccessTools.Method(typeof(WankulCardsData), nameof(WankulCardsData.Postfix_GetCardMarketPrice_CardData));
+        MethodInfo patchMethod1 = AccessTools.Method(typeof(CardPrice), nameof(CardPrice.Postfix_GetCardMarketPrice_CardData));
         harmony.Patch(originalMethod1, postfix: new HarmonyMethod(patchMethod1));
 
         MethodInfo originalMethod2 = AccessTools.Method(typeof(CPlayerData), "GetCardMarketPrice", new[] { typeof(int), typeof(ECardExpansionType), typeof(bool) });
-        MethodInfo patchMethod2 = AccessTools.Method(typeof(WankulCardsData), nameof(WankulCardsData.Postfix_GetCardMarketPrice_ThreeParams));
+        MethodInfo patchMethod2 = AccessTools.Method(typeof(CardPrice), nameof(CardPrice.Postfix_GetCardMarketPrice_ThreeParams));
         harmony.Patch(originalMethod2, postfix: new HarmonyMethod(patchMethod2));
 
         MethodInfo original_InitCardPhone = AccessTools.Method(typeof(CheckPricePanelUI), "InitCard");
