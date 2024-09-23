@@ -8944,5 +8944,27 @@
             "TexturePath": "textures\\395_30_CIBLES.png",
             "Drop": 0.1
         }
+    ],
+    "specials": [
+        {
+            "Index": 546,
+            "Number": 546,
+            "Title": "TICKET D'OR !!!",
+            "Artist": "Wankil",
+            "Season": 3,
+            "CardType": 2,
+            "TexturePath": "textures\\546_546_T_OR.png",
+            "Drop": 0.0001
+        },
+        {
+            "Index": 547,
+            "Number": 547,
+            "Title": "À JETER",
+            "Artist": "Wankil",
+            "Season": 3,
+            "CardType": 2,
+            "TexturePath": "textures\\547_547_A_JETER.png",
+            "Drop": 0.0001
+        }
     ]
 }

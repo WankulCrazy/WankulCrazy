@@ -4,5 +4,6 @@
     {
         Terrain,
         Effigy,
+        Special
     }
 }

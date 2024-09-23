@@ -54,10 +54,10 @@ namespace WankulCrazyPlugin.inventory
             if (!isTerrain && isMinRare)
             {
                 List<EffigyCardData> effigyCardsData = seasonalCard
-                    .FindAll(card => card is EffigyCardData)
+                    .FindAll(card => card is EffigyCardData || card.CardType == CardType.Special)
                     .ConvertAll(card => (EffigyCardData)card);
 
-                seasonalCard = effigyCardsData.FindAll(card => card.Rarity >= Rarity.R)
+                seasonalCard = effigyCardsData.FindAll(card => card.Rarity >= Rarity.R || card.CardType == CardType.Special)
                     .ConvertAll(card => (WankulCardData)card);
                 ;
             }
@@ -90,7 +90,7 @@ namespace WankulCrazyPlugin.inventory
                 cumulativeDropChance += card.Drop;
                 if (randomValue <= cumulativeDropChance)
                 {
-                    string raritystrg = card is EffigyCardData efcard ? efcard.Rarity.ToString() : "terrain";
+                    string raritystrg = card is EffigyCardData efcard ? efcard.Rarity.ToString() : card.CardType == CardType.Special ? "SPECIAL" : "terrain";
 
                     Plugin.Logger.LogInfo($"Dropped card: {card.Title}, Season: {card.Season}, Rarity: {raritystrg}");
                     return card;

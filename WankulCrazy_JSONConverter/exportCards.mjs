@@ -134,16 +134,22 @@ async function main() {
     const formatedCards = {
         wankuls : [],
         terrains : [],
+        specials: [],
     };
-    for (const [index, card] of cards.entries()) {
+    let index = 0;
+    for (const card of cards) {
         // ne pas reduire /!\ evite le ddos du site wankul
+        const imagePath = path.join('./textures', index + "_" + card.number + "_" + card.title.replaceAll('/', '') + '.png');
+
+        // download image
         await new Promise(resolve => setTimeout(resolve, 50));
         const response = await fetch(card.image);
         const buffer = await response.arrayBuffer();
         const resizedBuffer = await resizeImage(buffer);
-        const imagePath = path.join('./textures', index + "_" + card.number + "_" + card.title.replaceAll('/', '') + '.png');
         await fsPromises.mkdir(path.dirname(imagePath), { recursive: true });
         await fsPromises.writeFile(imagePath, resizedBuffer);
+
+
         if (card.rarity.id == 1) {
             const formatedCard = {
                 Index: index,
@@ -180,8 +186,40 @@ async function main() {
             formatedCards.wankuls.push(formatedCard);
         }
 
+        index++;
     }
 
+    const T_OR_input_imagePath = path.join('./default_textures', "T_OR.png");
+    const T_OR_output_imagePath = path.join('./textures', index + "_" + index + "_T_OR.png");
+    fsPromises.copyFile(T_OR_input_imagePath, T_OR_output_imagePath);
+    const T_ORCard = {
+        Index: index,
+        Number: index,
+        Title: "TICKET D'OR !!!",
+        Artist: "Wankil",
+        Season: 3,
+        CardType: 2,
+        TexturePath: T_OR_output_imagePath,
+        Drop: 0.01/100,
+    };
+    formatedCards.specials.push(T_ORCard);
+
+    index++;
+
+    const A_JETER_input_imagePath = path.join('./default_textures', "A_JETER.png");
+    const A_JETER_output_imagePath = path.join('./textures', index + "_" + index + "_A_JETER.png");
+    fsPromises.copyFile(A_JETER_input_imagePath, A_JETER_output_imagePath);
+    const A_JETERCard = {
+        Index: index,
+        Number: index,
+        Title: "À JETER",
+        Artist: "Wankil",
+        Season: 3,
+        CardType: 2,
+        TexturePath: A_JETER_output_imagePath,
+        Drop: 0.01/100,
+    };
+    formatedCards.specials.push(A_JETERCard);
 
     await fsPromises.writeFile('formated_wankul_cards.json', JSON.stringify(formatedCards, null, 4));
 }
