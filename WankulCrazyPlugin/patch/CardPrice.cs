@@ -33,7 +33,7 @@ namespace WankulCrazyPlugin.patch
             }
             else if (wankulCardData.Drop >= 0.1f && wankulCardData is EffigyCardData)
             {
-                priceRangeMin = 3f;
+                priceRangeMin = 3.5f;
                 priceRangeMax = 10f;
             }
             else if (wankulCardData.Drop >= 0.0224f)
