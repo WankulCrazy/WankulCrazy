@@ -16,90 +16,55 @@ namespace WankulCrazyPlugin.patch
             float priceRangeMax;
             float priceRangeMin;
 
-            if (wankulCardData.Drop >= 0.9f)
+            if (wankulCardData.Drop >= 0.45f)
             {
                 priceRangeMin = 0.01f;
-                priceRangeMax = 0.05f;
-            }
-            else if (wankulCardData.Drop >= 0.8f)
-            {
-                priceRangeMin = 0.05f;
-                priceRangeMax = 0.02f;
-            }
-            else if (wankulCardData.Drop >= 0.7f)
-            {
-                priceRangeMin = 0.02f;
-                priceRangeMax = 0.05f;
-            }
-            else if (wankulCardData.Drop >= 0.6f)
-            {
-                priceRangeMin = 0.05f;
-                priceRangeMax = 0.1f;
-            }
-            else if (wankulCardData.Drop >= 0.5f)
-            {
-                priceRangeMin = 0.1f;
-                priceRangeMax = 0.15f;
-            }
-            else if (wankulCardData.Drop >= 0.4f)
-            {
-                priceRangeMin = 0.15f;
-                priceRangeMax = 0.2f;
+                priceRangeMax = 0.5f;
             }
             else if (wankulCardData.Drop >= 0.3f)
             {
-                priceRangeMin = 0.2f;
-                priceRangeMax = 0.25f;
-            }
-            else if (wankulCardData.Drop >= 0.2f)
-            {
-                priceRangeMin = 0.25f;
-                priceRangeMax = 0.3f;
+                priceRangeMin = 0.5f;
+                priceRangeMax = 1f;
             }
             else if (wankulCardData.Drop >= 0.1f)
             {
-                priceRangeMin = 0.3f;
-                priceRangeMax = 0.5f;
+                priceRangeMin = 10f;
+                priceRangeMax = 20f;
             }
-            else if (wankulCardData.Drop >= 0.08f)
+            else if (wankulCardData.Drop >= 0.0224f)
             {
-                priceRangeMin = 0.5f;
-                priceRangeMax = 0.8f;
+                priceRangeMin = 50f;
+                priceRangeMax = 80f;
             }
-            else if (wankulCardData.Drop >= 0.06f)
+            else if (wankulCardData.Drop >= 0.016f)
             {
-                priceRangeMin = 0.8f;
-                priceRangeMax = 1f;
+                priceRangeMin = 80f;
+                priceRangeMax = 150f;
             }
-            else if (wankulCardData.Drop >= 0.05f)
+            else if (wankulCardData.Drop >= 0.008f)
             {
-                priceRangeMin = 1f;
-                priceRangeMax = 2f;
+                priceRangeMin = 500f;
+                priceRangeMax = 1000f;
             }
-            else if (wankulCardData.Drop >= 0.04f)
+            else if (wankulCardData.Drop >= 0.0028f)
             {
-                priceRangeMin = 2f;
-                priceRangeMax = 2.5f;
+                priceRangeMin = 2000f;
+                priceRangeMax = 5000f;
             }
-            else if (wankulCardData.Drop >= 0.03f)
+            else if (wankulCardData.Drop >= 0.0008f)
             {
-                priceRangeMin = 4.5f;
-                priceRangeMax = 8.0f;
+                priceRangeMin = 5000f;
+                priceRangeMax = 8000f;
             }
-            else if (wankulCardData.Drop >= 0.02f)
+            else if (wankulCardData.Drop >= 0.0005f)
             {
-                priceRangeMin = 10.0f;
-                priceRangeMax = 25.0f;
-            }
-            else if (wankulCardData.Drop >= 0.01f)
-            {
-                priceRangeMin = 100.0f;
-                priceRangeMax = 200.0f;
+                priceRangeMin = 8000f;
+                priceRangeMax = 10000f;
             }
             else
             {
-                priceRangeMin = 200.0f;
-                priceRangeMax = 300.0f;
+                priceRangeMin = 0.01f;
+                priceRangeMax = 0.5f;
             }
 
             // Calculer le prix avec la variation aléatoire (influencée par le prix max du segment)
