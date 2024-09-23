@@ -4860,7 +4860,7 @@
             "Quote": "Il aime l’or, le sang, la bagarre, mais aussi l’odeur des croissants chauds de la boulangerie.",
             "Rarity": 8,
             "TexturePath": "textures\\340_1_PIRATE.png",
-            "Drop": 0.005
+            "Drop": 0.0005
         },
         {
             "Index": 341,
@@ -4877,7 +4877,7 @@
             "Quote": "“BRANCARDIER ! J’ai des douleurs dans la nuque, c’est très désagréable ! Et j’ai mal au bidou !”",
             "Rarity": 8,
             "TexturePath": "textures\\341_2_JACQUES FLANTIER.png",
-            "Drop": 0.005
+            "Drop": 0.0005
         },
         {
             "Index": 342,
@@ -4894,7 +4894,7 @@
             "Quote": "Il a raté son harakiri. Maintenant, il a une sonde urinaire et nettoie les murs du temple.",
             "Rarity": 8,
             "TexturePath": "textures\\342_3_SAMOURAÏ.png",
-            "Drop": 0.005
+            "Drop": 0.0005
         },
         {
             "Index": 343,
@@ -4911,7 +4911,7 @@
             "Quote": "“Les gens sont des porcs. C’est fou ce qu’on peut trouver par terre de nos jours.”",
             "Rarity": 8,
             "TexturePath": "textures\\343_4_MARTINE.png",
-            "Drop": 0.005
+            "Drop": 0.0005
         },
         {
             "Index": 344,
@@ -4928,7 +4928,7 @@
             "Quote": "Il a sombré dans la dépression, personne ne croit en lui alors qu'il fait 50h/semaine depuis un siècle.",
             "Rarity": 9,
             "TexturePath": "textures\\344_27_PÈRE NOËL.png",
-            "Drop": 0.005
+            "Drop": 0.0005
         },
         {
             "Index": 345,
@@ -4945,7 +4945,7 @@
             "Quote": "Amateur de sensation fortes, il adore prendre les pistes vertes extremenent dangereuses.",
             "Rarity": 10,
             "TexturePath": "textures\\345_S161_SKIEUR.png",
-            "Drop": 0.005
+            "Drop": 0.0005
         },
         {
             "Index": 346,
@@ -4962,7 +4962,7 @@
             "Quote": "Un chic type, il a mis des transats près des lacs de lave et divisé la durée des tortures par deux !",
             "Rarity": 11,
             "TexturePath": "textures\\346_S162_DIABLE.png",
-            "Drop": 0.005
+            "Drop": 0.0005
         },
         {
             "Index": 347,
@@ -4979,7 +4979,7 @@
             "Quote": "Il a fait pipi sur une voiture de la mafia et a démarré une guerre de gangs qui dure depuis 10 ans.",
             "Rarity": 12,
             "TexturePath": "textures\\347_131_CYBERLAINK.png",
-            "Drop": 0.005
+            "Drop": 0.0005
         },
         {
             "Index": 348,
@@ -4996,7 +4996,7 @@
             "Quote": "\"Moi ? Le cybersexe ? N'importe quoi, trop nul le cybersexe, je vais jamais au cybersexe, moi.\"",
             "Rarity": 12,
             "TexturePath": "textures\\348_132_CYBERTERRA.png",
-            "Drop": 0.005
+            "Drop": 0.0005
         },
         {
             "Index": 349,
@@ -5064,7 +5064,7 @@
             "Quote": "Le taux de réussite au BAC dans sa classe est de 15%, et c'est déjà pas mal.",
             "Rarity": 18,
             "TexturePath": "textures\\352_S182_PROFESSEUR.png",
-            "Drop": 0.005
+            "Drop": 0.0005
         },
         {
             "Index": 353,
@@ -5081,7 +5081,7 @@
             "Quote": "“Moi ? Le cybersexe ? N’importe quoi, trop nul le cybersexe, je vais jamais au cybersexe, moi.”",
             "Rarity": 13,
             "TexturePath": "textures\\353_S181_CYBERTERRA.png",
-            "Drop": 0.005
+            "Drop": 0.0005
         },
         {
             "Index": 354,
@@ -5098,7 +5098,7 @@
             "Quote": "Quelqu'un a vu la hache ?",
             "Rarity": 14,
             "TexturePath": "textures\\354_28_LA HACHE.png",
-            "Drop": 0.005
+            "Drop": 0.0005
         },
         {
             "Index": 355,
@@ -5115,7 +5115,7 @@
             "Quote": "Tout est allé trop vite et maintenant vous êtes l'heureux propriétaire d'une éponge magique à 150€.",
             "Rarity": 15,
             "TexturePath": "textures\\355_S181_TÉLÉACHAT.png",
-            "Drop": 0.005
+            "Drop": 0.0005
         },
         {
             "Index": 356,
@@ -5132,7 +5132,7 @@
             "Quote": "Il a peut-être un physique ingrat, n'empêche qu'il vaut mieux pas se retrouver dans son viseur.",
             "Rarity": 16,
             "TexturePath": "textures\\356_S182_HUNT REDNECK.png",
-            "Drop": 0.005
+            "Drop": 0.0005
         },
         {
             "Index": 357,
@@ -5149,7 +5149,7 @@
             "Quote": "“OUH OUH AAAAH AH OUH caca OUUUUUH !”",
             "Rarity": 17,
             "TexturePath": "textures\\357_115_SINGE.png",
-            "Drop": 0.005
+            "Drop": 0.0005
         },
         {
             "Index": 358,
@@ -5166,7 +5166,7 @@
             "Quote": "On espère pour lui qu’il gardera sa tête, malgré l’impôt qu’il augmente chaque année.",
             "Rarity": 17,
             "TexturePath": "textures\\358_121_ROI.png",
-            "Drop": 0.005
+            "Drop": 0.0005
         },
         {
             "Index": 359,
@@ -5183,7 +5183,7 @@
             "Quote": "Il est le créateur du drakkar et du peigne à cheveux, deux invention révolutionnaires.",
             "Rarity": 17,
             "TexturePath": "textures\\359_47_VIKING.png",
-            "Drop": 0.005
+            "Drop": 0.0005
         },
         {
             "Index": 360,
@@ -5200,7 +5200,7 @@
             "Quote": "Il a affronté la grand-mère du village en duel et a gagné; Il pense rejoindre le Valhalla.",
             "Rarity": 17,
             "TexturePath": "textures\\360_48_VIKING.png",
-            "Drop": 0.005
+            "Drop": 0.0005
         },
         {
             "Index": 361,
@@ -5217,7 +5217,7 @@
             "Quote": "Depuis qu'elle a cherché son nom sur Rule 34 ce n'est plus la même.",
             "Rarity": 17,
             "TexturePath": "textures\\361_88_ALYX.png",
-            "Drop": 0.005
+            "Drop": 0.0005
         },
         {
             "Index": 362,
@@ -5234,7 +5234,7 @@
             "Quote": "À la base le Gravity Gun c'était juste pour pouvoir récupérer ses AirPods tombés dans les égouts.",
             "Rarity": 17,
             "TexturePath": "textures\\362_89_GORDON.png",
-            "Drop": 0.005
+            "Drop": 0.0005
         },
         {
             "Index": 363,
@@ -5251,7 +5251,7 @@
             "Quote": "C'est terriblement dérangeant, il ne devrait pas être comme ça... Arrête tout de suite !",
             "Rarity": 17,
             "TexturePath": "textures\\363_103_DE FACE.png",
-            "Drop": 0.005
+            "Drop": 0.0005
         },
         {
             "Index": 364,
@@ -5268,7 +5268,7 @@
             "Quote": "Vous ressentez un énorme malaise en le regardant droit dans les yeux.",
             "Rarity": 17,
             "TexturePath": "textures\\364_104_DE FACE.png",
-            "Drop": 0.005
+            "Drop": 0.0005
         },
         {
             "Index": 365,
@@ -5285,7 +5285,7 @@
             "Quote": "",
             "Rarity": 12,
             "TexturePath": "textures\\365_201_OUVERTURE DE COLIS.png",
-            "Drop": 0.005
+            "Drop": 0.0005
         },
         {
             "Index": 396,

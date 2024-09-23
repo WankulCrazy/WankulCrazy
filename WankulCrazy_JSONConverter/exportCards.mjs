@@ -118,9 +118,9 @@ function getTxDrop(txDrop) {
         case "5% des boosters":
             return 0.05/100;
         case "":
-            return 0.5/100;
+            return 0.05/100;
         case "N/A":
-            return 0.5/100
+            return 0.05/100
         default:
             return -1;
     }
@@ -136,6 +136,7 @@ async function main() {
         terrains : [],
     };
     for (const [index, card] of cards.entries()) {
+        // ne pas reduire /!\ evite le ddos du site wankul
         await new Promise(resolve => setTimeout(resolve, 50));
         const response = await fetch(card.image);
         const buffer = await response.arrayBuffer();
