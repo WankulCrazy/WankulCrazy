@@ -26,35 +26,40 @@ namespace WankulCrazyPlugin.patch
                 priceRangeMin = 0.5f;
                 priceRangeMax = 1f;
             }
-            else if (wankulCardData.Drop >= 0.1f)
+            else if (wankulCardData.Drop >= 0.1f && wankulCardData is TerrainCardData)
             {
-                priceRangeMin = 10f;
-                priceRangeMax = 20f;
+                priceRangeMin = 0.5f;
+                priceRangeMax = 1.9f;
+            }
+            else if (wankulCardData.Drop >= 0.1f && wankulCardData is EffigyCardData)
+            {
+                priceRangeMin = 3f;
+                priceRangeMax = 10f;
             }
             else if (wankulCardData.Drop >= 0.0224f)
             {
-                priceRangeMin = 50f;
-                priceRangeMax = 80f;
+                priceRangeMin = 10f;
+                priceRangeMax = 50f;
             }
             else if (wankulCardData.Drop >= 0.016f)
             {
-                priceRangeMin = 80f;
+                priceRangeMin = 50f;
                 priceRangeMax = 150f;
             }
             else if (wankulCardData.Drop >= 0.008f)
             {
-                priceRangeMin = 500f;
-                priceRangeMax = 1000f;
+                priceRangeMin = 400;
+                priceRangeMax = 800;
             }
             else if (wankulCardData.Drop >= 0.0028f)
             {
-                priceRangeMin = 2000f;
-                priceRangeMax = 5000f;
+                priceRangeMin = 1000;
+                priceRangeMax = 2000f;
             }
             else if (wankulCardData.Drop >= 0.0008f)
             {
-                priceRangeMin = 5000f;
-                priceRangeMax = 8000f;
+                priceRangeMin = 2000f;
+                priceRangeMax = 4000f;
             }
             else if (wankulCardData.Drop >= 0.0005f)
             {

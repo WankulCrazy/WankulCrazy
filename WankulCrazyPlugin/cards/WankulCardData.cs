@@ -34,8 +34,8 @@ namespace WankulCrazyPlugin.cards
         {
             get
             {
-                // Met à jour le prix si plus de 10 minutes se sont écoulées
-                if ((DateTime.Now - lastPriceUpdate).TotalMinutes > 10)
+                // Met à jour le prix si plus de 20 minutes se sont écoulées
+                if ((DateTime.Now - lastPriceUpdate).TotalMinutes > 20)
                 {
                     CardPrice.UpdateMarketPrice(this);
                 }
