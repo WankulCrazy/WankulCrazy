@@ -60,7 +60,7 @@ public class ReplacingCards
         WankulCardData wankulCardData = cardsData.GetFromMonster(gameCardData, true);
         if (wankulCardData == null)
         {
-            return;
+            wankulCardData = WankulCardsData.Instance.cards.Find(wankulCard => wankulCard is SpecialCardData special && special.Special == Specials.AJETER);
         }
 
         if (__instance.m_NormalGrp != null)

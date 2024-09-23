@@ -152,6 +152,9 @@ namespace WankulCrazyPlugin.cards
                         {
                             if (
                                 monster == EMonsterType.EarlyPlayer ||
+                                monster == EMonsterType.START_CATJOB ||
+                                monster == EMonsterType.START_FANTASYRPG ||
+                                monster == EMonsterType.START_MEGABOT ||
                                 monster == EMonsterType.None ||
                                 monster == EMonsterType.MAX ||
                                 monster == EMonsterType.Max ||
