@@ -148,12 +148,14 @@ namespace WankulCrazyPlugin.cards
                 CardData inGameCard = ___m_RolledCardDataList[i];
                 WankulCardData wankulCard = DropCard(___m_CollectionPackType, isTerrain, isMinRare);
                 CardData associatedCard = wankulCardsData.GetCardDataFromWankulCardData(wankulCard);
+                Plugin.Logger.LogInfo($"Dropped Card added: {wankulCard.Title}, Market Price: {wankulCard.MarketPrice}, CardIngame: {inGameCard.monsterType}_{inGameCard.expansionType}_{inGameCard.borderType}");
 
                 if (associatedCard != null)
                 {
                     inGameCard = wankulCardsData.GetUnassciatedCardData();
                     ___m_RolledCardDataList[i] = inGameCard;
                 }
+                Plugin.Logger.LogInfo($"Set unassociated Card : {wankulCard.Title}, Market Price: {wankulCard.MarketPrice}, CardIngame: {inGameCard.monsterType}_{inGameCard.expansionType}_{inGameCard.borderType}");
 
                 if (wankulCard != null)
                 {
@@ -169,10 +171,6 @@ namespace WankulCrazyPlugin.cards
                         }
                     }
 
-                    ECardExpansionType expansionType = inGameCard.expansionType;
-                    MonsterData monsterData = InventoryBase.GetMonsterData(inGameCard.monsterType);
-
-                    string key = inGameCard.monsterType.ToString() + "_" + inGameCard.borderType.ToString() + "_" + expansionType.ToString();
                     wankulCardsData.SetFromMonster(inGameCard, wankulCard);
                 }
                 else
@@ -185,6 +183,7 @@ namespace WankulCrazyPlugin.cards
                     AddCard(wankulCard, inGameCard);
 
                     ___m_CardValueList.Add(wankulCard.MarketPrice);
+                    Plugin.Logger.LogInfo($"Card added: {wankulCard.Title}, Market Price: {wankulCard.MarketPrice}");
                 }
                 else
                 {

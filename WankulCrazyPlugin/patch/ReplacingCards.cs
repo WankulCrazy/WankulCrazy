@@ -17,10 +17,19 @@ public class ReplacingCards
 
     static void SetCardUIPrefix(CardData cardData)
     {
+        if (cardData == null)
+        {
+            Plugin.Logger.LogError("gameCardData is null");
+            return;
+        }
         CardData gameCardData = cardData;
         WankulCardsData cardsData = WankulCardsData.Instance;
 
-        WankulCardData wankulCardData = cardsData.GetFromMonster(gameCardData, false);
+        WankulCardData wankulCardData = cardsData.GetFromMonster(gameCardData, true);
+        if (wankulCardData == null)
+        {
+            return;
+        }
 
         gameCardData.isFoil = false;
         gameCardData.isChampionCard = false;
@@ -39,10 +48,19 @@ public class ReplacingCards
 
     static void SetCardUIPostFix(CardData cardData, CardUI __instance)
     {
+        if (cardData == null)
+        {
+            Plugin.Logger.LogError("gameCardData is null");
+            return;
+        }
         CardData gameCardData = cardData;
         WankulCardsData cardsData = WankulCardsData.Instance;
 
-        WankulCardData wankulCardData = cardsData.GetFromMonster(gameCardData, false);
+        WankulCardData wankulCardData = cardsData.GetFromMonster(gameCardData, true);
+        if (wankulCardData == null)
+        {
+            return;
+        }
 
         if (__instance.m_NormalGrp != null)
         {

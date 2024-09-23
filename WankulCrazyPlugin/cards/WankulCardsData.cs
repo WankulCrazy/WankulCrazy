@@ -17,6 +17,10 @@ namespace WankulCrazyPlugin.cards
         {
             ECardExpansionType expansionType = monster.expansionType;
             MonsterData monsterData = InventoryBase.GetMonsterData(monster.monsterType);
+            if (monsterData == null)
+            {
+                return null;
+            }
             ERarity rarity = monsterData.Rarity;
 
             string key = $"{monster.monsterType}_{monster.borderType}_{expansionType}";
