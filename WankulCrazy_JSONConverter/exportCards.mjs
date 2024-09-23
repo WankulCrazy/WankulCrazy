@@ -200,6 +200,7 @@ async function main() {
         Season: 3,
         CardType: 2,
         TexturePath: T_OR_output_imagePath,
+        Special: 1,
         Drop: 0.01/100,
     };
     formatedCards.specials.push(T_ORCard);
@@ -217,7 +218,8 @@ async function main() {
         Season: 3,
         CardType: 2,
         TexturePath: A_JETER_output_imagePath,
-        Drop: 0.01/100,
+        Special: 0,
+        Drop: 0,
     };
     formatedCards.specials.push(A_JETERCard);
 

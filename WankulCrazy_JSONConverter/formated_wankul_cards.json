@@ -8954,6 +8954,7 @@
             "Season": 3,
             "CardType": 2,
             "TexturePath": "textures\\546_546_T_OR.png",
+            "Special": 1,
             "Drop": 0.0001
         },
         {
@@ -8964,7 +8965,8 @@
             "Season": 3,
             "CardType": 2,
             "TexturePath": "textures\\547_547_A_JETER.png",
-            "Drop": 0.0001
+            "Special": 0,
+            "Drop": 0
         }
     ]
 }

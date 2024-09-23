@@ -161,14 +161,19 @@ public class ReplacingCards
                 __instance.m_CollectionBinderUI.m_CardFullRarityNameText.text = RaritiesContainer.Rarities[effigyCard.Rarity];
                 __instance.m_CollectionBinderUI.m_CardNameText.text = effigyCard.Title + "\n" + effigyCard.Effigy;
             }
-            else if (__state.wankulCardData.CardType == CardType.Special) {
+            else if (__state.wankulCardData is SpecialCardData) {
                 __instance.m_CollectionBinderUI.m_CardFullRarityNameText.text = "SPECIAL";
+                __instance.m_CollectionBinderUI.m_CardNameText.text = wankulCardData.Title;
+            }
+            else if(__state.wankulCardData is TerrainCardData)
+            {
+                __instance.m_CollectionBinderUI.m_CardFullRarityNameText.text = "Terrain";
                 __instance.m_CollectionBinderUI.m_CardNameText.text = wankulCardData.Title;
             }
             else
             {
-                __instance.m_CollectionBinderUI.m_CardFullRarityNameText.text = "Terrain";
-                __instance.m_CollectionBinderUI.m_CardNameText.text = wankulCardData.Title;
+                __instance.m_CollectionBinderUI.m_CardFullRarityNameText.text = "Erreur";
+                __instance.m_CollectionBinderUI.m_CardNameText.text = "Erreur";
             }
 
         }
@@ -233,13 +238,16 @@ public class ReplacingCards
             {
                 __instance.m_NameText.text = effigyCard.Title + "\n" + effigyCard.Effigy;
             }
-            else if (wankulCardData.CardType == CardType.Special)
+            else if (wankulCardData is SpecialCardData)
             {
                 __instance.m_NameText.text = wankulCardData.Title + "\n" + "SPECIAL";
+            } else if (wankulCardData is TerrainCardData)
+            {
+                __instance.m_NameText.text = wankulCardData.Title + "\n" + "Terrain";
             }
             else
             {
-                __instance.m_NameText.text = wankulCardData.Title + "\n" + "Terrain";
+                __instance.m_NameText.text = wankulCardData.Title + "\n" + "Erreur";
             }
         }
     }

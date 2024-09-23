@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using WankulCrazyPlugin.cards;
 using WankulCrazyPlugin.utils;
@@ -54,12 +55,17 @@ namespace WankulCrazyPlugin.inventory
             if (!isTerrain && isMinRare)
             {
                 List<EffigyCardData> effigyCardsData = seasonalCard
-                    .FindAll(card => card is EffigyCardData || card.CardType == CardType.Special)
+                    .FindAll(card => card is EffigyCardData)
                     .ConvertAll(card => (EffigyCardData)card);
 
-                seasonalCard = effigyCardsData.FindAll(card => card.Rarity >= Rarity.R || card.CardType == CardType.Special)
+                List<WankulCardData> specialCardsData = seasonalCard
+                    .FindAll(card => card is SpecialCardData);
+
+                seasonalCard = effigyCardsData.FindAll(card => card.Rarity >= Rarity.R)
                     .ConvertAll(card => (WankulCardData)card);
                 ;
+
+                seasonalCard = [.. seasonalCard, .. specialCardsData];
             }
             else if (!isTerrain && !isMinRare)
             {
@@ -90,7 +96,7 @@ namespace WankulCrazyPlugin.inventory
                 cumulativeDropChance += card.Drop;
                 if (randomValue <= cumulativeDropChance)
                 {
-                    string raritystrg = card is EffigyCardData efcard ? efcard.Rarity.ToString() : card.CardType == CardType.Special ? "SPECIAL" : "terrain";
+                    string raritystrg = card is EffigyCardData efcard ? efcard.Rarity.ToString() : card is SpecialCardData ? "SPECIAL" : card is TerrainCardData ? "terrain" : "Erreur";
 
                     Plugin.Logger.LogInfo($"Dropped card: {card.Title}, Season: {card.Season}, Rarity: {raritystrg}");
                     return card;

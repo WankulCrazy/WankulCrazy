@@ -26,8 +26,12 @@ public class JsonImporter
             if (cards.Count > 0)
             {
                 CreateCardsData(cards);
-                WankulCardsData cardsData = WankulCardsData.Instance;
-                Plugin.Logger.LogInfo("Cards data loaded: " + cardsData.cards.Count + " cards");
+                WankulCardsData wankulCardsData = WankulCardsData.Instance;
+                foreach (var cardData in wankulCardsData.cards)
+                {
+                    Plugin.Logger.LogInfo("Card loaded: " + cardData.Title);
+                }
+                Plugin.Logger.LogInfo("Cards data loaded: " + wankulCardsData.cards.Count + " cards");
             }
             else
             {
@@ -63,6 +67,16 @@ public class JsonImporter
                 TypeNameHandling = TypeNameHandling.Auto
             });
             cards.AddRange(terrains);
+        }
+
+        JToken specialsToken = jsonObject["specials"];
+        if (specialsToken != null)
+        {
+            List<SpecialCardData> specials = specialsToken.ToObject<List<SpecialCardData>>(new JsonSerializer
+            {
+                TypeNameHandling = TypeNameHandling.Auto
+            });
+            cards.AddRange(specials);
         }
 
         return cards;
