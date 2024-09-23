@@ -73,6 +73,17 @@ async function resizeImage(imageBuffer) {
         .resize(637, 891) // Resize to 637x891 pixels
         .toBuffer();
 
+    const roundedCorners = Buffer.from(
+        `<svg>
+            <rect x="0" y="0" width="637" height="891" rx="25" ry="25"/>
+        </svg>`
+    );
+
+    const roundedImage = await sharp(resizedBuffer)
+        .composite([{ input: roundedCorners, blend: 'dest-in' }])
+        .toFormat('png')
+        .toBuffer();
+
     return sharp({
         create: {
             width: 1024,
@@ -81,7 +92,7 @@ async function resizeImage(imageBuffer) {
             background: { r: 0, g: 0, b: 0, alpha: 0 } // Transparent background
         }
     })
-    .composite([{ input: resizedBuffer, gravity: 'center' }]) // Center the resized image
+    .composite([{ input: roundedImage, gravity: 'center', blend: 'dest-over' }]) // Center the resized image
     .png() // Convert to PNG format
     .toBuffer();
 }
@@ -105,11 +116,11 @@ function getTxDrop(txDrop) {
         case "0.08%":
             return 0.08/100;
         case "5% des boosters":
-            return 0.01/100;
+            return 0.05/100;
         case "":
-            return 0.1/100;
+            return 0.5/100;
         case "N/A":
-            return 0;
+            return 0.5/100
         default:
             return -1;
     }
