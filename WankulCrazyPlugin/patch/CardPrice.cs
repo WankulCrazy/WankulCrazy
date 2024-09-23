@@ -49,7 +49,7 @@ namespace WankulCrazyPlugin.patch
             else if (wankulCardData.Drop >= 0.008f)
             {
                 priceRangeMin = 400;
-                priceRangeMax = 800;
+                priceRangeMax = 900;
             }
             else if (wankulCardData.Drop >= 0.0028f)
             {
