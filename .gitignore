@@ -1,5 +1,3 @@
-*/node_modules/*
-/WankulCrazy_JSONConverter/textures/*
 */.vscode/*
 */.vs/*
 .vs/*
@@ -12,8 +10,10 @@
 */.gitkeep/*
 */.gitlab-ci.yml/*
 */.gitlab
-/WankulCrazyPlugin/data/*
-/WankulCrazyPlugin/obj/*
-/WankulCrazyPlugin/bin/*
+/data/*
+/obj/*
+/bin/*
 /sharedassets1.assets
 /sharedassets0.assets
+/data.zip
+/WanulCrazyData.zip
