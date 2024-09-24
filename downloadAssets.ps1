@@ -2,7 +2,7 @@
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 # URL de telechargement Dropbox (avec tous les paramètres necessaires)
-$dropboxUrl = "https://dl.dropboxusercontent.com/scl/fi/jy8t6fkwd8tu592gqm452/WanulCrazyData.zip?rlkey=b2edjt81rfp9ex9bf2y331kpf&st=f57eqfwq&dl=1"
+$dropboxUrl = "https://dl.dropboxusercontent.com/scl/fi/hxuw3bsey744lr29aoeyw/WankulCrazyData-v0.0.1.zip?rlkey=4stihz167ybubgbqbqmcmg1ra&st=z5xy36j0&dl=1"
 # Nom de fichier de destination dans le dossier 'data'
 $outputFile = Join-Path $scriptDir "data.zip"
 
