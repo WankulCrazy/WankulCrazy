@@ -13,6 +13,7 @@
 /data/*
 /obj/*
 /bin/*
+/dist/*
 /sharedassets1.assets
 /sharedassets0.assets
 /data.zip
