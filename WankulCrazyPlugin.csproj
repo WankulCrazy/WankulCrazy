@@ -58,7 +58,7 @@
     </ItemGroup>
 
     <ItemGroup>
-		<None Update="data\**\*">
+		<None Include="LICENCE.txt">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
