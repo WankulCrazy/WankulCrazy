@@ -1,4 +1,4 @@
-WankulCrazy © 2024 by ToHo is licensed under Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International. To view a copy of this license, visit https://creativecommons.org/licenses/by-nc-nd/4.0/
+WankulCrazy © 2024 by ToHold is licensed under Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International. To view a copy of this license, visit https://creativecommons.org/licenses/by-nc-nd/4.0/
 
 Tanks for contributing :
 - Karilla for helping on code
