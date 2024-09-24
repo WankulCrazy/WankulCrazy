@@ -2,8 +2,8 @@
 ## À propos du projet
 
 Le projet a été initié par une demande de nos streamers préférés, ils souhaitaient pouvoir intégrer leur univers au jeu TCG Card Shop Simulator.<br>
-C'est dans cet optique que nous avons développer ce mod. Celui-ci permet de remplacer les textures des assets en jeu et de rajouter les cartes Wankuls ainsi que leur fonctionnement.<br>
-Lorsque nous avons débuter le projet, nous aurions apprécié trouver des projets similaires pour nous inspirer dans notre développer, c'est pourquoi étant passionnés de développement / programmation, nous avons décider de rendre les sources du mod publique.<br>
+C'est dans cet optique que nous avons développé ce mod. Celui-ci permet de remplacer les textures des assets en jeu et de rajouter les cartes Wankuls ainsi que leur fonctionnement.<br>
+Lorsque nous avons débuté le projet, nous aurions apprécié trouver des projets similaires pour nous inspirer dans notre développement, c'est pourquoi étant passionnés de développement / programmation, nous avons décidé de rendre les sources du mod publiques.<br>
 Toute fois, nous n'autorisons pas le copier / coller du code cf: LICENCE.txt, nous favorisons la recherche et la réflexion.<br>
 Nous rappelons que le projet n'a pas pour but d'être commercialisé, et que nous ne demandons aucune forme de financement.<br>
 L'utilisation des textures de cartes Wankuls pour tout autre projet doit avant tout être validé, et autorisé par Wankil.
