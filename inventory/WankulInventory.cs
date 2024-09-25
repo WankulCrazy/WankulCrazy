@@ -158,5 +158,15 @@ namespace WankulCrazyPlugin.inventory
                 }
             }
         }
+
+        public static float GetTotalPrice()
+        {
+            float totalPrice = 0f;
+            foreach (var card in Instance.wankulCards)
+            {
+                totalPrice += card.Value.Item1.MarketPrice * card.Value.Item3;
+            }
+            return totalPrice;
+        }
     }
 }

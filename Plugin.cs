@@ -71,6 +71,10 @@ public class Plugin : BaseUnityPlugin
         MethodInfo original_RemoveCard = AccessTools.Method(typeof(CPlayerData), "ReduceCard");
         MethodInfo patch_RemoveCard = AccessTools.Method(typeof(Inventory), "RemoveCard");
         harmony.Patch(original_RemoveCard, postfix: new HarmonyMethod(patch_RemoveCard));
+
+        MethodInfo original_SetTotalValue = AccessTools.Method(typeof(CollectionBinderUI), "SetTotalValue");
+        MethodInfo patch_SetCardPriceTotalValue = AccessTools.Method(typeof(Inventory), "SetCardPriceTotalValue");
+        harmony.Patch(original_SetTotalValue, postfix: new HarmonyMethod(patch_SetCardPriceTotalValue));
     }
 
     public static string GetPluginPath()

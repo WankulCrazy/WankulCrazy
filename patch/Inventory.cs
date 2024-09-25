@@ -30,5 +30,10 @@ namespace WankulCrazyPlugin.patch
             WankulInventory.RemoveCard(wankulCardData, reduceAmount);
         }
 
+        public static void SetCardPriceTotalValue(CollectionBinderUI __instance)
+        {
+            __instance.m_TotalValueText.text = GameInstance.GetPriceString(WankulInventory.GetTotalPrice());
+        }
+
     }
 }
