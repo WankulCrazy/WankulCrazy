@@ -49,8 +49,6 @@ namespace WankulCrazyPlugin.patch
 
                 if (wankulCard != null)
                 {
-                    WankulInventory.AddCard(wankulCard, inGameCard);
-
                     ___m_CardValueList.Add(wankulCard.MarketPrice);
                     Plugin.Logger.LogInfo($"Card added: {wankulCard.Title}, Market Price: {wankulCard.MarketPrice}");
                 }

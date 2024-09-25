@@ -128,17 +128,34 @@ namespace WankulCrazyPlugin.inventory
             return seasonalCard[randomValue];
         }
 
-        public static void AddCard(WankulCardData wankulCardData, CardData cardData)
+        public static void AddCard(WankulCardData wankulCardData, CardData cardData, int amount)
         {
             if (!Instance.wankulCards.ContainsKey(wankulCardData.Index))
             {
-                Instance.wankulCards[wankulCardData.Index] = (wankulCardData, cardData, 1);
+                Instance.wankulCards[wankulCardData.Index] = (wankulCardData, cardData, amount);
             }
             else
             {
                 (WankulCardData, CardData, int) inventoryWankulCard = Instance.wankulCards[wankulCardData.Index];
-                inventoryWankulCard.Item3 = inventoryWankulCard.Item3 + 1;
+                inventoryWankulCard.Item3 = inventoryWankulCard.Item3 + amount;
                 Instance.wankulCards[wankulCardData.Index] = inventoryWankulCard;
+            }
+        }
+
+        public static void RemoveCard(WankulCardData wankulCardData, int amount)
+        {
+            if (Instance.wankulCards.ContainsKey(wankulCardData.Index))
+            {
+                (WankulCardData, CardData, int) inventoryWankulCard = Instance.wankulCards[wankulCardData.Index];
+                inventoryWankulCard.Item3 = inventoryWankulCard.Item3 - amount;
+                if (inventoryWankulCard.Item3 <= 0)
+                {
+                    Instance.wankulCards.Remove(wankulCardData.Index);
+                }
+                else
+                {
+                    Instance.wankulCards[wankulCardData.Index] = inventoryWankulCard;
+                }
             }
         }
     }

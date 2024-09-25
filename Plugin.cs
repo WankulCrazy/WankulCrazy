@@ -63,6 +63,14 @@ public class Plugin : BaseUnityPlugin
         MethodInfo original_InitCardPhone = AccessTools.Method(typeof(CheckPricePanelUI), "InitCard");
         MethodInfo patch_InitCardPhone = AccessTools.Method(typeof(ReplacingCards), "InitCard");
         harmony.Patch(original_InitCardPhone, postfix: new HarmonyMethod(patch_InitCardPhone));
+
+        MethodInfo original_AddCard = AccessTools.Method(typeof(CPlayerData), "AddCard");
+        MethodInfo patch_AddCard = AccessTools.Method(typeof(Inventory), "AddCard");
+        harmony.Patch(original_AddCard, postfix: new HarmonyMethod(patch_AddCard));
+
+        MethodInfo original_RemoveCard = AccessTools.Method(typeof(CPlayerData), "ReduceCard");
+        MethodInfo patch_RemoveCard = AccessTools.Method(typeof(Inventory), "RemoveCard");
+        harmony.Patch(original_RemoveCard, postfix: new HarmonyMethod(patch_RemoveCard));
     }
 
     public static string GetPluginPath()
