@@ -12,8 +12,8 @@ public class JsonImporter
 
     public static void ImportJson()
     {
-        string pluginPath = Application.dataPath + "/../BepInEx/plugins";
-        string path = Path.Combine(pluginPath, PluginInfo.PLUGIN_NAME, "data/formated_wankul_cards.json");
+        string pluginPath = Plugin.GetPluginPath();
+        string path = Path.Combine(pluginPath, "data/formated_wankul_cards.json");
 
         string jsonContent = File.ReadAllText(path);
 
@@ -90,8 +90,8 @@ public class JsonImporter
         {
             if (!string.IsNullOrEmpty(card.TexturePath))
             {
-                string pluginPath = Application.dataPath + "/../BepInEx/plugins";
-                string texturepath = Path.Combine(pluginPath, PluginInfo.PLUGIN_NAME, "data", card.TexturePath);
+                string pluginPath = Plugin.GetPluginPath();
+                string texturepath = Path.Combine(pluginPath, "data", card.TexturePath);
                 Texture2D texture = LoadTexture(texturepath);
                 if (texture != null)
                 {

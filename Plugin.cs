@@ -1,8 +1,10 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
+using System.IO;
 using System.Reflection;
 using WankulCrazyPlugin.patch;
+using UnityEngine;
 
 namespace WankulCrazyPlugin;
 
@@ -22,7 +24,6 @@ public class Plugin : BaseUnityPlugin
         MethodInfo original_start = AccessTools.Method(typeof(TitleScreen), "Start");
         MethodInfo patch_start = AccessTools.Method(typeof(GameStarting), "Start");
         harmony.Patch(original_start, new HarmonyMethod(patch_start));
-
 
         MethodInfo original_setcardui = AccessTools.Method(typeof(CardUI), "SetCardUI");
         MethodInfo patch_setcarduiprefix = AccessTools.Method(typeof(ReplacingCards), "SetCardUIPrefix");
@@ -64,4 +65,8 @@ public class Plugin : BaseUnityPlugin
         harmony.Patch(original_InitCardPhone, postfix: new HarmonyMethod(patch_InitCardPhone));
     }
 
+    public static string GetPluginPath()
+    {
+        return Path.Combine(Application.dataPath, "../BepInEx/plugins", PluginInfo.PLUGIN_NAME);
+    }
 }

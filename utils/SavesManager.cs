@@ -3,6 +3,7 @@ using WankulCrazyPlugin.cards;
 using Newtonsoft.Json;
 using UnityEngine;
 using WankulCrazyPlugin.inventory;
+using System.IO;
 
 namespace WankulCrazyPlugin.utils
 {
@@ -22,7 +23,7 @@ namespace WankulCrazyPlugin.utils
         {
             Plugin.Logger.LogInfo("Saving cards associations");
             Dictionary<string, WankulCardData> associations = WankulCardsData.Instance.association;
-            string pluginPath = Application.dataPath + "/../BepInEx/plugins";
+            string pluginPath = Plugin.GetPluginPath();
 
             int saveIndex = CGameManager.Instance.m_CurrentSaveLoadSlotSelectedIndex;
 
@@ -53,7 +54,7 @@ namespace WankulCrazyPlugin.utils
         public static void LoadCardsAssociations()
         {
             Plugin.Logger.LogInfo("Loading cards associations");
-            string pluginPath = Application.dataPath + "/../BepInEx/plugins";
+            string pluginPath = Plugin.GetPluginPath();
 
             int saveIndex = CGameManager.Instance.m_CurrentSaveLoadSlotSelectedIndex;
 
