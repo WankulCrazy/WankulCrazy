@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
 using WankulCrazyPlugin.cards;
 using Newtonsoft.Json;
-using UnityEngine;
 using WankulCrazyPlugin.inventory;
-using System.IO;
+using System.Reflection;
+using System;
+using System.Security.Cryptography;
+using System.Transactions;
 
 namespace WankulCrazyPlugin.utils
 {
@@ -11,14 +13,17 @@ namespace WankulCrazyPlugin.utils
     {
         public Dictionary<string, int> associations = [];
         public Dictionary<int, (int WankulCardIndex, string cardkey, int amount)> wankulCards = [];
-        public Save(Dictionary<string, int> associations, Dictionary<int, (int WankulCardIndex, string cardkey, int amount)> wankulCards)
+        public bool savedebug = false;
+        public Save(Dictionary<string, int> associations, Dictionary<int, (int WankulCardIndex, string cardkey, int amount)> wankulCards, bool savedebug = false)
         {
             this.associations = associations;
             this.wankulCards = wankulCards;
+            this.savedebug = savedebug;
         }
     }
     public class SavesManager
     {
+        public static bool DebuggingSave = false;
         public static void SaveCardsAssociations()
         {
             Plugin.Logger.LogInfo("Saving cards associations");
@@ -45,7 +50,7 @@ namespace WankulCrazyPlugin.utils
                 wankulCards[item.Key] = (item.Value.wankulcard.Index, cardkey, item.Value.amount);
             }
 
-            Save save = new(knewAssociations, wankulCards);
+            Save save = new(knewAssociations, wankulCards, false);
 
             string json = JsonConvert.SerializeObject(save);
             System.IO.File.WriteAllText(path, json);
@@ -72,6 +77,43 @@ namespace WankulCrazyPlugin.utils
             string json = System.IO.File.ReadAllText(path);
             Save save = JsonConvert.DeserializeObject<Save>(json);
 
+            bool savedebug = save.savedebug;
+
+            if (savedebug)
+            { // MODE SANS ECHEC
+                DebuggingSave = true;
+                Plugin.Logger.LogWarning("No associations found in save file");
+                Plugin.Logger.LogInfo("Clearing save");
+                CPlayerData.m_CardCollectedList.Clear();
+                CPlayerData.m_CardCollectedListDestiny.Clear();
+                CPlayerData.m_CardCollectedListGhost.Clear();
+                CPlayerData.m_CardCollectedListGhostBlack.Clear();
+                CPlayerData.m_CardCollectedListMegabot.Clear();
+                CPlayerData.m_CardCollectedListFantasyRPG.Clear();
+                CPlayerData.m_CardCollectedListCatJob.Clear();
+                Dictionary<int, (int WankulCardIndex, string cardkey, int amount)> wankulCardsToDebug = save.wankulCards;
+                List<CardData> debugCardsData = [];
+                int debugIndex = 0;
+                foreach (var item in wankulCardsToDebug)
+                {
+                    if (debugCardsData.Count == 0 || debugIndex == debugCardsData.Count - 1)
+                    {
+                        debugCardsData = debubPackContent();
+                        debugIndex = 0;
+                    }
+                    Plugin.Logger.LogInfo($"debugImdex: {debugIndex}");
+                    Plugin.Logger.LogInfo($"debugCardsData Count: {debugCardsData.Count}");
+                    WankulCardData wankulCardData = WankulCardsData.Instance.cards.Find(card => card.Index == item.Value.WankulCardIndex);
+                    CardData cardData = debugCardsData[debugIndex];
+                    Plugin.Logger.LogInfo($"DEBUG Adding card: {cardData.monsterType}_{cardData.borderType}_{cardData.expansionType} for {wankulCardData.Title} => {item.Value.amount}");
+                    WankulCardsData.Instance.association[cardData.monsterType + "_" + cardData.borderType + "_" + cardData.expansionType] = wankulCardData;
+                    WankulInventory.Instance.wankulCards[item.Key] = (wankulCardData, cardData, item.Value.amount);
+                    debugIndex++;
+                }
+                DebuggingSave = false;
+                return;
+            }
+
             Dictionary<string, int> associations = save.associations;
             foreach (var association in associations)
             {
@@ -87,6 +129,50 @@ namespace WankulCrazyPlugin.utils
 
                 WankulInventory.Instance.wankulCards[item.Key] = (wankulCardData, cardData, item.Value.amount);
             }
+        }
+
+        public static List<CardData> debubPackContent()
+        {
+            Type type = typeof(CardOpeningSequence);
+            MethodInfo methodInfo = type.GetMethod("GetPackContent", BindingFlags.NonPublic | BindingFlags.Instance);
+            FieldInfo rolledCardDataList = type.GetField("m_RolledCardDataList", BindingFlags.NonPublic | BindingFlags.Instance);
+            FieldInfo cardValueList = type.GetField("m_CardValueList", BindingFlags.NonPublic | BindingFlags.Instance);
+            FieldInfo collectionPackType = type.GetField("m_CollectionPackType", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            if (collectionPackType != null)
+            {
+                Plugin.Logger.LogInfo("Setting m_CollectionPackType");
+                collectionPackType.SetValue(CardOpeningSequence.Instance, ECollectionPackType.BasicCardPack);
+                Plugin.Logger.LogInfo("Set m_CollectionPackType");
+            }
+            else
+            {
+                Plugin.Logger.LogError($"Le champ m_CollectionPackType n'a pas été trouvé.");
+            }
+
+            if (methodInfo != null)
+            {
+                Plugin.Logger.LogInfo("Calling GetPackContent");
+                methodInfo.Invoke(CardOpeningSequence.Instance, new object[] { true, false, false, ECollectionPackType.BasicCardPack });
+                Plugin.Logger.LogInfo("GetPackContent called");
+            }
+            else
+            {
+                Plugin.Logger.LogError($"Le champ GetPackContent n'a pas été trouvé.");
+            }
+
+            if ( rolledCardDataList != null ) {
+                Plugin.Logger.LogInfo("Getting m_RolledCardDataList");
+                List<CardData> m_RolledCardDataList = (List<CardData>)rolledCardDataList.GetValue(CardOpeningSequence.Instance);
+                Plugin.Logger.LogInfo($"Get m_RolledCardDataList count: {m_RolledCardDataList.Count}");
+                return m_RolledCardDataList;
+            }
+            else
+            {
+                Plugin.Logger.LogError($"Le champ m_RolledCardDataList n'a pas été trouvé.");
+            }
+
+            return null;
         }
     }
 }

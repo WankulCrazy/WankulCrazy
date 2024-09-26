@@ -133,21 +133,23 @@ namespace WankulCrazyPlugin.cards
 
         public CardData GetUnassciatedCardData()
         {
-                foreach (ECardBorderType border in Enum.GetValues(typeof(ECardBorderType)))
+                
+                foreach (ECardExpansionType expansion in Enum.GetValues(typeof(ECardExpansionType)))
                 {
-                    foreach (ECardExpansionType expansion in Enum.GetValues(typeof(ECardExpansionType)))
+                    if (
+                                expansion == ECardExpansionType.None ||
+                                expansion == ECardExpansionType.FantasyRPG ||
+                                expansion == ECardExpansionType.Megabot ||
+                                expansion == ECardExpansionType.CatJob ||
+                                expansion == ECardExpansionType.Ghost ||
+                                expansion == ECardExpansionType.FoodieGO ||
+                                expansion == ECardExpansionType.MAX
+                        )
                     {
-                        if (
-                            expansion == ECardExpansionType.None ||
-                            expansion == ECardExpansionType.FantasyRPG ||
-                            expansion == ECardExpansionType.CatJob ||
-                            expansion == ECardExpansionType.Ghost ||
-                            expansion == ECardExpansionType.FoodieGO ||
-                            expansion == ECardExpansionType.MAX
-                            )
-                        {
-                            continue;
-                        }
+                        continue;
+                    }
+                    foreach (ECardBorderType border in Enum.GetValues(typeof(ECardBorderType)))
+                    {
                         foreach (EMonsterType monster in Enum.GetValues(typeof(EMonsterType)))
                         {
                             if (
@@ -177,7 +179,6 @@ namespace WankulCrazyPlugin.cards
                             string key = $"{cardData.monsterType.ToString()}_{cardData.borderType.ToString()}_{cardData.expansionType.ToString()}";
                             if (!association.ContainsKey(key))
                             {
-                                Plugin.Logger.LogInfo($"GetUnassciatedCardData : {key}");
                                 return cardData; // Retourne le premier CardData manquant trouvé
                             }
                         }
@@ -185,6 +186,79 @@ namespace WankulCrazyPlugin.cards
 
                 }
             return null; // Si aucune CardData manquante n'est trouvée
+        }
+
+        public static int GetExperienceFromWankulCard(WankulCardData wankulCardData)
+        {
+            int experience = 1;
+
+            if (wankulCardData is TerrainCardData)
+            {
+                experience = 3;
+            }
+            else if (wankulCardData is EffigyCardData effigyCardData)
+            {
+                if (effigyCardData.Rarity == Rarity.C)
+                {
+                    experience = 2;
+                } 
+                else if (effigyCardData.Rarity == Rarity.UC)
+                {
+                    experience = 4;
+                }
+                else if (effigyCardData.Rarity == Rarity.R)
+                {
+                    experience = 8;
+                }
+                else if (effigyCardData.Rarity == Rarity.UR1)
+                {
+                    experience = 16;
+                }
+                else if (effigyCardData.Rarity == Rarity.UR2)
+                {
+                    experience = 32;
+                }
+                else if (effigyCardData.Rarity == Rarity.LB)
+                {
+                    experience = 64;
+                }
+                else if (effigyCardData.Rarity == Rarity.LA)
+                {
+                    experience = 128;
+                }
+                else if (effigyCardData.Rarity == Rarity.LO)
+                {
+                    experience = 256;
+                }
+                else if (
+                    effigyCardData.Rarity == Rarity.PGW23 ||
+                    effigyCardData.Rarity == Rarity.NOEL23 ||
+                    effigyCardData.Rarity == Rarity.SPCIV ||
+                    effigyCardData.Rarity == Rarity.SPLEG ||
+                    effigyCardData.Rarity == Rarity.ED ||
+                    effigyCardData.Rarity == Rarity.SPPOP ||
+                    effigyCardData.Rarity == Rarity.GP ||
+                    effigyCardData.Rarity == Rarity.SPTV ||
+                    effigyCardData.Rarity == Rarity.SPJV ||
+                    effigyCardData.Rarity == Rarity.EG ||
+                    effigyCardData.Rarity == Rarity.SPCAR ||
+                    effigyCardData.Rarity == Rarity.TOR
+                    )
+                {
+                    experience = 512;
+                }
+            }
+            else if (wankulCardData is SpecialCardData)
+            {
+                experience = 1000;
+            }
+
+            return experience;
+        }
+
+        public static WankulCardData GetAJETER()
+        {
+            return WankulCardsData.Instance.cards.Find(wankulCard => wankulCard is SpecialCardData special && special.Special == Specials.AJETER);
         }
 
         public void DebugDisplayAllCardsAssociations()

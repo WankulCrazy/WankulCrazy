@@ -98,7 +98,6 @@ namespace WankulCrazyPlugin.inventory
                 {
                     string raritystrg = card is EffigyCardData efcard ? efcard.Rarity.ToString() : card is SpecialCardData ? "SPECIAL" : card is TerrainCardData ? "terrain" : "Erreur";
 
-                    Plugin.Logger.LogInfo($"Dropped card: {card.Title}, Season: {card.Season}, Rarity: {raritystrg}");
                     return card;
                 }
             }

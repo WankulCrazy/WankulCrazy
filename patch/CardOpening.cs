@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using WankulCrazyPlugin.cards;
 using WankulCrazyPlugin.inventory;
+using WankulCrazyPlugin.utils;
 
 namespace WankulCrazyPlugin.patch
 {
@@ -8,8 +9,13 @@ namespace WankulCrazyPlugin.patch
     {
         public static void OpenBooster(List<CardData> ___m_RolledCardDataList, List<float> ___m_CardValueList, ECollectionPackType ___m_CollectionPackType)
         {
+            if (SavesManager.DebuggingSave)
+            {
+                return;
+            }
             WankulCardsData wankulCardsData = WankulCardsData.Instance;
             ___m_CardValueList.Clear();
+            int totalExpGained = 0;
             for (int i = 0; i < ___m_RolledCardDataList.Count; i++)
             {
                 bool isTerrain = i == 0;
@@ -17,17 +23,12 @@ namespace WankulCrazyPlugin.patch
                 CardData inGameCard = ___m_RolledCardDataList[i];
                 WankulCardData wankulCard = WankulInventory.DropCard(___m_CollectionPackType, isTerrain, isMinRare);
                 CardData associatedCard = wankulCardsData.GetCardDataFromWankulCardData(wankulCard);
-                Plugin.Logger.LogInfo($"Dropped Card added: {wankulCard.Title}, Market Price: {wankulCard.MarketPrice}, CardIngame: {inGameCard.monsterType}_{inGameCard.expansionType}_{inGameCard.borderType}");
 
-                if (associatedCard != null)
+                if (associatedCard == null)
                 {
                     inGameCard = wankulCardsData.GetUnassciatedCardData();
                     ___m_RolledCardDataList[i] = inGameCard;
-                }
-                Plugin.Logger.LogInfo($"Set unassociated Card : {wankulCard.Title}, Market Price: {wankulCard.MarketPrice}, CardIngame: {inGameCard.monsterType}_{inGameCard.expansionType}_{inGameCard.borderType}");
 
-                if (wankulCard != null)
-                {
                     inGameCard.isFoil = false;
                     inGameCard.isChampionCard = false;
                     if (wankulCard is EffigyCardData)
@@ -44,19 +45,15 @@ namespace WankulCrazyPlugin.patch
                 }
                 else
                 {
-                    Plugin.Logger.LogError("Failed to drop a card");
+                    inGameCard = associatedCard;
+                    ___m_RolledCardDataList[i] = inGameCard;
                 }
 
-                if (wankulCard != null)
-                {
-                    ___m_CardValueList.Add(wankulCard.MarketPrice);
-                    Plugin.Logger.LogInfo($"Card added: {wankulCard.Title}, Market Price: {wankulCard.MarketPrice}");
-                }
-                else
-                {
-                    Plugin.Logger.LogError("Failed to drop a card");
-                }
+                totalExpGained = totalExpGained + WankulCardsData.GetExperienceFromWankulCard(wankulCard);
+                ___m_CardValueList.Add(wankulCard.MarketPrice);
             }
+
+            CEventManager.QueueEvent(new CEventPlayer_AddShopExp(totalExpGained));
         }
     }
 }

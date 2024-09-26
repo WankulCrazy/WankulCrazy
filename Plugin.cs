@@ -75,6 +75,10 @@ public class Plugin : BaseUnityPlugin
         MethodInfo original_SetTotalValue = AccessTools.Method(typeof(CollectionBinderUI), "SetTotalValue");
         MethodInfo patch_SetCardPriceTotalValue = AccessTools.Method(typeof(Inventory), "SetCardPriceTotalValue");
         harmony.Patch(original_SetTotalValue, postfix: new HarmonyMethod(patch_SetCardPriceTotalValue));
+
+        MethodInfo original_GetIcon = AccessTools.Method(typeof(MonsterData), "GetIcon");
+        MethodInfo patch_GetIcon = AccessTools.Method(typeof(ReplacingCards), "GetIcon");
+        harmony.Patch(original_GetIcon, prefix: new HarmonyMethod(patch_GetIcon));
     }
 
     public static string GetPluginPath()

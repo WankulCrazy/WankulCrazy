@@ -38,13 +38,13 @@ namespace WankulCrazyPlugin.patch
             }
             else if (wankulCardData.Drop >= 0.0224f) // Ultra rare holo 1
             {
-                priceRangeMin = 10f;
-                priceRangeMax = 50f;
+                priceRangeMin = 50f;
+                priceRangeMax = 150f;
             }
             else if (wankulCardData.Drop >= 0.016f) // Ultra rare holo 2
             {
-                priceRangeMin = 50f;
-                priceRangeMax = 150f;
+                priceRangeMin = 150f;
+                priceRangeMax = 350f;
             }
             else if (wankulCardData.Drop >= 0.008f) // Légendaire Bronze
             {

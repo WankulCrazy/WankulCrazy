@@ -10,6 +10,7 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Linq;
 using WankulCrazyPlugin.inventory;
+using WankulCrazyPlugin.utils;
 
 namespace WankulCrazyPlugin.patch;
 public class ReplacingCards
@@ -18,13 +19,24 @@ public class ReplacingCards
 
     static void SetCardUIPrefix(CardData cardData)
     {
+        WankulCardsData cardsData = WankulCardsData.Instance;
+
+        // fixing broken saves
         if (cardData == null)
         {
-            Plugin.Logger.LogError("gameCardData is null");
-            return;
+            Plugin.Logger.LogWarning("gameCardData is null");
+
+            cardData = cardsData.GetUnassciatedCardData();
+            WankulCardData debugwankulCardData = WankulCardsData.GetAJETER();
+
+            string key = $"{cardData.monsterType}_{cardData.borderType}_{cardData.expansionType}";
+            Plugin.Logger.LogWarning($"gameCardData is null, adding to inventory {debugwankulCardData.Title} {debugwankulCardData.Index}, {key}");
+
+            cardsData.SetFromMonster(cardData, debugwankulCardData);
+            CPlayerData.AddCard(cardData, 1);
         }
+
         CardData gameCardData = cardData;
-        WankulCardsData cardsData = WankulCardsData.Instance;
 
         WankulCardData wankulCardData = cardsData.GetFromMonster(gameCardData, true);
         if (wankulCardData == null)
@@ -60,7 +72,9 @@ public class ReplacingCards
         WankulCardData wankulCardData = cardsData.GetFromMonster(gameCardData, true);
         if (wankulCardData == null)
         {
-            wankulCardData = WankulCardsData.Instance.cards.Find(wankulCard => wankulCard is SpecialCardData special && special.Special == Specials.AJETER);
+            string key = $"{gameCardData.monsterType}_{gameCardData.borderType}_{gameCardData.expansionType}";
+            Plugin.Logger.LogError($"wankulCardData is null from {key}, using AJETER");
+            wankulCardData = WankulCardsData.GetAJETER();
         }
 
         if (__instance.m_NormalGrp != null)
@@ -216,6 +230,22 @@ public class ReplacingCards
             WankulCardData wankulCardData = wankulCardTuple.wankulcard;
 
             CardData cardData = WankulCardsData.Instance.GetCardDataFromWankulCardData(wankulCardData);
+
+            // fixing broken saves
+            if (cardData == null)
+            {
+                Plugin.Logger.LogWarning("gameCardData is null");
+
+                cardData = WankulCardsData.Instance.GetUnassciatedCardData();
+                WankulCardData debugwankulCardData = WankulCardsData.GetAJETER();
+
+                string debugkey = $"{cardData.monsterType}_{cardData.borderType}_{cardData.expansionType}";
+                Plugin.Logger.LogWarning($"gameCardData is null, adding to inventory {debugwankulCardData.Title} {debugwankulCardData.Index}, {debugkey}");
+
+                WankulCardsData.Instance.SetFromMonster(cardData, debugwankulCardData);
+                CPlayerData.AddCard(cardData, 1);
+            }
+
             __instance.m_BinderPageGrpList[binderIndex].SetSingleCard(i, cardData, wankulCardTuple.amount);
         }
     }
@@ -250,6 +280,14 @@ public class ReplacingCards
                 __instance.m_NameText.text = wankulCardData.Title + "\n" + "Erreur";
             }
         }
+    }
+
+    public static bool GetIcon(ECardExpansionType cardExpansionType, MonsterData __instance, ref Sprite __result)
+    {
+        WankulCardData aJETER = WankulCardsData.GetAJETER();
+;
+        __result = aJETER.Sprite;
+        return false;
     }
 
 }

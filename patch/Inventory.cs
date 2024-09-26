@@ -11,7 +11,8 @@ namespace WankulCrazyPlugin.patch
 
             if (wankulCardData == null)
             {
-                wankulCardData = WankulCardsData.Instance.cards.Find(wankulCard => wankulCard is SpecialCardData special && special.Special == Specials.AJETER);
+                wankulCardData = WankulCardsData.GetAJETER();
+                Plugin.Logger.LogWarning("wankulCardData is null, using AJETER");
             }
 
             WankulInventory.AddCard(wankulCardData, cardData, addAmount);
