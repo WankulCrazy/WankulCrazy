@@ -1,4 +1,6 @@
-﻿using WankulCrazyPlugin.utils;
+﻿using UnityEngine;
+using WankulCrazyPlugin.importer;
+using WankulCrazyPlugin.utils;
 
 namespace WankulCrazyPlugin.patch
 {
@@ -11,6 +13,7 @@ namespace WankulCrazyPlugin.patch
 
         public static void Load()
         {
+            PatchTexturesImporter.ReplaceGameTextures("shared1");
             SavesManager.LoadCardsAssociations();
         }
     }

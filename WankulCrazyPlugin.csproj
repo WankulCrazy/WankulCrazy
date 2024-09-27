@@ -13,8 +13,8 @@
         </RestoreAdditionalProjectSources>
         <RootNamespace>WankulCrazyPlugin</RootNamespace>
         <Configurations>Debug;Release;ReleaseNoDeps</Configurations>
-        <OutputPath>.\dist\BepInEx\plugins\WankulCrazy\</OutputPath>
-        <BaseOutputPath>.\dist\BepInEx\plugins\WankulCrazy\</BaseOutputPath>
+        <OutputPath>.\dist\WankulCrazy\</OutputPath>
+        <BaseOutputPath>.\dist\WankulCrazy\</BaseOutputPath>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
         <GenerateDependencyFile>false</GenerateDependencyFile>
@@ -62,19 +62,4 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
-	
-	<ItemGroup>
-		<None Include="sharedassets0.assets">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<Link>../../../Card Shop Simulator_Data/sharedassets0.assets</Link>
-		</None>
-		<None Include="sharedassets1.assets">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<Link>../../../Card Shop Simulator_Data/sharedassets1.assets</Link>
-		</None>
-	</ItemGroup>
-  
-    <ItemGroup>
-        <Folder Include="importer\" />
-    </ItemGroup>
 </Project>
