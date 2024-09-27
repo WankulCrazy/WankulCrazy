@@ -6,6 +6,7 @@ using System.Reflection;
 using System;
 using System.Security.Cryptography;
 using System.Transactions;
+using WankulCrazyPlugin.patch;
 
 namespace WankulCrazyPlugin.utils
 {
@@ -58,6 +59,8 @@ namespace WankulCrazyPlugin.utils
 
         public static void LoadCardsAssociations()
         {
+            SortUI.inited = false;
+
             Plugin.Logger.LogInfo("Loading cards associations");
             string pluginPath = Plugin.GetPluginPath();
 

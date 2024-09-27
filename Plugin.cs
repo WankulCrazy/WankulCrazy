@@ -79,6 +79,10 @@ public class Plugin : BaseUnityPlugin
         MethodInfo original_GetIcon = AccessTools.Method(typeof(MonsterData), "GetIcon");
         MethodInfo patch_GetIcon = AccessTools.Method(typeof(ReplacingCards), "GetIcon");
         harmony.Patch(original_GetIcon, prefix: new HarmonyMethod(patch_GetIcon));
+
+        MethodInfo original_OpenSortAlbumScreen = AccessTools.Method(typeof(CollectionBinderUI), "OpenSortAlbumScreen");
+        MethodInfo patch_OpenSortAlbumScreen = AccessTools.Method(typeof(SortUI), "OpenSortAlbumScreen");
+        harmony.Patch(original_OpenSortAlbumScreen, postfix: new HarmonyMethod(patch_OpenSortAlbumScreen));
     }
 
     public static string GetPluginPath()
