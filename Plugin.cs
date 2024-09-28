@@ -106,10 +106,26 @@ public class Plugin : BaseUnityPlugin
         MethodInfo patch_CardExpansionUpdated = AccessTools.Method(typeof(patch.workbench.WorkbenchPatch), "OnCardExpansionUpdated");
         harmony.Patch(original_CardExpansionUpdated, postfix: new HarmonyMethod(patch_CardExpansionUpdated));
 
+        MethodInfo original_RarityOpenScreen = AccessTools.Method(typeof(CardRaritySelectScreen), "OpenScreen");
+        MethodInfo patch_RarityOpenScreen = AccessTools.Method(typeof(patch.workbench.WorkbenchPatch), "OpenRarityScreen");
+        harmony.Patch(original_RarityOpenScreen, postfix: new HarmonyMethod(patch_RarityOpenScreen));
+
+        MethodInfo original_RarityPressButton = AccessTools.Method(typeof(CardRaritySelectScreen), "OnPressButton");
+        MethodInfo patch_RarityPressButton = AccessTools.Method(typeof(patch.workbench.WorkbenchPatch), "OnRarityPressButton");
+        harmony.Patch(original_RarityPressButton, prefix: new HarmonyMethod(patch_RarityPressButton));
+
+        MethodInfo original_CardRarityUpdated = AccessTools.Method(typeof(WorkbenchUIScreen), "OnRarityLimitUpdated");
+        MethodInfo patch_CardRarityUpdated = AccessTools.Method(typeof(patch.workbench.WorkbenchPatch), "OnRarityLimitUpdated");
+        harmony.Patch(original_CardRarityUpdated, postfix: new HarmonyMethod(patch_CardRarityUpdated));
+
         MethodInfo original_WorkbenchOpenScreen = AccessTools.Method(typeof(WorkbenchUIScreen), "OpenScreen");
         MethodInfo patch_WorkbenchOpenScreen = AccessTools.Method(typeof(patch.workbench.WorkbenchPatch), "OpenWorkBenchScreen");
         harmony.Patch(original_WorkbenchOpenScreen, postfix: new HarmonyMethod(patch_WorkbenchOpenScreen));
 
+        MethodInfo original_RunBundleCardBulkFunction = AccessTools.Method(typeof(WorkbenchUIScreen), "RunBundleCardBulkFunction");
+        MethodInfo patch_RunBundleCardBulkFunction = AccessTools.Method(typeof(patch.workbench.WorkbenchPatch), "RunBundleCardBulkFunction");
+        harmony.Patch(original_RunBundleCardBulkFunction, postfix: new HarmonyMethod(patch_RunBundleCardBulkFunction));
+        
     }
 
     public static string GetPluginPath()
