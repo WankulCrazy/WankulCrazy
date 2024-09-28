@@ -124,7 +124,7 @@ public class Plugin : BaseUnityPlugin
 
         MethodInfo original_RunBundleCardBulkFunction = AccessTools.Method(typeof(WorkbenchUIScreen), "RunBundleCardBulkFunction");
         MethodInfo patch_RunBundleCardBulkFunction = AccessTools.Method(typeof(patch.workbench.WorkbenchPatch), "RunBundleCardBulkFunction");
-        harmony.Patch(original_RunBundleCardBulkFunction, postfix: new HarmonyMethod(patch_RunBundleCardBulkFunction));
+        harmony.Patch(original_RunBundleCardBulkFunction, prefix: new HarmonyMethod(patch_RunBundleCardBulkFunction));
         
     }
 

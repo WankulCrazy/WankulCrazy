@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HarmonyLib;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -105,8 +106,18 @@ namespace WankulCrazyPlugin.patch.workbench
             WorkbenchUIScreen.Instance.m_RarityLimitText.text = rarityGroups[currentRarityIndex].label;
         }
 
-        public static void RunBundleCardBulkFunction(InteractableWorkbench ___m_CurrentInteractableWorkbench, bool ___m_IsWorkingOnTask, ECardExpansionType ___m_CurrentCardExpansionType, WorkbenchUIScreen __instance)
+        public static bool RunBundleCardBulkFunction(WorkbenchUIScreen __instance)
         {
+            // Utilisation de la réflexion pour récupérer les champs privés
+            var currentInteractableWorkbench = (InteractableWorkbench)AccessTools.Field(__instance.GetType(), "m_CurrentInteractableWorkbench").GetValue(__instance);
+            var isWorkingOnTask = (bool)AccessTools.Field(__instance.GetType(), "m_IsWorkingOnTask").GetValue(__instance);
+            var currentCardExpansionType = (ECardExpansionType)AccessTools.Field(__instance.GetType(), "m_CurrentCardExpansionType").GetValue(__instance);
+
+            // Accès à d'autres champs ou méthodes si nécessaire
+            var sliderPriceLimit = (UnityEngine.UI.Slider)AccessTools.Field(__instance.GetType(), "m_SliderPriceLimit").GetValue(__instance);
+            var sliderMinCard = (UnityEngine.UI.Slider)AccessTools.Field(__instance.GetType(), "m_SliderMinCard").GetValue(__instance);
+            var taskFinishCircleGrp = (UnityEngine.GameObject)AccessTools.Field(__instance.GetType(), "m_TaskFinishCirlceGrp").GetValue(__instance);
+
             Season[] seasons = (Season[])Enum.GetValues(typeof(Season));
             Season currentSeason = seasons[currentExpensionIndex];
             List<Rarity> currentRarities = rarityGroups[currentRarityIndex].rarities;
@@ -122,23 +133,24 @@ namespace WankulCrazyPlugin.patch.workbench
                 .ToDictionary(card => card.Key, card => (card.Value.wankulcard as TerrainCardData, card.Value.card, card.Value.amount));
 
             int terrainAmount = 0;
-            int maxTerrainAmount = 10;
+            int maxTerrainAmount = 1;
             int totalSelectedAmount = 0;
-            int maxSelectedAmount = 100;
+            int maxSelectedAmount = 10;
             int totalEffigyAmount = effigyCards.Sum(card => card.Value.amount);
             int totalTerrainAmount = terrainCards.Sum(card => card.Value.amount);
             int totalCardsAmount = totalEffigyAmount + totalTerrainAmount;
 
-            __instance.m_SliderPriceLimit.interactable = false;
-            __instance.m_SliderMinCard.interactable = false;
+            // Désactivation des sliders avec réflexion
+            sliderPriceLimit.interactable = false;
+            sliderMinCard.interactable = false;
 
             Dictionary<int, (WankulCardData wankulcard, CardData card, int amount)> SelectedCards = new Dictionary<int, (WankulCardData wankulcard, CardData card, int amount)>();
             List<CardData> selectedCardsData = new List<CardData>();
 
-            if (totalTerrainAmount < 10 && totalCardsAmount < 100)
+            if (totalTerrainAmount < 1 && totalCardsAmount < 10)
             {
                 NotEnoughResourceTextPopup.ShowText(ENotEnoughResourceText.NotEnoughCardForBundle);
-                return;
+                return false;
             }
 
             while (totalSelectedAmount < maxSelectedAmount)
@@ -178,9 +190,16 @@ namespace WankulCrazyPlugin.patch.workbench
                 }
             }
 
-            ___m_CurrentInteractableWorkbench.PlayBundlingCardBoxSequence(selectedCardsData, ___m_CurrentCardExpansionType);
-            ___m_IsWorkingOnTask = true;
-            __instance.m_TaskFinishCirlceGrp.SetActive(value: true);
+            Plugin.Logger.LogInfo($"Selected cards : {selectedCardsData.Count}, expansion : {currentCardExpansionType}");
+
+            currentInteractableWorkbench.PlayBundlingCardBoxSequence(selectedCardsData, currentCardExpansionType);
+
+            AccessTools.Field(__instance.GetType(), "m_IsWorkingOnTask").SetValue(__instance, true);
+
+            // Activation du GameObject via réflexion
+            taskFinishCircleGrp.SetActive(true);
+
+            return false;
         }
 
         private static string GetGameObjectPath(GameObject obj)
