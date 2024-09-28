@@ -18,18 +18,19 @@ namespace WankulCrazyPlugin.patch
         static List<int> SortedCardIndies = [];
         static SortSeasonType currentSeason = SortSeasonType.ALL;
         static SortType currentSortType = SortType.Price;
+        static int currentGameSortMethod = 2;
+        static int currentGameExpansionIndex = 0;
 
         public static void OpenSortAlbumScreenPrefix(ref int sortingMethodIndex, ref int currentExpansionIndex, CollectionBinderUI __instance)
         {
-            if (!inited)
-            {
-                sortingMethodIndex = 2;
-                currentExpansionIndex = 0;
-            }
+            sortingMethodIndex = currentGameSortMethod;
+            currentExpansionIndex = currentGameExpansionIndex;
         }
 
         public static void OpenSortAlbumScreen(int sortingMethodIndex, int currentExpansionIndex, CollectionBinderUI __instance)
         {
+
+
             if (!inited)
             {
                 // Position et texte des boutons initiaux
@@ -72,47 +73,56 @@ namespace WankulCrazyPlugin.patch
                 {
                     currentSeason = SortSeasonType.ALL;
                     __instance.OnPressSwitchExpansion(0);
+                    currentGameExpansionIndex = 0;
                 });
                 __instance.m_ExpansionBtnList[1].GetComponentInChildren<Button>().onClick.AddListener(() =>
                 {
                     currentSeason = SortSeasonType.S01;
                     __instance.OnPressSwitchExpansion(1);
+                    currentGameExpansionIndex = 1;
                 });
                 __instance.m_ExpansionBtnList[2].GetComponentInChildren<Button>().onClick.AddListener(() =>
                 {
                     currentSeason = SortSeasonType.S02;
                     __instance.OnPressSwitchExpansion(2);
+                    currentGameExpansionIndex = 2;
                 });
                 __instance.m_ExpansionBtnList[3].GetComponentInChildren<Button>().onClick.AddListener(() =>
                 {
                     currentSeason = SortSeasonType.S03;
                     __instance.OnPressSwitchExpansion(3);
+                    currentGameExpansionIndex = 3;
                 });
                 __instance.m_ExpansionBtnList[4].GetComponentInChildren<Button>().onClick.AddListener(() =>
                 {
                     currentSeason = SortSeasonType.HS;
                     __instance.OnPressSwitchExpansion(4);
+                    currentGameExpansionIndex = 4;
                 });
 
                 __instance.m_SortAlbumBtnList[2].GetComponentInChildren<Button>().onClick.AddListener(() =>
                 {
                     currentSortType = SortType.Price;
                     __instance.OnPressSwitchSortingMethod(2);
+                    currentGameSortMethod = 2;
                 });
                 __instance.m_SortAlbumBtnList[1].GetComponentInChildren<Button>().onClick.AddListener(() =>
                 {
                     currentSortType = SortType.Rarity;
                     __instance.OnPressSwitchSortingMethod(1);
+                    currentGameSortMethod = 1;
                 });
                 __instance.m_SortAlbumBtnList[0].GetComponentInChildren<Button>().onClick.AddListener(() =>
                 {
                     currentSortType = SortType.Number;
                     __instance.OnPressSwitchSortingMethod(0);
+                    currentGameSortMethod = 0;
                 });
                 __instance.m_SortAlbumBtnList[3].GetComponentInChildren<Button>().onClick.AddListener(() =>
                 {
                     currentSortType = SortType.Amount;
                     __instance.OnPressSwitchSortingMethod(3);
+                    currentGameSortMethod = 3;
                 });
 
                 // Marquer l'initialisation comme terminée
