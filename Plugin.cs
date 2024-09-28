@@ -89,6 +89,27 @@ public class Plugin : BaseUnityPlugin
         MethodInfo patch_OpenSortAlbumScreenPrefix = AccessTools.Method(typeof(SortUI), "OpenSortAlbumScreenPrefix");
         MethodInfo patch_OpenSortAlbumScreen = AccessTools.Method(typeof(SortUI), "OpenSortAlbumScreen");
         harmony.Patch(original_OpenSortAlbumScreen, postfix: new HarmonyMethod(patch_OpenSortAlbumScreen), prefix: new HarmonyMethod(patch_OpenSortAlbumScreenPrefix));
+
+
+
+
+
+        MethodInfo original_ExpansionOpenScreen = AccessTools.Method(typeof(CardExpansionSelectScreen), "OpenScreen");
+        MethodInfo patch_ExpansionOpenScreen = AccessTools.Method(typeof(patch.workbench.WorkbenchPatch), "OpenExpansionScreen");
+        harmony.Patch(original_ExpansionOpenScreen, postfix: new HarmonyMethod(patch_ExpansionOpenScreen));
+
+        MethodInfo original_ExpansionPressButton = AccessTools.Method(typeof(CardExpansionSelectScreen), "OnPressButton");
+        MethodInfo patch_ExpansionPressButton = AccessTools.Method(typeof(patch.workbench.WorkbenchPatch), "OnExpansionPressButton");
+        harmony.Patch(original_ExpansionPressButton, prefix: new HarmonyMethod(patch_ExpansionPressButton));
+
+        MethodInfo original_CardExpansionUpdated = AccessTools.Method(typeof(WorkbenchUIScreen), "OnCardExpansionUpdated");
+        MethodInfo patch_CardExpansionUpdated = AccessTools.Method(typeof(patch.workbench.WorkbenchPatch), "OnCardExpansionUpdated");
+        harmony.Patch(original_CardExpansionUpdated, postfix: new HarmonyMethod(patch_CardExpansionUpdated));
+
+        MethodInfo original_WorkbenchOpenScreen = AccessTools.Method(typeof(WorkbenchUIScreen), "OpenScreen");
+        MethodInfo patch_WorkbenchOpenScreen = AccessTools.Method(typeof(patch.workbench.WorkbenchPatch), "OpenWorkBenchScreen");
+        harmony.Patch(original_WorkbenchOpenScreen, postfix: new HarmonyMethod(patch_WorkbenchOpenScreen));
+
     }
 
     public static string GetPluginPath()
