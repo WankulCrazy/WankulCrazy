@@ -259,6 +259,29 @@ namespace WankulCrazyPlugin.inventory
         {
             return Instance.wankulCards.Where(card => card.Value.wankulcard.Season == season).ToDictionary(card => card.Key, card => card.Value);
         }
+
+        public static float GetMaxPrice()
+        {
+            float maxPrice = 0f;
+            foreach (var card in Instance.wankulCards)
+            {
+                if (card.Value.Item1.MarketPrice > maxPrice) {
+                    maxPrice = card.Value.wankulcard.MarketPrice;
+                }
+            }
+            return maxPrice;
+        }
+
+        public static float GetAveragePrice()
+        {
+            float totalPrice = 0f;
+            foreach (var card in Instance.wankulCards)
+            {
+                totalPrice += card.Value.Item1.MarketPrice;
+            }
+            return totalPrice / Instance.wankulCards.Count;
+        }
+
         public static float GetTotalPrice()
         {
             float totalPrice = 0f;

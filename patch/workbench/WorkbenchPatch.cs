@@ -47,7 +47,6 @@ namespace WankulCrazyPlugin.patch.workbench
         public static void OnExpansionPressButton(int index)
         {
             currentExpensionIndex = index;
-            Plugin.Logger.LogInfo($"OnExpansionPressButton {index}");
         }
 
 
@@ -85,7 +84,6 @@ namespace WankulCrazyPlugin.patch.workbench
         public static void OnRarityPressButton(int index)
         {
             currentRarityIndex = index + 1;
-            Plugin.Logger.LogInfo($"OnRarityPressButton {currentRarityIndex}, label : {rarityGroups[currentRarityIndex].label}");
         }
 
 
@@ -100,10 +98,13 @@ namespace WankulCrazyPlugin.patch.workbench
             __instance.m_RarityLimitText.text = rarityGroups[currentRarityIndex].label;
         }
 
-        public static void OpenWorkBenchScreen()
+        public static void OpenWorkBenchScreen(WorkbenchUIScreen __instance)
         {
             WorkbenchUIScreen.Instance.m_CardExpansionText.text = SeasonsContainer.Seasons[(Season)currentExpensionIndex];
             WorkbenchUIScreen.Instance.m_RarityLimitText.text = rarityGroups[currentRarityIndex].label;
+            float averagePrice = WankulInventory.GetAveragePrice();
+            WorkbenchUIScreen.Instance.m_SliderPriceLimit.maxValue = averagePrice * 100;
+            WorkbenchUIScreen.Instance.m_PriceLimitMaxText.text = averagePrice.ToString("0.00");
         }
 
         public static bool RunBundleCardBulkFunction(WorkbenchUIScreen __instance)
@@ -118,6 +119,7 @@ namespace WankulCrazyPlugin.patch.workbench
             var sliderMinCard = (UnityEngine.UI.Slider)AccessTools.Field(__instance.GetType(), "m_SliderMinCard").GetValue(__instance);
             var taskFinishCircleGrp = (UnityEngine.GameObject)AccessTools.Field(__instance.GetType(), "m_TaskFinishCirlceGrp").GetValue(__instance);
 
+
             Season[] seasons = (Season[])Enum.GetValues(typeof(Season));
             Season currentSeason = seasons[currentExpensionIndex];
             List<Rarity> currentRarities = rarityGroups[currentRarityIndex].rarities;
@@ -125,11 +127,12 @@ namespace WankulCrazyPlugin.patch.workbench
             Dictionary<int, (WankulCardData wankulcard, CardData card, int amount)> wankulCards = WankulInventory.GetCardsBySeason(currentSeason);
 
             Dictionary<int, (EffigyCardData wankulcard, CardData card, int amount)> effigyCards = wankulCards
-                .Where(card => (card.Value.wankulcard is EffigyCardData))
+                .Where(card => (card.Value.wankulcard is EffigyCardData && card.Value.wankulcard.MarketPrice < (sliderPriceLimit.value/100) && card.Value.amount > sliderMinCard.value))
                 .ToDictionary(card => card.Key, card => (card.Value.wankulcard as EffigyCardData, card.Value.card, card.Value.amount));
+            effigyCards = effigyCards.Where(card => currentRarities.Contains(card.Value.wankulcard.Rarity)).ToDictionary(card => card.Key, card => card.Value);
 
             Dictionary<int, (TerrainCardData wankulcard, CardData card, int amount)> terrainCards = wankulCards
-                .Where(card => (card.Value.wankulcard is TerrainCardData))
+                .Where(card => (card.Value.wankulcard is TerrainCardData && card.Value.wankulcard.MarketPrice < (sliderPriceLimit.value/100) && card.Value.amount > sliderMinCard.value))
                 .ToDictionary(card => card.Key, card => (card.Value.wankulcard as TerrainCardData, card.Value.card, card.Value.amount));
 
             int terrainAmount = 0;
@@ -138,7 +141,6 @@ namespace WankulCrazyPlugin.patch.workbench
             int maxSelectedAmount = 10;
             int totalEffigyAmount = effigyCards.Sum(card => card.Value.amount);
             int totalTerrainAmount = terrainCards.Sum(card => card.Value.amount);
-            int totalCardsAmount = totalEffigyAmount + totalTerrainAmount;
 
             // Désactivation des sliders avec réflexion
             sliderPriceLimit.interactable = false;
@@ -147,29 +149,26 @@ namespace WankulCrazyPlugin.patch.workbench
             Dictionary<int, (WankulCardData wankulcard, CardData card, int amount)> SelectedCards = new Dictionary<int, (WankulCardData wankulcard, CardData card, int amount)>();
             List<CardData> selectedCardsData = new List<CardData>();
 
-            if (totalTerrainAmount < 1 && totalCardsAmount < 10)
+            if (totalTerrainAmount < 1 && totalEffigyAmount < 9)
             {
+                sliderPriceLimit.interactable = true;
+                sliderMinCard.interactable = true;
                 NotEnoughResourceTextPopup.ShowText(ENotEnoughResourceText.NotEnoughCardForBundle);
                 return false;
             }
 
+
+            int tests = 0;
             while (totalSelectedAmount < maxSelectedAmount)
             {
-                Plugin.Logger.LogInfo($"totalSelectedAmount : {totalSelectedAmount}, maxSelectedAmount : {maxSelectedAmount}");
                 if (terrainAmount < maxTerrainAmount && terrainCards.Count > 0)
                 {
                     int randomTerrainIndex = UnityEngine.Random.Range(0, terrainCards.Count);
                     KeyValuePair<int, (TerrainCardData wankulcard, CardData card, int amount)> randomTerrain = terrainCards.ElementAt(randomTerrainIndex);
 
-                    //var updatedCard = randomTerrain.Value;
-                    //updatedCard.amount -= 1;
-                    //if (updatedCard.amount >= 0)
-                    //{
-                        //terrainCards[randomTerrain.Key] = updatedCard;
-                        selectedCardsData.Add(randomTerrain.Value.card);
-                        CPlayerData.ReduceCard(randomTerrain.Value.card, 1);
-                        totalSelectedAmount += 1;
-                    //}
+                    selectedCardsData.Add(randomTerrain.Value.card);
+                    CPlayerData.ReduceCard(randomTerrain.Value.card, 1);
+                    totalSelectedAmount += 1;
                 }
                 else
                 {
@@ -177,20 +176,25 @@ namespace WankulCrazyPlugin.patch.workbench
                     KeyValuePair<int, (EffigyCardData wankulcard, CardData card, int amount)> randomCard = effigyCards.ElementAt(randomIndex);
                     if (currentRarities.Contains(randomCard.Value.wankulcard.Rarity))
                     {
-                        //var updatedCard = randomCard.Value;
-                        //updatedCard.amount -= 1;
-                        //if (updatedCard.amount >= 0)
-                        //{
-                        //    effigyCards[randomCard.Key] = updatedCard;
-                            selectedCardsData.Add(randomCard.Value.card);
-                            CPlayerData.ReduceCard(randomCard.Value.card, 1);
-                            totalSelectedAmount += 1;
-                        //}
+                        
+                        selectedCardsData.Add(randomCard.Value.card);
+                        CPlayerData.ReduceCard(randomCard.Value.card, 1);
+                        totalSelectedAmount += 1;
                     }
                 }
-            }
 
-            Plugin.Logger.LogInfo($"Selected cards : {selectedCardsData.Count}, expansion : {currentCardExpansionType}");
+                tests += 1;
+
+                if (tests > 1000)
+                {
+                    // SHOULD NEVER HAPPEN
+                    Plugin.Logger.LogError("Infinite loop detected");
+                    NotEnoughResourceTextPopup.ShowText(ENotEnoughResourceText.NotEnoughCardForBundle);
+                    sliderPriceLimit.interactable = true;
+                    sliderMinCard.interactable = true;
+                    return false;
+                }
+            }
 
             currentInteractableWorkbench.PlayBundlingCardBoxSequence(selectedCardsData, currentCardExpansionType);
 
