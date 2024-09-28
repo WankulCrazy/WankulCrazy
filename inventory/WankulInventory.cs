@@ -39,6 +39,7 @@ namespace WankulCrazyPlugin.inventory
         public static WankulCardData DropCard(ECollectionPackType packType, bool isTerrain = false, bool isMinRare = false)
         {
             bool increaseRarity = false;
+            Season season = ConvertPackTypeToSeason(packType);
 
             if (
                 packType == ECollectionPackType.DestinyBasicCardPack ||
@@ -61,10 +62,16 @@ namespace WankulCrazyPlugin.inventory
                 allCards = allCards.FindAll(card => card is not TerrainCardData);
             }
 
-            // Filtrer les cartes déjà associées
-            List<WankulCardData> seasonalCard =
-                allCards.FindAll(card => card.Season == ConvertPackTypeToSeason(packType));
+            List<WankulCardData> seasonalCard;
 
+            if (season != Season.HS)
+            {
+                seasonalCard = allCards.FindAll(card => card.Season == season);
+            }
+            else
+            {
+                seasonalCard = allCards;
+            }
 
             if (!isTerrain && isMinRare)
             {
@@ -75,11 +82,18 @@ namespace WankulCrazyPlugin.inventory
                 List<WankulCardData> specialCardsData = seasonalCard
                     .FindAll(card => card is SpecialCardData);
 
-                seasonalCard = effigyCardsData.FindAll(card => card.Rarity >= Rarity.R)
-                    .ConvertAll(card => (WankulCardData)card);
-                ;
+                if (increaseRarity)
+                {
+                    seasonalCard = effigyCardsData.FindAll(card => card.Rarity > Rarity.R)
+                        .ConvertAll(card => (WankulCardData)card);
+                }
+                else
+                {
+                    seasonalCard = effigyCardsData.FindAll(card => card.Rarity >= Rarity.R)
+                        .ConvertAll(card => (WankulCardData)card);
+                }
 
-                seasonalCard = [.. seasonalCard, .. specialCardsData];
+                seasonalCard.AddRange(specialCardsData);
             }
             else if (!isTerrain && !isMinRare)
             {
@@ -88,7 +102,6 @@ namespace WankulCrazyPlugin.inventory
                     !(card is EffigyCardData effigyCard && effigyCard.Rarity >= Rarity.R)
                 );
             }
-
 
             if (seasonalCard.Count == 0)
             {
@@ -99,8 +112,42 @@ namespace WankulCrazyPlugin.inventory
             float totalDropChance = 0f;
             foreach (var card in seasonalCard)
             {
-                float increasefactor = increaseRarity ? 5f : 1f;
-                totalDropChance += card.Drop * increasefactor;
+                float increaseFactor = 1f;
+                if (increaseRarity)
+                {
+                    if (card is EffigyCardData effigyCard)
+                    {
+                        switch (effigyCard.Rarity)
+                        {
+                            case Rarity.R:
+                                increaseFactor = 1.5f;
+                                break;
+                            case Rarity.UR1:
+                            case Rarity.UR2:
+                                increaseFactor = 3f;
+                                break;
+                            case Rarity.LB:
+                            case Rarity.LA:
+                            case Rarity.LO:
+                                increaseFactor = 5f;
+                                break;
+                            default:
+                                increaseFactor = 1f;
+                                break;
+                        }
+                    }
+                }
+                if (season == Season.HS)
+                {
+                    if (card is EffigyCardData effigyCard)
+                    {
+                        if (effigyCard.Rarity >= Rarity.PGW23)
+                        {
+                            increaseFactor = 20;
+                        }
+                    }
+                }
+                totalDropChance += card.Drop * increaseFactor;
             }
 
             float randomValue = Random.Range(0f, totalDropChance);
@@ -108,10 +155,45 @@ namespace WankulCrazyPlugin.inventory
 
             foreach (var card in seasonalCard)
             {
-                cumulativeDropChance += card.Drop;
+                float increaseFactor = 1f;
+                if (increaseRarity)
+                {
+                    if (card is EffigyCardData effigyCard)
+                    {
+                        switch (effigyCard.Rarity)
+                        {
+                            case Rarity.R:
+                                increaseFactor = 1.5f;
+                                break;
+                            case Rarity.UR1:
+                            case Rarity.UR2:
+                                increaseFactor = 3f;
+                                break;
+                            case Rarity.LB:
+                            case Rarity.LA:
+                            case Rarity.LO:
+                                increaseFactor = 5f;
+                                break;
+                            default:
+                                increaseFactor = 1f;
+                                break;
+                        }
+                    }
+                }
+                if (season == Season.HS)
+                {
+                    if (card is EffigyCardData effigyCard)
+                    {
+                        if (effigyCard.Rarity >= Rarity.PGW23)
+                        {
+                            increaseFactor = 20;
+                        }
+                    }
+                }
+
+                cumulativeDropChance += card.Drop * increaseFactor;
                 if (randomValue <= cumulativeDropChance)
                 {
-                    string raritystrg = card is EffigyCardData efcard ? efcard.Rarity.ToString() : card is SpecialCardData ? "SPECIAL" : card is TerrainCardData ? "terrain" : "Erreur";
 
                     return card;
                 }
@@ -173,6 +255,10 @@ namespace WankulCrazyPlugin.inventory
             }
         }
 
+        public static Dictionary<int, (WankulCardData wankulcard, CardData card, int amount)> GetCardsBySeason(Season season)
+        {
+            return Instance.wankulCards.Where(card => card.Value.wankulcard.Season == season).ToDictionary(card => card.Key, card => card.Value);
+        }
         public static float GetTotalPrice()
         {
             float totalPrice = 0f;
