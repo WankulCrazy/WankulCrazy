@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using TMPro;
 using UnityEngine;
@@ -17,6 +18,15 @@ namespace WankulCrazyPlugin.patch
         static List<int> SortedCardIndies = [];
         static SortSeasonType currentSeason = SortSeasonType.ALL;
         static SortType currentSortType = SortType.Price;
+
+        public static void OpenSortAlbumScreenPrefix(ref int sortingMethodIndex, ref int currentExpansionIndex, CollectionBinderUI __instance)
+        {
+            if (!inited)
+            {
+                sortingMethodIndex = 2;
+                currentExpansionIndex = 0;
+            }
+        }
 
         public static void OpenSortAlbumScreen(int sortingMethodIndex, int currentExpansionIndex, CollectionBinderUI __instance)
         {
@@ -56,8 +66,6 @@ namespace WankulCrazyPlugin.patch
                 __instance.m_SortAlbumBtnList[4].gameObject.SetActive(false);
                 __instance.m_SortAlbumBtnList[5].gameObject.SetActive(false);
                 __instance.m_SortAlbumBtnList[6].gameObject.SetActive(false);
-
-                __instance.OnPressSwitchSortingMethod(2);
 
 
                 __instance.m_ExpansionBtnList[0].GetComponentInChildren<Button>().onClick.AddListener(() =>
@@ -165,7 +173,7 @@ namespace WankulCrazyPlugin.patch
                 .ToList();
         }
 
-        public static void SortByNumber()
+        public static void SortBySeasonAndNumber()
         {
             SortedCardIndies.Clear();
 
@@ -173,7 +181,8 @@ namespace WankulCrazyPlugin.patch
 
             SortedCardIndies = wankulCards
                 .Select((card) => new { card })
-                .OrderByDescending(x => x.card.Value.wankulcard.Number)
+                .OrderBy(x => x.card.Value.wankulcard.Season)
+                .ThenBy(x => x.card.Value.wankulcard.NumberInt)
                 .Select(x => x.card.Value.wankulcard.Index)
                 .ToList();
         }
@@ -202,7 +211,7 @@ namespace WankulCrazyPlugin.patch
                     SortByRarity();
                     break;
                 case SortType.Number:
-                    SortByNumber();
+                    SortBySeasonAndNumber();
                     break;
                 case SortType.Amount:
                     SortByAmount();

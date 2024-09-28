@@ -48,5 +48,29 @@ namespace WankulCrazyPlugin.cards
                 lastPriceUpdate = DateTime.Now;
             }
         }
+
+        public bool IsNumberInt(string text)
+        {
+            foreach (char c in text)
+            {
+                if (!char.IsDigit(c))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public int NumberInt
+        {
+            get
+            {
+                if (!IsNumberInt(Number))
+                {
+                    return -1;
+                }
+                return int.Parse(Number);
+            }
+        }
     }
 }
