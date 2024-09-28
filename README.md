@@ -9,14 +9,13 @@ Nous rappelons que le projet n'a pas pour but d'être commercialisé, et que nou
 L'utilisation des textures de cartes Wankuls pour tout autre projet doit avant tout être validé, et autorisé par Wankil.
 
 
-
 ### Généré avec
 
 Le mod a été généré avec :
 
-* BepInEx: https://github.com/BepInEx/BepInEx
-* Harmony: https://harmony.pardeike.net/
-* Unity: https://unity.com/
+* BepInEx (5.4.23.2): https://github.com/BepInEx/BepInEx
+* Harmony (2.7.0): https://harmony.pardeike.net/
+* Unity (v2021.3.38.8007589): https://unity.com/
 
 
 <!-- GETTING STARTED -->
@@ -27,6 +26,7 @@ Pour générer le projet il vous faudra suivre ces étapes.
 ### Prérequis
 
 * Visual Studio 2022:
+* BepInEx (5.4.23.2) d'installé dans le dossier du jeu
 
 ### Installation
 
@@ -43,13 +43,14 @@ Pour générer le projet il vous faudra suivre ces étapes.
 3. Générer<br>
    Lancez la génération du projet depuis visual studio avec le preset ReleaseNoDeps
 4. Lancer le mod<br>
-   Copiez le contenu du dossier dist généré dans le dossier du jeu.
+   Copiez le contenu du dossier dist généré dans le dossier plugins de BepInEx.
 
 
 <!-- CONTRIBUTING -->
 ## Contribuer
 
-Nous n'avons pas encore défini de façon de nous contacter pour contribuer, libre à vous de trouver comment nous contacter.
+Pour contribuer, je vous invite à forker le projet et à créer une pull request avec vos modifications.
+Si vous avez des questions, n'hésitez pas à contacter @ToHo sur les discords Wankil, de préférence engagez la conversation en MP pour ne pas flood le serveur.
 
 
 <!-- LICENSE -->

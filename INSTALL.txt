@@ -1,0 +1,4 @@
+Pour installer :
+
+- Téléchargez et installez BepInEx 5.4.23.2.
+- Copiez ce dossier dans le dossier "BepInEx/plugins" de votre jeu.
