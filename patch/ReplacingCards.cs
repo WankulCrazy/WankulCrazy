@@ -15,8 +15,6 @@ using WankulCrazyPlugin.utils;
 namespace WankulCrazyPlugin.patch;
 public class ReplacingCards
 {
-    static List<int> SortedCardIndies = [];
-
     static void SetCardUIPrefix(CardData cardData)
     {
         WankulCardsData cardsData = WankulCardsData.Instance;
@@ -190,63 +188,6 @@ public class ReplacingCards
                 __instance.m_CollectionBinderUI.m_CardNameText.text = "Erreur";
             }
 
-        }
-    }
-
-
-    public static void SortByPriceAmount()
-    {
-        SortedCardIndies.Clear();
-
-        List<WankulCardData> wankulCards = WankulInventory.Instance.wankulCards.Values.Select(x => x.wankulcard).ToList();
-
-        SortedCardIndies = wankulCards
-            .Select((card) => new { card })
-            .OrderByDescending(x => x.card.MarketPrice)
-            .Select(x => x.card.Index)
-            .ToList();
-    }
-
-    public static void UpdateBinderAllCardUI(int binderIndex, int pageIndex, ref int ___m_MaxIndex, CollectionBinderFlipAnimCtrl __instance)
-    {
-        SortByPriceAmount();
-
-        if (pageIndex <= 0 || pageIndex > ___m_MaxIndex)
-        {
-            return;
-        }
-        for (int i = 0; i < __instance.m_BinderPageGrpList[binderIndex].m_CardList.Count; i++)
-        {
-
-            int num = (pageIndex - 1) * 12 + i;
-            if (num >= SortedCardIndies.Count)
-            {
-                __instance.m_BinderPageGrpList[binderIndex].SetSingleCard(i, null, 0);
-                continue;
-            }
-            int index = SortedCardIndies[num];
-
-            var wankulCardTuple = WankulInventory.Instance.wankulCards[index];
-            WankulCardData wankulCardData = wankulCardTuple.wankulcard;
-
-            CardData cardData = WankulCardsData.Instance.GetCardDataFromWankulCardData(wankulCardData);
-
-            // fixing broken saves
-            if (cardData == null)
-            {
-                Plugin.Logger.LogWarning("gameCardData is null");
-
-                cardData = WankulCardsData.Instance.GetUnassciatedCardData();
-                WankulCardData debugwankulCardData = WankulCardsData.GetAJETER();
-
-                string debugkey = $"{cardData.monsterType}_{cardData.borderType}_{cardData.expansionType}";
-                Plugin.Logger.LogWarning($"gameCardData is null, adding to inventory {debugwankulCardData.Title} {debugwankulCardData.Index}, {debugkey}");
-
-                WankulCardsData.Instance.SetFromMonster(cardData, debugwankulCardData);
-                CPlayerData.AddCard(cardData, 1);
-            }
-
-            __instance.m_BinderPageGrpList[binderIndex].SetSingleCard(i, cardData, wankulCardTuple.amount);
         }
     }
 

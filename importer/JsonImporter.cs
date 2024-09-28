@@ -26,10 +26,6 @@ public class JsonImporter
             {
                 CreateCardsData(cards);
                 WankulCardsData wankulCardsData = WankulCardsData.Instance;
-                foreach (var cardData in wankulCardsData.cards)
-                {
-                    Plugin.Logger.LogInfo("Card loaded: " + cardData.Title);
-                }
                 Plugin.Logger.LogInfo("Cards data loaded: " + wankulCardsData.cards.Count + " cards");
             }
             else

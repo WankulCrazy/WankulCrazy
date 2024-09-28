@@ -40,7 +40,7 @@ public class Plugin : BaseUnityPlugin
         harmony.Patch(original_CardOpening, postfix: new HarmonyMethod(patch_CardOpening));
 
         MethodInfo original_binderSetCard = AccessTools.Method(typeof(CollectionBinderFlipAnimCtrl), "UpdateBinderAllCardUI");
-        MethodInfo patch_binderSetCard = AccessTools.Method(typeof(ReplacingCards), "UpdateBinderAllCardUI");
+        MethodInfo patch_binderSetCard = AccessTools.Method(typeof(SortUI), "UpdateBinderAllCardUI");
         harmony.Patch(original_binderSetCard, postfix: new HarmonyMethod(patch_binderSetCard));
 
         MethodInfo original_save = AccessTools.Method(typeof(CSaveLoad), "Save");
