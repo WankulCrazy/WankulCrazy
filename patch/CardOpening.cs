@@ -7,6 +7,15 @@ namespace WankulCrazyPlugin.patch
 {
     public class CardOpening
     {
+        public static int totalExpGained = 0;
+        public static void UpdatePostFix(CardOpeningSequence __instance)
+        {
+            if (__instance.m_StateIndex == 11 && totalExpGained > 0)
+            {
+                CEventManager.QueueEvent(new CEventPlayer_AddShopExp(totalExpGained));
+                totalExpGained = 0;
+            }
+        }
         public static void OpenBooster(List<CardData> ___m_RolledCardDataList, List<float> ___m_CardValueList, ECollectionPackType ___m_CollectionPackType)
         {
             if (SavesManager.DebuggingSave)
@@ -15,7 +24,7 @@ namespace WankulCrazyPlugin.patch
             }
             WankulCardsData wankulCardsData = WankulCardsData.Instance;
             ___m_CardValueList.Clear();
-            int totalExpGained = 0;
+            totalExpGained = 0;
             for (int i = 0; i < ___m_RolledCardDataList.Count; i++)
             {
                 bool isTerrain = i == 0;
@@ -52,8 +61,6 @@ namespace WankulCrazyPlugin.patch
                 totalExpGained = totalExpGained + WankulCardsData.GetExperienceFromWankulCard(wankulCard);
                 ___m_CardValueList.Add(wankulCard.MarketPrice);
             }
-
-            CEventManager.QueueEvent(new CEventPlayer_AddShopExp(totalExpGained));
         }
     }
 }

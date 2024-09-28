@@ -39,6 +39,10 @@ public class Plugin : BaseUnityPlugin
         MethodInfo patch_CardOpening = AccessTools.Method(typeof(CardOpening), "OpenBooster");
         harmony.Patch(original_CardOpening, postfix: new HarmonyMethod(patch_CardOpening));
 
+        MethodInfo original_Update = AccessTools.Method(typeof(CardOpeningSequence), "Update");
+        MethodInfo patch_Update = AccessTools.Method(typeof(CardOpening), "UpdatePostFix");
+        harmony.Patch(original_Update, postfix: new HarmonyMethod(patch_Update));
+
         MethodInfo original_binderSetCard = AccessTools.Method(typeof(CollectionBinderFlipAnimCtrl), "UpdateBinderAllCardUI");
         MethodInfo patch_binderSetCard = AccessTools.Method(typeof(SortUI), "UpdateBinderAllCardUI");
         harmony.Patch(original_binderSetCard, postfix: new HarmonyMethod(patch_binderSetCard));

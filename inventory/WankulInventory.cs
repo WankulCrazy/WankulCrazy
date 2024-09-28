@@ -28,6 +28,8 @@ namespace WankulCrazyPlugin.inventory
                 case ECollectionPackType.DestinyEpicCardPack:
                     return Season.S03;
 
+                case ECollectionPackType.LegendaryCardPack:
+                case ECollectionPackType.DestinyLegendaryCardPack:
                 default:
                     return Season.HS;
             }
@@ -36,6 +38,18 @@ namespace WankulCrazyPlugin.inventory
 
         public static WankulCardData DropCard(ECollectionPackType packType, bool isTerrain = false, bool isMinRare = false)
         {
+            bool increaseRarity = false;
+
+            if (
+                packType == ECollectionPackType.DestinyBasicCardPack ||
+                packType == ECollectionPackType.DestinyRareCardPack ||
+                packType == ECollectionPackType.DestinyEpicCardPack ||
+                packType == ECollectionPackType.DestinyLegendaryCardPack
+            )
+            {
+                increaseRarity = true;
+            }
+
             List<WankulCardData> allCards = WankulCardsData.Instance.cards;
 
             if (isTerrain)
@@ -85,7 +99,8 @@ namespace WankulCrazyPlugin.inventory
             float totalDropChance = 0f;
             foreach (var card in seasonalCard)
             {
-                totalDropChance += card.Drop;
+                float increasefactor = increaseRarity ? 5f : 1f;
+                totalDropChance += card.Drop * increasefactor;
             }
 
             float randomValue = Random.Range(0f, totalDropChance);
