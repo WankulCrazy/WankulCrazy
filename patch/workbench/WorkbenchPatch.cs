@@ -15,7 +15,6 @@ namespace WankulCrazyPlugin.patch.workbench
 {
     public class WorkbenchPatch
     {
-        public static int currentExpensionIndex = 0;
         public static int currentRarityIndex = 0;
         public static Dictionary<int, (string label, List<Rarity> rarities, bool isTerrain)> rarityGroups = new Dictionary<int, (string label, List<Rarity>, bool isTerrain)>
         {
@@ -25,29 +24,6 @@ namespace WankulCrazyPlugin.patch.workbench
             { 3, ("Rare", new List<Rarity> { Rarity.R }, false) },
             { 4, ("Terrains", new List<Rarity> {}, true) }
         };
-
-        public static void OpenExpansionScreen(ECardExpansionType initCardExpansion)
-        {
-            Transform tetramonButton = FindChildByPath(CSingleton<CardExpansionSelectScreen>.Instance.m_ScreenGrp.transform, "AnimGrp/Mask/UIGroup/Tetramon_Button");
-            if (tetramonButton != null) {
-                tetramonButton.GetComponentInChildren<TextMeshProUGUI>().text = "Origins";
-            }
-            Transform destinyButton = FindChildByPath(CSingleton<CardExpansionSelectScreen>.Instance.m_ScreenGrp.transform, "AnimGrp/Mask/UIGroup/Destiny_Button");
-            if (destinyButton != null)
-            {
-                destinyButton.GetComponentInChildren<TextMeshProUGUI>().text = "Campus";
-            }
-            Transform ghostButton = FindChildByPath(CSingleton<CardExpansionSelectScreen>.Instance.m_ScreenGrp.transform, "AnimGrp/Mask/UIGroup/Ghost_Button");
-            if (ghostButton != null)
-            {
-                ghostButton.GetComponentInChildren<TextMeshProUGUI>().text = "Battle";
-            }
-        }
-
-        public static void OnExpansionPressButton(int index)
-        {
-            currentExpensionIndex = index;
-        }
 
 
         public static void OpenRarityScreen(ERarity initCardRarity)
@@ -90,7 +66,7 @@ namespace WankulCrazyPlugin.patch.workbench
 
         public static void OnCardExpansionUpdated(WorkbenchUIScreen __instance)
         {
-            __instance.m_CardExpansionText.text = SeasonsContainer.Seasons[(Season)currentExpensionIndex];
+            __instance.m_CardExpansionText.text = SeasonsContainer.Seasons[(Season)ExpansionScreen.currentExpensionIndex];
         }
 
         public static void OnRarityLimitUpdated(WorkbenchUIScreen __instance)
@@ -100,7 +76,7 @@ namespace WankulCrazyPlugin.patch.workbench
 
         public static void OpenWorkBenchScreen(WorkbenchUIScreen __instance)
         {
-            WorkbenchUIScreen.Instance.m_CardExpansionText.text = SeasonsContainer.Seasons[(Season)currentExpensionIndex];
+            WorkbenchUIScreen.Instance.m_CardExpansionText.text = SeasonsContainer.Seasons[(Season)ExpansionScreen.currentExpensionIndex];
             WorkbenchUIScreen.Instance.m_RarityLimitText.text = rarityGroups[currentRarityIndex].label;
             WorkbenchUIScreen.Instance.m_SliderPriceLimit.maxValue = 30 * 100;
             WorkbenchUIScreen.Instance.m_PriceLimitMaxText.text = (30).ToString("0.00");
@@ -120,7 +96,7 @@ namespace WankulCrazyPlugin.patch.workbench
 
 
             Season[] seasons = (Season[])Enum.GetValues(typeof(Season));
-            Season currentSeason = seasons[currentExpensionIndex];
+            Season currentSeason = seasons[ExpansionScreen.currentExpensionIndex];
             List<Rarity> currentRarities = rarityGroups[currentRarityIndex].rarities;
             bool isTerrain = rarityGroups[currentRarityIndex].isTerrain;
 

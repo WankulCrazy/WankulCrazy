@@ -65,8 +65,20 @@ public class Plugin : BaseUnityPlugin
         harmony.Patch(originalMethod2, postfix: new HarmonyMethod(patchMethod2));
 
         MethodInfo original_InitCardPhone = AccessTools.Method(typeof(CheckPricePanelUI), "InitCard");
-        MethodInfo patch_InitCardPhone = AccessTools.Method(typeof(ReplacingCards), "InitCard");
-        harmony.Patch(original_InitCardPhone, postfix: new HarmonyMethod(patch_InitCardPhone));
+        MethodInfo patch_InitCardPhone = AccessTools.Method(typeof(CheckPriceUI), "CheckPricePanelInitCard");
+        harmony.Patch(original_InitCardPhone, prefix: new HarmonyMethod(patch_InitCardPhone));
+
+        MethodInfo original_EvaluateItemPanelUI = AccessTools.Method(typeof(CheckPriceScreen), "EvaluateCardPanelUI");
+        MethodInfo patch_EvaluateItemPanelUI = AccessTools.Method(typeof(CheckPriceUI), "EvaluateCardPanelUI");
+        harmony.Patch(original_EvaluateItemPanelUI, prefix: new HarmonyMethod(patch_EvaluateItemPanelUI));
+        
+        MethodInfo original_OnPressOpenCardPriceGraph = AccessTools.Method(typeof(CheckPriceScreen), "OnPressOpenCardPriceGraph");
+        MethodInfo patch_OnPressOpenCardPriceGraph = AccessTools.Method(typeof(CheckPriceUI), "OnPressOpenCardPriceGraph");
+        harmony.Patch(original_OnPressOpenCardPriceGraph, prefix: new HarmonyMethod(patch_OnPressOpenCardPriceGraph));
+
+        MethodInfo original_ShowCardPriceChart = AccessTools.Method(typeof(ItemPriceGraphScreen), "ShowCardPriceChart");
+        MethodInfo patch_ShowCardPriceChart = AccessTools.Method(typeof(CheckPriceUI), "ShowCardPriceChart");
+        harmony.Patch(original_ShowCardPriceChart, prefix: new HarmonyMethod(patch_ShowCardPriceChart));
 
         MethodInfo original_AddCard = AccessTools.Method(typeof(CPlayerData), "AddCard");
         MethodInfo patch_AddCard = AccessTools.Method(typeof(Inventory), "AddCard");
@@ -95,11 +107,11 @@ public class Plugin : BaseUnityPlugin
 
 
         MethodInfo original_ExpansionOpenScreen = AccessTools.Method(typeof(CardExpansionSelectScreen), "OpenScreen");
-        MethodInfo patch_ExpansionOpenScreen = AccessTools.Method(typeof(patch.workbench.WorkbenchPatch), "OpenExpansionScreen");
+        MethodInfo patch_ExpansionOpenScreen = AccessTools.Method(typeof(ExpansionScreen), "OpenExpansionScreen");
         harmony.Patch(original_ExpansionOpenScreen, postfix: new HarmonyMethod(patch_ExpansionOpenScreen));
 
         MethodInfo original_ExpansionPressButton = AccessTools.Method(typeof(CardExpansionSelectScreen), "OnPressButton");
-        MethodInfo patch_ExpansionPressButton = AccessTools.Method(typeof(patch.workbench.WorkbenchPatch), "OnExpansionPressButton");
+        MethodInfo patch_ExpansionPressButton = AccessTools.Method(typeof(ExpansionScreen), "OnExpansionPressButton");
         harmony.Patch(original_ExpansionPressButton, prefix: new HarmonyMethod(patch_ExpansionPressButton));
 
         MethodInfo original_CardExpansionUpdated = AccessTools.Method(typeof(WorkbenchUIScreen), "OnCardExpansionUpdated");

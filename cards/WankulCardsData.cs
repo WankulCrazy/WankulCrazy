@@ -256,6 +256,16 @@ namespace WankulCrazyPlugin.cards
             return experience;
         }
 
+        public static int GetTotalCardsCount()
+        {
+            return Instance.cards.Count;
+        }
+
+        public static List<WankulCardData> GetCardsFromSeason(Season season)
+        {
+            return Instance.cards.FindAll(wankulCard => wankulCard.Season == season);
+        }
+
         public static WankulCardData GetAJETER()
         {
             return WankulCardsData.Instance.cards.Find(wankulCard => wankulCard is SpecialCardData special && special.Special == Specials.AJETER);
