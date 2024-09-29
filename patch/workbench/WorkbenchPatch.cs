@@ -17,13 +17,13 @@ namespace WankulCrazyPlugin.patch.workbench
     {
         public static int currentExpensionIndex = 0;
         public static int currentRarityIndex = 0;
-        public static Dictionary<int, (string label, List<Rarity> rarities)> rarityGroups = new Dictionary<int, (string label, List<Rarity>)>
+        public static Dictionary<int, (string label, List<Rarity> rarities, bool isTerrain)> rarityGroups = new Dictionary<int, (string label, List<Rarity>, bool isTerrain)>
         {
-            { 0, ("Toute rareté", new List<Rarity>((Rarity[])Enum.GetValues(typeof(Rarity)))) },
-            { 1, ("Commune et Peu Commune", new List<Rarity> { Rarity.C, Rarity.UC }) },
-            { 2, ("Rare", new List<Rarity> { Rarity.R }) },
-            { 3, ("Ultra rare 1/2", new List<Rarity> { Rarity.UR1, Rarity.UR2 }) },
-            { 4, ("Légendaire Or/Argent/Bronze", new List<Rarity> { Rarity.LO, Rarity.LA, Rarity.LB }) }
+            { 0, ("Toute Rareté", new List<Rarity>((Rarity[])Enum.GetValues(typeof(Rarity))), false) },
+            { 1, ("Commune", new List<Rarity> { Rarity.C }, false) },
+            { 2, ("Peu Commune", new List<Rarity> { Rarity.UC }, false) },
+            { 3, ("Rare", new List<Rarity> { Rarity.R }, false) },
+            { 4, ("Terrains", new List<Rarity> {}, true) }
         };
 
         public static void OpenExpansionScreen(ECardExpansionType initCardExpansion)
@@ -102,9 +102,8 @@ namespace WankulCrazyPlugin.patch.workbench
         {
             WorkbenchUIScreen.Instance.m_CardExpansionText.text = SeasonsContainer.Seasons[(Season)currentExpensionIndex];
             WorkbenchUIScreen.Instance.m_RarityLimitText.text = rarityGroups[currentRarityIndex].label;
-            float averagePrice = WankulInventory.GetAveragePrice();
-            WorkbenchUIScreen.Instance.m_SliderPriceLimit.maxValue = averagePrice * 100;
-            WorkbenchUIScreen.Instance.m_PriceLimitMaxText.text = averagePrice.ToString("0.00");
+            WorkbenchUIScreen.Instance.m_SliderPriceLimit.maxValue = 30 * 100;
+            WorkbenchUIScreen.Instance.m_PriceLimitMaxText.text = (30).ToString("0.00");
         }
 
         public static bool RunBundleCardBulkFunction(WorkbenchUIScreen __instance)
@@ -123,20 +122,19 @@ namespace WankulCrazyPlugin.patch.workbench
             Season[] seasons = (Season[])Enum.GetValues(typeof(Season));
             Season currentSeason = seasons[currentExpensionIndex];
             List<Rarity> currentRarities = rarityGroups[currentRarityIndex].rarities;
+            bool isTerrain = rarityGroups[currentRarityIndex].isTerrain;
 
             Dictionary<int, (WankulCardData wankulcard, CardData card, int amount)> wankulCards = WankulInventory.GetCardsBySeason(currentSeason);
 
             Dictionary<int, (EffigyCardData wankulcard, CardData card, int amount)> effigyCards = wankulCards
-                .Where(card => (card.Value.wankulcard is EffigyCardData && card.Value.wankulcard.MarketPrice < (sliderPriceLimit.value/100) && card.Value.amount > sliderMinCard.value))
+                .Where(card => (card.Value.wankulcard is EffigyCardData && card.Value.wankulcard.MarketPrice < (sliderPriceLimit.value) && card.Value.amount > sliderMinCard.value))
                 .ToDictionary(card => card.Key, card => (card.Value.wankulcard as EffigyCardData, card.Value.card, card.Value.amount));
             effigyCards = effigyCards.Where(card => currentRarities.Contains(card.Value.wankulcard.Rarity)).ToDictionary(card => card.Key, card => card.Value);
 
             Dictionary<int, (TerrainCardData wankulcard, CardData card, int amount)> terrainCards = wankulCards
-                .Where(card => (card.Value.wankulcard is TerrainCardData && card.Value.wankulcard.MarketPrice < (sliderPriceLimit.value/100) && card.Value.amount > sliderMinCard.value))
+                .Where(card => (card.Value.wankulcard is TerrainCardData && card.Value.wankulcard.MarketPrice < (sliderPriceLimit.value) && card.Value.amount > sliderMinCard.value))
                 .ToDictionary(card => card.Key, card => (card.Value.wankulcard as TerrainCardData, card.Value.card, card.Value.amount));
 
-            int terrainAmount = 0;
-            int maxTerrainAmount = 1;
             int totalSelectedAmount = 0;
             int maxSelectedAmount = 10;
             int totalEffigyAmount = effigyCards.Sum(card => card.Value.amount);
@@ -149,7 +147,7 @@ namespace WankulCrazyPlugin.patch.workbench
             Dictionary<int, (WankulCardData wankulcard, CardData card, int amount)> SelectedCards = new Dictionary<int, (WankulCardData wankulcard, CardData card, int amount)>();
             List<CardData> selectedCardsData = new List<CardData>();
 
-            if (totalTerrainAmount < 1 && totalEffigyAmount < 9)
+            if ((isTerrain && totalTerrainAmount < 10) || (!isTerrain && totalEffigyAmount < 10))
             {
                 sliderPriceLimit.interactable = true;
                 sliderMinCard.interactable = true;
@@ -161,7 +159,7 @@ namespace WankulCrazyPlugin.patch.workbench
             int tests = 0;
             while (totalSelectedAmount < maxSelectedAmount)
             {
-                if (terrainAmount < maxTerrainAmount && terrainCards.Count > 0)
+                if (isTerrain)
                 {
                     int randomTerrainIndex = UnityEngine.Random.Range(0, terrainCards.Count);
                     KeyValuePair<int, (TerrainCardData wankulcard, CardData card, int amount)> randomTerrain = terrainCards.ElementAt(randomTerrainIndex);
