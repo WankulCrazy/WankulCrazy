@@ -7,7 +7,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Merci d'avoir pris le temps de de reporter un bug
+        Merci d'avoir pris le temps de reporter un bug
   - type: textarea
     id: what-happened
     attributes:
