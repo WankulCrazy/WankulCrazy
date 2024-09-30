@@ -16,7 +16,6 @@ body:
       label: Que s'est-t-il passé ?
       description: Qu\'aurait-t-il dû se passer ?
       placeholder: Dites nous ce que vous voyer !
-      value: "Wow un bug !"
     validations:
       required: true
   - type: dropdown
