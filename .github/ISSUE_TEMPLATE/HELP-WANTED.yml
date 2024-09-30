@@ -1,0 +1,18 @@
+name: Help Wanted
+description: Dites nous comment vous aider.
+title: "[Help]: "
+labels: ["help wanted"]
+projects: ["WankulCrazy"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Nous sommes là pour aider ! Vous n'êtes pas seul !
+  - type: textarea
+    id: help
+    attributes:
+      label: Comment pouvons-nous vous aider ?
+      description: Exprimez-nous clairement votre problème
+      placeholder: Exprimez-nous clairement votre problème
+    validations:
+      required: true
