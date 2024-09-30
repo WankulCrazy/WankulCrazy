@@ -45,26 +45,33 @@ namespace WankulCrazyPlugin.patch
                 __instance.m_ExpansionBtnList[3].gameObject.SetActive(true);
                 __instance.m_ExpansionBtnList[3].GetComponentInChildren<TextMeshProUGUI>().text = SeasonsContainer.Seasons[Season.S03];
 
-                // Calculer l'espacement vertical constant entre les boutons
-                float buttonHeight = __instance.m_ExpansionBtnList[3].GetComponent<RectTransform>().sizeDelta.y;
                 // Utiliser un facteur pour espacer (par exemple 1.5x la hauteur du bouton)
                 float verticalSpacing = __instance.m_ExpansionBtnList[2].GetComponent<RectTransform>().anchoredPosition.y - __instance.m_ExpansionBtnList[3].GetComponent<RectTransform>().anchoredPosition.y;
-
                 // Positionner le 5ème bouton en dessous du 4ème, avec un espacement cohérent
-                __instance.m_ExpansionBtnList[4].gameObject.SetActive(true);
                 __instance.m_ExpansionBtnList[4].GetComponent<RectTransform>().anchoredPosition = new Vector2(
                     __instance.m_ExpansionBtnList[3].GetComponent<RectTransform>().anchoredPosition.x,
                     __instance.m_ExpansionBtnList[3].GetComponent<RectTransform>().anchoredPosition.y - verticalSpacing  // Espacement vertical
                 );
-
                 // Changer le texte du 5ème bouton
                 __instance.m_ExpansionBtnList[4].GetComponentInChildren<TextMeshProUGUI>().text = SeasonsContainer.Seasons[Season.HS];
+                __instance.m_ExpansionBtnList[4].gameObject.SetActive(true);
 
                 __instance.m_SortAlbumBtnList[2].GetComponentInChildren<TextMeshProUGUI>().text = "Prix";
                 __instance.m_SortAlbumBtnList[1].GetComponentInChildren<TextMeshProUGUI>().text = "Rareté";
                 __instance.m_SortAlbumBtnList[0].GetComponentInChildren<TextMeshProUGUI>().text = "Numéro de Carte";
                 __instance.m_SortAlbumBtnList[3].GetComponentInChildren<TextMeshProUGUI>().text = "Quantité";
-                __instance.m_SortAlbumBtnList[4].gameObject.SetActive(false);
+
+
+                // Utiliser un facteur pour espacer (par exemple 1.5x la hauteur du bouton)
+                float verticalSpacingSort = __instance.m_SortAlbumBtnList[3].GetComponent<RectTransform>().anchoredPosition.y - __instance.m_SortAlbumBtnList[3].GetComponent<RectTransform>().anchoredPosition.y;
+                // Positionner le 5ème bouton en dessous du 4ème, avec un espacement cohérent
+                __instance.m_SortAlbumBtnList[4].GetComponent<RectTransform>().anchoredPosition = new Vector2(
+                    __instance.m_SortAlbumBtnList[3].GetComponent<RectTransform>().anchoredPosition.x,
+                    __instance.m_SortAlbumBtnList[3].GetComponent<RectTransform>().anchoredPosition.y - verticalSpacingSort  // Espacement vertical
+                );
+                __instance.m_SortAlbumBtnList[4].GetComponentInChildren<TextMeshProUGUI>().text = "Doublon";
+                __instance.m_SortAlbumBtnList[4].gameObject.SetActive(true);
+
                 __instance.m_SortAlbumBtnList[5].gameObject.SetActive(false);
                 __instance.m_SortAlbumBtnList[6].gameObject.SetActive(false);
 
@@ -123,6 +130,13 @@ namespace WankulCrazyPlugin.patch
                     currentSortType = SortType.Amount;
                     __instance.OnPressSwitchSortingMethod(3);
                     currentGameSortMethod = 3;
+                });
+
+                __instance.m_SortAlbumBtnList[4].GetComponentInChildren<Button>().onClick.AddListener(() =>
+                {
+                    currentSortType = SortType.Double;
+                    __instance.OnPressSwitchSortingMethod(4);
+                    currentGameSortMethod = 4;
                 });
 
                 // Marquer l'initialisation comme terminée
@@ -210,6 +224,20 @@ namespace WankulCrazyPlugin.patch
                 .ToList();
         }
 
+        public static void SortByDouble()
+        {
+            SortedCardIndies.Clear();
+
+            Dictionary<int, (WankulCardData wankulcard, CardData card, int amount)> wankulCards = GetWankulCardsBySeason(currentSeason);
+
+            SortedCardIndies = wankulCards
+                .Select((card) => new { card })
+                .Where(x => x.card.Value.amount > 1)
+                .OrderByDescending(x => x.card.Value.wankulcard.MarketPrice)
+                .Select(x => x.card.Value.wankulcard.Index)
+                .ToList();
+        }
+
         public static void UpdateBinderAllCardUI(int binderIndex, int pageIndex, ref int ___m_MaxIndex, CollectionBinderFlipAnimCtrl __instance)
         {
             switch (currentSortType)
@@ -225,6 +253,9 @@ namespace WankulCrazyPlugin.patch
                     break;
                 case SortType.Amount:
                     SortByAmount();
+                    break;
+                case SortType.Double:
+                    SortByDouble();
                     break;
             }
 
