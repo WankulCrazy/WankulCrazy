@@ -1,8 +1,8 @@
 name: Bug Report
-description: File a bug report.
+description: Informez nous d\'un bug.
 title: "[Bug]: "
-labels: ["bug", "triage"]
-projects: ["octo-org/1", "octo-org/44"]
+labels: ["bug"]
+projects: ["WankulCrazy"]
 assignees:
   - octocat
 body:
