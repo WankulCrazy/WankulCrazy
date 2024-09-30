@@ -36,7 +36,7 @@ Pour générer le projet il vous faudra suivre ces étapes.
    git clone https://github.com/WankulCrazy/WankulCrazy.git
    ```
 2. Télécharger les textures<br>
-   Téléchargez le dernier WankulCrazyData-vX.X.X dans les release (on a été victime de notre succès, le dropbox de l'ancien script downloadAssets.ps1 a été fermé).
+   Téléchargez le dernier WankulCrazyData-vX.X.X dans les releases (on a été victime de notre succès, le dropbox de l'ancien script downloadAssets.ps1 a été fermé).
    Décompressez ensuite le dossier data à la racine du projet git.
 4. Générer<br>
    Lancez la génération du projet depuis visual studio avec le preset ReleaseNoDeps
