@@ -23,7 +23,7 @@ body:
     id: version
     attributes:
       label: Version
-      description: What version of our software are you running?
+      description: Quel version du mod était utilisée ?
       options:
         - 1.0.1 (Latest)
         - 1.0.0
