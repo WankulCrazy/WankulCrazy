@@ -3,8 +3,6 @@ description: Informez nous d'un bug.
 title: "[Bug]: "
 labels: ["bug"]
 projects: ["WankulCrazy"]
-assignees:
-  - octocat
 body:
   - type: markdown
     attributes:
