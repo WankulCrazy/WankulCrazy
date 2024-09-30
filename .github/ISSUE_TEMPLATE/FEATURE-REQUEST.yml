@@ -1,0 +1,18 @@
+name: Feature Request
+description: Proposez nous un développement.
+title: "[Feat]: "
+labels: ["feat"]
+projects: ["WankulCrazy"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci d'avoir pris le temps de propser une nouvelle feature
+  - type: textarea
+    id: feature
+    attributes:
+      label: Que souhaiteriez-vous voir dans le mod ?
+      description: Que souhaiteriez-vous voir dans le mod ?
+      placeholder: Dites nous ce que vous voulez !
+    validations:
+      required: true
