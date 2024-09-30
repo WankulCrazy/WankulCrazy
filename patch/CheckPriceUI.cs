@@ -197,18 +197,18 @@ namespace WankulCrazyPlugin.patch
         public static bool ShowCardPriceChart(int cardIndex, ECardExpansionType expansionType, bool isDestiny, ItemPriceGraphScreen __instance)
         {
             __instance.m_CurrentScaleLineIndex = 0;
-            List<float> pastCardPricePercentChange = CPlayerData.GetPastCardPricePercentChange(cardIndex, expansionType, isDestiny);
+            WankulCardData wankulCardData = wankulCardsSet[cardIndex];
             List<float> list = new List<float>();
-            //for (int i = 0; i < pastCardPricePercentChange.Count; i++)
-            //{
-            //    list.Add(CPlayerData.GetCardMarketPriceCustomPercent(cardIndex, expansionType, isDestiny, pastCardPricePercentChange[i]));
-            //}
+
+            for (int i = 0; i < wankulCardData.PastPrices.Count; i++)
+            {
+                list.Add(wankulCardData.PastPrices[i]);
+            }
 
 
             MethodInfo EvaluatePriceChartMethod = __instance.GetType().GetMethod("EvaluatePriceChart", BindingFlags.Instance | BindingFlags.NonPublic);
             EvaluatePriceChartMethod.Invoke(__instance, new object[] { list });
 
-            WankulCardData wankulCardData = wankulCardsSet[cardIndex];
             CardData cardData = WankulCardsData.Instance.GetCardDataFromWankulCardData(wankulCardData);
             if (cardData == null)
             {

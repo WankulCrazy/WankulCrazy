@@ -13,9 +13,9 @@ namespace WankulCrazyPlugin.utils
     public class Save
     {
         public Dictionary<string, int> associations = [];
-        public Dictionary<int, (int WankulCardIndex, string cardkey, int amount)> wankulCards = [];
+        public Dictionary<int, (int WankulCardIndex, string cardkey, int amount, List<float> pastPrices)> wankulCards = [];
         public bool savedebug = false;
-        public Save(Dictionary<string, int> associations, Dictionary<int, (int WankulCardIndex, string cardkey, int amount)> wankulCards, bool savedebug = false)
+        public Save(Dictionary<string, int> associations, Dictionary<int, (int WankulCardIndex, string cardkey, int amount, List<float> pastPrices)> wankulCards, bool savedebug = false)
         {
             this.associations = associations;
             this.wankulCards = wankulCards;
@@ -44,11 +44,11 @@ namespace WankulCrazyPlugin.utils
                 knewAssociations.Add(association.Key, association.Value.Index);
             }
 
-            Dictionary<int, (int WankulCardIndex, string cardkey, int amount)> wankulCards = [];
+            Dictionary<int, (int WankulCardIndex, string cardkey, int amount, List<float> pastPrices)> wankulCards = [];
             foreach (var item in WankulInventory.Instance.wankulCards)
             {
                 string cardkey = $"{item.Value.card.monsterType}_{item.Value.card.borderType}_{item.Value.card.expansionType}";
-                wankulCards[item.Key] = (item.Value.wankulcard.Index, cardkey, item.Value.amount);
+                wankulCards[item.Key] = (item.Value.wankulcard.Index, cardkey, item.Value.amount, item.Value.wankulcard.PastPrices);
             }
 
             Save save = new(knewAssociations, wankulCards, false);
@@ -94,7 +94,7 @@ namespace WankulCrazyPlugin.utils
                 CPlayerData.m_CardCollectedListMegabot.Clear();
                 CPlayerData.m_CardCollectedListFantasyRPG.Clear();
                 CPlayerData.m_CardCollectedListCatJob.Clear();
-                Dictionary<int, (int WankulCardIndex, string cardkey, int amount)> wankulCardsToDebug = save.wankulCards;
+                Dictionary<int, (int WankulCardIndex, string cardkey, int amount, List<float> pastPrices)> wankulCardsToDebug = save.wankulCards;
                 List<CardData> debugCardsData = [];
                 int debugIndex = 0;
                 foreach (var item in wankulCardsToDebug)
@@ -124,7 +124,7 @@ namespace WankulCrazyPlugin.utils
                 WankulCardsData.Instance.association[association.Key] = card;
             }
 
-            Dictionary<int, (int WankulCardIndex, string cardkey, int amount)> wankulCards = save.wankulCards;
+            Dictionary<int, (int WankulCardIndex, string cardkey, int amount, List<float> pastPrices)> wankulCards = save.wankulCards;
             foreach (var item in wankulCards)
             {
                 WankulCardData wankulCardData =WankulCardsData.Instance.cards.Find(card => card.Index == item.Value.WankulCardIndex);

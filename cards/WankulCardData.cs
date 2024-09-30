@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using WankulCrazyPlugin.patch;
 
@@ -6,6 +7,8 @@ namespace WankulCrazyPlugin.cards
 {
     public class WankulCardData
     {
+        public static float timeToUpdatePrice = 20f;
+
         public int Index;
 
         public string Number;
@@ -26,6 +29,8 @@ namespace WankulCrazyPlugin.cards
 
         public float Drop;
 
+        public List<float> PastPrices = new List<float>();
+
         private DateTime lastPriceUpdate;
 
         private float marketPrice;
@@ -35,7 +40,7 @@ namespace WankulCrazyPlugin.cards
             get
             {
                 // Met à jour le prix si plus de 20 minutes se sont écoulées
-                if ((DateTime.Now - lastPriceUpdate).TotalMinutes > 20)
+                if ((DateTime.Now - lastPriceUpdate).TotalMinutes > WankulCardData.timeToUpdatePrice)
                 {
                     CardPrice.UpdateMarketPrice(this);
                 }
@@ -44,6 +49,12 @@ namespace WankulCrazyPlugin.cards
             set
             {
                 // Permet également de définir manuellement le prix du marché
+                PastPrices.Add(marketPrice);
+                if (PastPrices.Count > 30)
+                {
+                    PastPrices.RemoveAt(0);
+                }
+
                 marketPrice = value;
                 lastPriceUpdate = DateTime.Now;
             }
