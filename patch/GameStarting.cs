@@ -5,18 +5,25 @@ namespace WankulCrazyPlugin.patch;
 
 public class GameStarting
 {
-    public static void Start()
+    public static void OnLevelFinishedLoading(CGameManager __instance)
     {
-        if (WankulCardsData.Instance.cards.Count == 0)
-        {
-            PatchTexturesImporter.ReplaceGameTextures("shared0");
-            // Import JSON data
-            JsonImporter.ImportJson();
-            Plugin.Logger.LogInfo("JSON data imported");
+        if (__instance.m_IsGameLevel) {
+            PatchTexturesImporter.ReplaceGameTextures("shared1");
         }
         else
         {
-            Plugin.Logger.LogInfo("JSON data already imported");
+            PatchTexturesImporter.ReplaceGameTextures("shared0");
+            if (WankulCardsData.Instance.cards.Count == 0)
+            {
+                PatchTexturesImporter.ReplaceGameTextures("shared0");
+                // Import JSON data
+                JsonImporter.ImportJson();
+                Plugin.Logger.LogInfo("JSON data imported");
+            }
+            else
+            {
+                Plugin.Logger.LogInfo("JSON data already imported");
+            }
         }
     }
 }

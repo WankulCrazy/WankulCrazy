@@ -13,7 +13,6 @@ namespace WankulCrazyPlugin.patch
 
         public static void Load()
         {
-            PatchTexturesImporter.ReplaceGameTextures("shared1");
             SavesManager.LoadCardsAssociations();
         }
     }

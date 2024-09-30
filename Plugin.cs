@@ -21,9 +21,9 @@ public class Plugin : BaseUnityPlugin
 
         Harmony harmony = new Harmony(PluginInfo.PLUGIN_GUID);
 
-        MethodInfo original_start = AccessTools.Method(typeof(TitleScreen), "Start");
-        MethodInfo patch_start = AccessTools.Method(typeof(GameStarting), "Start");
-        harmony.Patch(original_start, new HarmonyMethod(patch_start));
+        MethodInfo original_OnLevelFinishedLoading = AccessTools.Method(typeof(CGameManager), "OnLevelFinishedLoading");
+        MethodInfo patch_OnLevelFinishedLoading = AccessTools.Method(typeof(GameStarting), "OnLevelFinishedLoading");
+        harmony.Patch(original_OnLevelFinishedLoading, postfix:new HarmonyMethod(patch_OnLevelFinishedLoading));
 
         MethodInfo original_setcardui = AccessTools.Method(typeof(CardUI), "SetCardUI");
         MethodInfo patch_setcarduiprefix = AccessTools.Method(typeof(ReplacingCards), "SetCardUIPrefix");
