@@ -36,13 +36,11 @@ Pour générer le projet il vous faudra suivre ces étapes.
    git clone https://github.com/WankulCrazy/WankulCrazy.git
    ```
 2. Télécharger les textures<br>
-   Lancez le script suivant dans powershell
-   ```
-   downloadAssets.ps1
-   ```
-3. Générer<br>
+   Téléchargez le dernier WankulCrazyData-vX.X.X dans les releases (on a été victime de notre succès, le dropbox de l'ancien script downloadAssets.ps1 a été fermé).
+   Décompressez ensuite le dossier data à la racine du projet git.
+4. Générer<br>
    Lancez la génération du projet depuis visual studio avec le preset ReleaseNoDeps
-4. Lancer le mod<br>
+5. Lancer le mod<br>
    Copiez le contenu du dossier dist généré dans le dossier plugins de BepInEx.
 
 

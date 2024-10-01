@@ -5,6 +5,7 @@ namespace WankulCrazyPlugin.cards
         Price,
         Rarity,
         Number,
-        Amount
+        Amount,
+        Double,
     }
 }
