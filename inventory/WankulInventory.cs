@@ -143,7 +143,7 @@ namespace WankulCrazyPlugin.inventory
                     {
                         if (effigyCard.Rarity >= Rarity.PGW23)
                         {
-                            increaseFactor = 20;
+                            increaseFactor = 3;
                         }
                     }
                 }
@@ -186,7 +186,7 @@ namespace WankulCrazyPlugin.inventory
                     {
                         if (effigyCard.Rarity >= Rarity.PGW23)
                         {
-                            increaseFactor = 20;
+                            increaseFactor = 3;
                         }
                     }
                 }
