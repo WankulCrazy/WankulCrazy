@@ -82,16 +82,8 @@ namespace WankulCrazyPlugin.inventory
                 List<WankulCardData> specialCardsData = seasonalCard
                     .FindAll(card => card is SpecialCardData);
 
-                if (increaseRarity)
-                {
-                    seasonalCard = effigyCardsData.FindAll(card => card.Rarity > Rarity.R)
-                        .ConvertAll(card => (WankulCardData)card);
-                }
-                else
-                {
-                    seasonalCard = effigyCardsData.FindAll(card => card.Rarity >= Rarity.R)
-                        .ConvertAll(card => (WankulCardData)card);
-                }
+                seasonalCard = effigyCardsData.FindAll(card => card.Rarity >= Rarity.R)
+                    .ConvertAll(card => (WankulCardData)card);
 
                 seasonalCard.AddRange(specialCardsData);
             }
@@ -124,12 +116,12 @@ namespace WankulCrazyPlugin.inventory
                                 break;
                             case Rarity.UR1:
                             case Rarity.UR2:
-                                increaseFactor = 3f;
+                                increaseFactor = 5f;
                                 break;
                             case Rarity.LB:
                             case Rarity.LA:
                             case Rarity.LO:
-                                increaseFactor = 5f;
+                                increaseFactor = 10f;
                                 break;
                             default:
                                 increaseFactor = 1f;
@@ -143,7 +135,7 @@ namespace WankulCrazyPlugin.inventory
                     {
                         if (effigyCard.Rarity >= Rarity.PGW23)
                         {
-                            increaseFactor = 3;
+                            increaseFactor = 10;
                         }
                     }
                 }
@@ -167,12 +159,12 @@ namespace WankulCrazyPlugin.inventory
                                 break;
                             case Rarity.UR1:
                             case Rarity.UR2:
-                                increaseFactor = 3f;
+                                increaseFactor = 5f;
                                 break;
                             case Rarity.LB:
                             case Rarity.LA:
                             case Rarity.LO:
-                                increaseFactor = 5f;
+                                increaseFactor = 10f;
                                 break;
                             default:
                                 increaseFactor = 1f;
@@ -186,7 +178,7 @@ namespace WankulCrazyPlugin.inventory
                     {
                         if (effigyCard.Rarity >= Rarity.PGW23)
                         {
-                            increaseFactor = 3;
+                            increaseFactor = 10;
                         }
                     }
                 }
