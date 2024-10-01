@@ -22,15 +22,20 @@ namespace WankulCrazyPlugin.patch
             {
                 return;
             }
+
             WankulCardsData wankulCardsData = WankulCardsData.Instance;
             ___m_CardValueList.Clear();
             totalExpGained = 0;
-            for (int i = 0; i < ___m_RolledCardDataList.Count; i++)
+
+            int boosterSize = ___m_RolledCardDataList.Count;
+            HashSet<WankulCardData> alreadySelectedCards = new HashSet<WankulCardData>();
+
+            for (int i = 0; i < boosterSize; i++)
             {
                 bool isTerrain = i == 0;
-                bool isMinRare = i == ___m_RolledCardDataList.Count - 1;
+                bool isMinRare = i == boosterSize - 1;
+                WankulCardData wankulCard = WankulInventory.DropCard(___m_CollectionPackType, alreadySelectedCards, isTerrain, isMinRare);
                 CardData inGameCard = ___m_RolledCardDataList[i];
-                WankulCardData wankulCard = WankulInventory.DropCard(___m_CollectionPackType, isTerrain, isMinRare);
                 CardData associatedCard = wankulCardsData.GetCardDataFromWankulCardData(wankulCard);
 
                 if (associatedCard == null)
@@ -40,10 +45,13 @@ namespace WankulCrazyPlugin.patch
 
                     inGameCard.isFoil = false;
                     inGameCard.isChampionCard = false;
+
+                    // Vérification de la rareté pour décider si la carte est foil
                     if (wankulCard is EffigyCardData)
                     {
                         EffigyCardData effigyCard = (EffigyCardData)wankulCard;
 
+                        // Si la carte a une rareté de UR1 ou plus, elle devient foil
                         if (effigyCard.Rarity >= Rarity.UR1)
                         {
                             inGameCard.isFoil = true;
@@ -58,9 +66,12 @@ namespace WankulCrazyPlugin.patch
                     ___m_RolledCardDataList[i] = inGameCard;
                 }
 
-                totalExpGained = totalExpGained + WankulCardsData.GetExperienceFromWankulCard(wankulCard);
+                // Calcul de l'XP gagnée
+                totalExpGained += WankulCardsData.GetExperienceFromWankulCard(wankulCard);
+                // Ajout de la valeur de la carte dans la liste des prix
                 ___m_CardValueList.Add(wankulCard.MarketPrice);
             }
         }
+
     }
 }

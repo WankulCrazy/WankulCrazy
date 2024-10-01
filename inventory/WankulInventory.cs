@@ -36,7 +36,7 @@ namespace WankulCrazyPlugin.inventory
 
         }
 
-        public static WankulCardData DropCard(ECollectionPackType packType, bool isTerrain = false, bool isMinRare = false)
+        public static WankulCardData DropCard(ECollectionPackType packType, HashSet<WankulCardData> alreadySelectedCards, bool isTerrain = false, bool isMinRare = false)
         {
             bool increaseRarity = false;
             Season season = ConvertPackTypeToSeason(packType);
@@ -89,7 +89,6 @@ namespace WankulCrazyPlugin.inventory
             }
             else if (!isTerrain && !isMinRare)
             {
-                // Filtrer toutes les cartes avec une rareté inférieure à Rare, pas seulement les EffigyCardData
                 seasonalCard = seasonalCard.FindAll(card =>
                     !(card is EffigyCardData effigyCard && effigyCard.Rarity >= Rarity.R)
                 );
@@ -98,6 +97,15 @@ namespace WankulCrazyPlugin.inventory
             if (seasonalCard.Count == 0)
             {
                 Plugin.Logger.LogError("No available cards to drop");
+                return null;
+            }
+
+            // Filtrer les cartes déjà sélectionnées pour éviter les doublons
+            seasonalCard = seasonalCard.Where(card => !alreadySelectedCards.Contains(card)).ToList();
+
+            if (seasonalCard.Count == 0)
+            {
+                Plugin.Logger.LogError("No available unique cards to drop");
                 return null;
             }
 
@@ -186,15 +194,16 @@ namespace WankulCrazyPlugin.inventory
                 cumulativeDropChance += card.Drop * increaseFactor;
                 if (randomValue <= cumulativeDropChance)
                 {
-
+                    // Ajouter la carte sélectionnée aux cartes déjà sélectionnées pour éviter un doublon
+                    alreadySelectedCards.Add(card);
                     return card;
                 }
             }
 
-            // En cas d'erreur, retourner null
             Plugin.Logger.LogError("Failed to drop a card");
             return null;
         }
+
 
         public static WankulCardData randFromPackType(ECollectionPackType packType)
         {
@@ -215,6 +224,7 @@ namespace WankulCrazyPlugin.inventory
 
             return seasonalCard[randomValue];
         }
+
 
         public static void AddCard(WankulCardData wankulCardData, CardData cardData, int amount)
         {
