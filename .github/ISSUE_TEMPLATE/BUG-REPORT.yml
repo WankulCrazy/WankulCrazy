@@ -22,7 +22,10 @@ body:
       label: Version
       description: Quel version du mod était utilisée ?
       options:
-        - 1.0.1 (Latest)
+        - 1.0.4 (Latest)
+        - 1.0.3
+        - 1.0.2
+        - 1.0.1
         - 1.0.0
       default: 0
     validations:
