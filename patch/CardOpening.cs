@@ -28,7 +28,7 @@ namespace WankulCrazyPlugin.patch
             totalExpGained = 0;
 
             int boosterSize = ___m_RolledCardDataList.Count;
-            HashSet<WankulCardData> alreadySelectedCards = new HashSet<WankulCardData>();
+            List<WankulCardData> alreadySelectedCards = new List<WankulCardData>();
 
             for (int i = 0; i < boosterSize; i++)
             {

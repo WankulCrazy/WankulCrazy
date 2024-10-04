@@ -36,7 +36,7 @@ namespace WankulCrazyPlugin.inventory
 
         }
 
-        public static WankulCardData DropCard(ECollectionPackType packType, HashSet<WankulCardData> alreadySelectedCards, bool isTerrain = false, bool isMinRare = false)
+        public static WankulCardData DropCard(ECollectionPackType packType, List<WankulCardData> alreadySelectedCards, bool isTerrain = false, bool isMinRare = false)
         {
             bool increaseRarity = false;
             Season season = ConvertPackTypeToSeason(packType);
