@@ -4,7 +4,7 @@ using System.Text;
 using UnityEngine.Rendering;
 using UnityEngine;
 
-namespace WankulCrazyPlugin.objmod
+namespace WankulCrazyPlugin.utils.obj
 {
     public class OBJObjectBuilder
     {

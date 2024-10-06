@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Text;
 using UnityEngine;
 
-namespace WankulCrazyPlugin.objmod
+namespace WankulCrazyPlugin.utils.obj
 {
     public static class OBJLoaderHelper
     {

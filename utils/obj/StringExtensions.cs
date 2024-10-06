@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace WankulCrazyPlugin.objmod
+namespace WankulCrazyPlugin.utils.obj
 {
     public static class StringExtensions
     {
