@@ -14,9 +14,4 @@
 /obj/*
 /bin/*
 /dist/*
-/sharedassets1.assets
-/sharedassets0.assets
-/data.zip
-/WankulCrazyData.zip
-/resources.assets
-/WankulCrazyData-v0.0.7.zip
+/WankulCrazyData-*.*
