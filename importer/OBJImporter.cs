@@ -46,7 +46,6 @@ namespace WankulCrazyPlugin.importer
                     foreach (string file in Directory.GetFiles(OBJImporter.path_mes, searchPattern, SearchOption.AllDirectories))
                     {
                         string fileName = Path.GetFileName(file);
-                        Plugin.Logger.LogInfo($"File: {fileName}");
                         string directoryName = Path.GetDirectoryName(file);
                         if (!OBJImporter.filePaths_obj.ContainsKey(fileName))
                             OBJImporter.filePaths_obj.Add(fileName, directoryName + "/");
@@ -107,7 +106,7 @@ namespace WankulCrazyPlugin.importer
                     }
                 }
             }
-            Debug.Log((object)"Meshes cached at start");
+            Plugin.Logger.LogInfo("Meshes cached at start");
         }
 
         private static Mesh GetCachedMesh(string name)
@@ -133,10 +132,10 @@ namespace WankulCrazyPlugin.importer
                         }
                     }
                 }
-                Debug.Log((object)"Custom 3D Objects loaded!");
+                Plugin.Logger.LogInfo("Custom 3D Objects loaded!");
             }
             ReplaceSpriteLists();
-            Debug.Log((object)"Custom Textures loaded!");
+            Plugin.Logger.LogInfo("Custom Textures loaded!");
         }
 
         private static void ReplaceSpriteLists()
