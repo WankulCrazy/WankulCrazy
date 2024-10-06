@@ -8,6 +8,8 @@ using UnityEngine.SceneManagement;
 using WankulCrazyPlugin.utils.obj;
 using WankulCrazyPlugin;
 using UnityEngine.UI;
+using BepInEx;
+using System.Globalization;
 
 namespace WankulCrazyPlugin.importer
 {
@@ -15,10 +17,12 @@ namespace WankulCrazyPlugin.importer
     {
         private static string path_mes = Path.Combine(Plugin.GetPluginPath(), "data", "meshes/");
         private static string path_nam = Path.Combine(Plugin.GetPluginPath(), "data", "names/");
+        private static string path_spr = Path.Combine(Plugin.GetPluginPath(), "data", "sprites/");
         private static MeshFilter[] mesh_list = new MeshFilter[0];
         private static Material[] mat_list = new Material[0];
         private static Image[] image_list = new Image[0];
         public static Dictionary<string, string> filePaths_obj = new Dictionary<string, string>((IEqualityComparer<string>)StringComparer.OrdinalIgnoreCase);
+        public static Dictionary<string, string> filePaths_tex = new Dictionary<string, string>((IEqualityComparer<string>)StringComparer.OrdinalIgnoreCase);
         private static Dictionary<string, Texture2D> cachedTextures = new Dictionary<string, Texture2D>();
         private static Dictionary<string, Mesh> cachedMeshes = new Dictionary<string, Mesh>();
         public static GameObject tempmesh = new GameObject((string)null);
@@ -28,6 +32,8 @@ namespace WankulCrazyPlugin.importer
         {
             if (!Directory.Exists(OBJImporter.path_mes))
                 Directory.CreateDirectory(OBJImporter.path_mes);
+            if(!Directory.Exists(OBJImporter.path_spr))
+                Directory.CreateDirectory(OBJImporter.path_spr);
             if (Directory.Exists(OBJImporter.path_nam))
                 return;
             Directory.CreateDirectory(OBJImporter.path_nam);
@@ -38,6 +44,27 @@ namespace WankulCrazyPlugin.importer
             Plugin.Logger.LogInfo("Loading 3D Objects...");
             checkFolders();
             Plugin.Logger.LogInfo("Checking for .obj files...");
+            try
+            {
+                string[] strArray = new string[2]
+                {
+            "*.png",
+            "*.txt"
+                };
+                foreach (string searchPattern in strArray)
+                {
+                    foreach (string file in Directory.GetFiles(OBJImporter.path_spr, searchPattern, SearchOption.AllDirectories))
+                    {
+                        string fileName = Path.GetFileName(file);
+                        string directoryName = Path.GetDirectoryName(file);
+                        if (!OBJImporter.filePaths_tex.ContainsKey(fileName))
+                            OBJImporter.filePaths_tex.Add(fileName, directoryName + "/");
+                    }
+                }
+            }
+            catch
+            {
+            }
             try
             {
                 string[] strArray = new string[1] { "*.obj" };
@@ -57,8 +84,29 @@ namespace WankulCrazyPlugin.importer
                 Plugin.Logger.LogError("Error while loading .obj files");
             }
             CacheMeshesAtStart();
+            CacheTexturesAtStart();
         }
 
+        private static void CacheTexturesAtStart()
+        {
+            foreach (KeyValuePair<string, string> keyValuePair in OBJImporter.filePaths_tex)
+            {
+                string key = keyValuePair.Key.Replace(".png", "");
+                Texture2D texture2D = !key.ToLower().EndsWith("_n") && !key.ToLower().EndsWith("_normal") && !key.ToLower().EndsWith(" n") ? OBJImporter.LoadPNG(keyValuePair.Value + key + ".png") : OBJImporter.LoadPNG_Bump(keyValuePair.Value + key + ".png");
+                if ((UnityEngine.Object)texture2D != (UnityEngine.Object)null)
+                {
+                    texture2D.Apply(true, true);
+                    OBJImporter.cachedTextures[key] = texture2D;
+                }
+            }
+            Debug.Log((object)"Textures cached at start");
+        }
+
+        private static Texture2D GetCachedTexture(string name)
+        {
+            Texture2D texture2D;
+            return OBJImporter.cachedTextures.TryGetValue(name, out texture2D) ? texture2D : (Texture2D)null;
+        }
 
         private static void CacheMeshesAtStart()
         {
@@ -134,6 +182,22 @@ namespace WankulCrazyPlugin.importer
                 }
                 Plugin.Logger.LogInfo("Custom 3D Objects loaded!");
             }
+            OBJImporter.image_list = UnityEngine.Resources.FindObjectsOfTypeAll<Image>();
+            if (OBJImporter.image_list.Length != 0)
+            {
+                foreach (Image image in OBJImporter.image_list)
+                {
+                    if ((UnityEngine.Object)image != (UnityEngine.Object)null && (UnityEngine.Object)image.sprite != (UnityEngine.Object)null)
+                    {
+                        Texture2D cachedTexture = GetCachedTexture(image.sprite.name);
+                        if ((UnityEngine.Object)cachedTexture != (UnityEngine.Object)null)
+                        {
+                            Sprite sprite = OBJImporter.TextureToSprite(cachedTexture);
+                            image.sprite = sprite;
+                        }
+                    }
+                }
+            }
             ReplaceSpriteLists();
             Plugin.Logger.LogInfo("Custom Textures loaded!");
         }
@@ -198,6 +262,12 @@ namespace WankulCrazyPlugin.importer
                             }
                         }
                     }
+                    Texture2D cachedTexture = GetCachedTexture(icon.name);
+                    if ((UnityEngine.Object)cachedTexture != (UnityEngine.Object)null)
+                    {
+                        Sprite sprite = OBJImporter.TextureToSprite(cachedTexture);
+                        spriteList[index].icon = sprite;
+                    }
                 }
             }
         }
@@ -217,6 +287,35 @@ namespace WankulCrazyPlugin.importer
                     }
                 }
             }
+        }
+
+        public static Texture2D LoadPNG(string filePath)
+        {
+            Texture2D tex = (Texture2D)null;
+            if (File.Exists(filePath))
+            {
+                byte[] data = File.ReadAllBytes(filePath);
+                tex = new Texture2D(2, 2);
+                tex.LoadImage(data);
+            }
+            return tex;
+        }
+
+        public static Texture2D LoadPNG_Bump(string filePath)
+        {
+            Texture2D tex = (Texture2D)null;
+            if (File.Exists(filePath))
+            {
+                byte[] data = File.ReadAllBytes(filePath);
+                tex = new Texture2D(2, 2, UnityEngine.TextureFormat.R8, true, true);
+                tex.LoadImage(data);
+            }
+            return tex;
+        }
+
+        public static Sprite TextureToSprite(Texture2D texture)
+        {
+            return Sprite.Create(texture, new Rect(0.0f, 0.0f, (float)texture.width, (float)texture.height), new Vector2(0.5f, 0.5f), 50f, 0U, SpriteMeshType.FullRect);
         }
     }
 }
