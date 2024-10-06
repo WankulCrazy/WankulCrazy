@@ -13,8 +13,8 @@ namespace WankulCrazyPlugin.importer
 {
     internal class OBJImporter
     {
-        private static string path_mes = Path.Combine(Plugin.GetPluginPath(), "data", "meshes");
-        private static string path_nam = Path.Combine(Plugin.GetPluginPath(), "data", "names");
+        private static string path_mes = Path.Combine(Plugin.GetPluginPath(), "data", "meshes/");
+        private static string path_nam = Path.Combine(Plugin.GetPluginPath(), "data", "names/");
         private static MeshFilter[] mesh_list = new MeshFilter[0];
         private static Material[] mat_list = new Material[0];
         private static Image[] image_list = new Image[0];

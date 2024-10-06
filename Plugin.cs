@@ -12,8 +12,6 @@ namespace WankulCrazyPlugin;
 public class Plugin : BaseUnityPlugin
 {
     internal static new ManualLogSource Logger;
-    private static Plugin Instance;
-
     private void Awake()
     {
         // Plugin startup logic
@@ -97,15 +95,10 @@ public class Plugin : BaseUnityPlugin
         MethodInfo patch_GetIcon = AccessTools.Method(typeof(ReplacingCards), "GetIcon");
         harmony.Patch(original_GetIcon, prefix: new HarmonyMethod(patch_GetIcon));
 
-
         MethodInfo original_OpenSortAlbumScreen = AccessTools.Method(typeof(CollectionBinderUI), "OpenSortAlbumScreen");
         MethodInfo patch_OpenSortAlbumScreenPrefix = AccessTools.Method(typeof(SortUI), "OpenSortAlbumScreenPrefix");
         MethodInfo patch_OpenSortAlbumScreen = AccessTools.Method(typeof(SortUI), "OpenSortAlbumScreen");
         harmony.Patch(original_OpenSortAlbumScreen, postfix: new HarmonyMethod(patch_OpenSortAlbumScreen), prefix: new HarmonyMethod(patch_OpenSortAlbumScreenPrefix));
-
-
-
-
 
         MethodInfo original_ExpansionOpenScreen = AccessTools.Method(typeof(CardExpansionSelectScreen), "OpenScreen");
         MethodInfo patch_ExpansionOpenScreen = AccessTools.Method(typeof(ExpansionScreen), "OpenExpansionScreen");
@@ -138,10 +131,6 @@ public class Plugin : BaseUnityPlugin
         MethodInfo original_RunBundleCardBulkFunction = AccessTools.Method(typeof(WorkbenchUIScreen), "RunBundleCardBulkFunction");
         MethodInfo patch_RunBundleCardBulkFunction = AccessTools.Method(typeof(patch.workbench.WorkbenchPatch), "RunBundleCardBulkFunction");
         harmony.Patch(original_RunBundleCardBulkFunction, prefix: new HarmonyMethod(patch_RunBundleCardBulkFunction));
-
-
-        Plugin.Instance = this;
-        Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), (string)null);
     }
 
     public static string GetPluginPath()
