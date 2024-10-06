@@ -12,7 +12,6 @@ namespace WankulCrazyPlugin;
 public class Plugin : BaseUnityPlugin
 {
     internal static new ManualLogSource Logger;
-
     private void Awake()
     {
         // Plugin startup logic
@@ -23,7 +22,7 @@ public class Plugin : BaseUnityPlugin
 
         MethodInfo original_OnLevelFinishedLoading = AccessTools.Method(typeof(CGameManager), "OnLevelFinishedLoading");
         MethodInfo patch_OnLevelFinishedLoading = AccessTools.Method(typeof(GameStarting), "OnLevelFinishedLoading");
-        harmony.Patch(original_OnLevelFinishedLoading, postfix:new HarmonyMethod(patch_OnLevelFinishedLoading));
+        harmony.Patch(original_OnLevelFinishedLoading, postfix: new HarmonyMethod(patch_OnLevelFinishedLoading));
 
         MethodInfo original_setcardui = AccessTools.Method(typeof(CardUI), "SetCardUI");
         MethodInfo patch_setcarduiprefix = AccessTools.Method(typeof(ReplacingCards), "SetCardUIPrefix");
@@ -71,7 +70,7 @@ public class Plugin : BaseUnityPlugin
         MethodInfo original_EvaluateItemPanelUI = AccessTools.Method(typeof(CheckPriceScreen), "EvaluateCardPanelUI");
         MethodInfo patch_EvaluateItemPanelUI = AccessTools.Method(typeof(CheckPriceUI), "EvaluateCardPanelUI");
         harmony.Patch(original_EvaluateItemPanelUI, prefix: new HarmonyMethod(patch_EvaluateItemPanelUI));
-        
+
         MethodInfo original_OnPressOpenCardPriceGraph = AccessTools.Method(typeof(CheckPriceScreen), "OnPressOpenCardPriceGraph");
         MethodInfo patch_OnPressOpenCardPriceGraph = AccessTools.Method(typeof(CheckPriceUI), "OnPressOpenCardPriceGraph");
         harmony.Patch(original_OnPressOpenCardPriceGraph, prefix: new HarmonyMethod(patch_OnPressOpenCardPriceGraph));
@@ -96,15 +95,10 @@ public class Plugin : BaseUnityPlugin
         MethodInfo patch_GetIcon = AccessTools.Method(typeof(ReplacingCards), "GetIcon");
         harmony.Patch(original_GetIcon, prefix: new HarmonyMethod(patch_GetIcon));
 
-
         MethodInfo original_OpenSortAlbumScreen = AccessTools.Method(typeof(CollectionBinderUI), "OpenSortAlbumScreen");
         MethodInfo patch_OpenSortAlbumScreenPrefix = AccessTools.Method(typeof(SortUI), "OpenSortAlbumScreenPrefix");
         MethodInfo patch_OpenSortAlbumScreen = AccessTools.Method(typeof(SortUI), "OpenSortAlbumScreen");
         harmony.Patch(original_OpenSortAlbumScreen, postfix: new HarmonyMethod(patch_OpenSortAlbumScreen), prefix: new HarmonyMethod(patch_OpenSortAlbumScreenPrefix));
-
-
-
-
 
         MethodInfo original_ExpansionOpenScreen = AccessTools.Method(typeof(CardExpansionSelectScreen), "OpenScreen");
         MethodInfo patch_ExpansionOpenScreen = AccessTools.Method(typeof(ExpansionScreen), "OpenExpansionScreen");
@@ -137,7 +131,6 @@ public class Plugin : BaseUnityPlugin
         MethodInfo original_RunBundleCardBulkFunction = AccessTools.Method(typeof(WorkbenchUIScreen), "RunBundleCardBulkFunction");
         MethodInfo patch_RunBundleCardBulkFunction = AccessTools.Method(typeof(patch.workbench.WorkbenchPatch), "RunBundleCardBulkFunction");
         harmony.Patch(original_RunBundleCardBulkFunction, prefix: new HarmonyMethod(patch_RunBundleCardBulkFunction));
-        
     }
 
     public static string GetPluginPath()

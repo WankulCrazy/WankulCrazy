@@ -9,10 +9,13 @@ public class GameStarting
     {
         if (__instance.m_IsGameLevel) {
             PatchTexturesImporter.ReplaceGameTextures("shared1");
+            OBJImporter.DoReplace();
         }
         else
         {
             PatchTexturesImporter.ReplaceGameTextures("shared0");
+            OBJImporter.InitFiles();
+
             if (WankulCardsData.Instance.cards.Count == 0)
             {
                 PatchTexturesImporter.ReplaceGameTextures("shared0");
