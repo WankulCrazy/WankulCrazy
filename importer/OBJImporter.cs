@@ -8,8 +8,7 @@ using UnityEngine.SceneManagement;
 using WankulCrazyPlugin.utils.obj;
 using WankulCrazyPlugin;
 using UnityEngine.UI;
-using BepInEx;
-using System.Globalization;
+
 
 namespace WankulCrazyPlugin.importer
 {
