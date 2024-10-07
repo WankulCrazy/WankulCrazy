@@ -53,8 +53,8 @@ namespace WankulCrazyPlugin.patch
                     __instance.m_ExpansionBtnList[3].GetComponent<RectTransform>().anchoredPosition.y - verticalSpacing  // Espacement vertical
                 );
                 // Changer le texte du 5ème bouton
-                __instance.m_ExpansionBtnList[4].GetComponentInChildren<TextMeshProUGUI>().text = SeasonsContainer.Seasons[Season.HS];
                 __instance.m_ExpansionBtnList[4].gameObject.SetActive(true);
+                __instance.m_ExpansionBtnList[4].GetComponentInChildren<TextMeshProUGUI>().text = SeasonsContainer.Seasons[Season.HS];
 
                 __instance.m_SortAlbumBtnList[2].GetComponentInChildren<TextMeshProUGUI>().text = "Prix";
                 __instance.m_SortAlbumBtnList[1].GetComponentInChildren<TextMeshProUGUI>().text = "Rareté";
@@ -269,7 +269,7 @@ namespace WankulCrazyPlugin.patch
                 int num = (pageIndex - 1) * 12 + i;
                 if (num >= SortedCardIndies.Count)
                 {
-                    __instance.m_BinderPageGrpList[binderIndex].SetSingleCard(i, null, 0);
+                    __instance.m_BinderPageGrpList[binderIndex].SetSingleCard(i, null, 0, ECollectionSortingType.Default);
                     continue;
                 }
                 int index = SortedCardIndies[num];
@@ -294,7 +294,7 @@ namespace WankulCrazyPlugin.patch
                     CPlayerData.AddCard(cardData, 1);
                 }
 
-                __instance.m_BinderPageGrpList[binderIndex].SetSingleCard(i, cardData, wankulCardTuple.amount);
+                __instance.m_BinderPageGrpList[binderIndex].SetSingleCard(i, cardData, wankulCardTuple.amount, ECollectionSortingType.Default);
             }
         }
     }
