@@ -24,6 +24,10 @@ public class Plugin : BaseUnityPlugin
         MethodInfo patch_OnLevelFinishedLoading = AccessTools.Method(typeof(GameStarting), "OnLevelFinishedLoading");
         harmony.Patch(original_OnLevelFinishedLoading, postfix: new HarmonyMethod(patch_OnLevelFinishedLoading));
 
+        MethodInfo original_OnDayStarted = AccessTools.Method(typeof(PriceChangeManager), "OnDayStarted");
+        MethodInfo patch_OnDayStarted = AccessTools.Method(typeof(CardPrice), "OnDayStarted");
+        harmony.Patch(original_OnDayStarted, postfix: new HarmonyMethod(patch_OnDayStarted));
+
         MethodInfo original_setcardui = AccessTools.Method(typeof(CardUI), "SetCardUI");
         MethodInfo patch_setcarduiprefix = AccessTools.Method(typeof(ReplacingCards), "SetCardUIPrefix");
         MethodInfo patch_setcarduipostfix = AccessTools.Method(typeof(ReplacingCards), "SetCardUIPostFix");

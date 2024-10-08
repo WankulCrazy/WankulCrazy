@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using WankulCrazyPlugin.patch;
 
@@ -26,26 +27,25 @@ namespace WankulCrazyPlugin.cards
 
         public float Drop;
 
-        private DateTime lastPriceUpdate;
+        public List<float> PastPercent = new List<float>();
+        public float Percentage = 100;
 
-        private float marketPrice;
+        public float nonPercentMarketPrice;
 
         public float MarketPrice
         {
             get
             {
-                // Met à jour le prix si plus de 20 minutes se sont écoulées
-                if ((DateTime.Now - lastPriceUpdate).TotalMinutes > 20)
+                if (nonPercentMarketPrice == 0)
                 {
-                    CardPrice.UpdateMarketPrice(this);
+                    nonPercentMarketPrice = CardPrice.generateMarketPrice(this);
                 }
-                return marketPrice;
+
+                return nonPercentMarketPrice * (Percentage / 100);
             }
             set
             {
-                // Permet également de définir manuellement le prix du marché
-                marketPrice = value;
-                lastPriceUpdate = DateTime.Now;
+                nonPercentMarketPrice = value;
             }
         }
 
