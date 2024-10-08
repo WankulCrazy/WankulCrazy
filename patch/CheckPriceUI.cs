@@ -141,10 +141,10 @@ namespace WankulCrazyPlugin.patch
             AccessTools.Field(__instance.GetType(), "m_IsDestiny").SetValue(__instance, m_IsDestiny);
             AccessTools.Field(__instance.GetType(), "m_TotalPrice").SetValue(__instance, m_TotalPrice);
 
-            List<float> pastCardPricePercentChange = CPlayerData.GetPastCardPricePercentChange(cardIndex, expansionType, isDestiny);
+            List<float> pastCardPricePercentChange = wankulCardData.PastPercent;
             if (pastCardPricePercentChange.Count > 1)
             {
-                float cardMarketPriceCustomPercent = CPlayerData.GetCardMarketPriceCustomPercent(cardIndex, expansionType, isDestiny, pastCardPricePercentChange[pastCardPricePercentChange.Count - 2]);
+                float cardMarketPriceCustomPercent = wankulCardData.nonPercentMarketPrice *( pastCardPricePercentChange[pastCardPricePercentChange.Count - 2]/100);
                 float num = m_TotalPrice - cardMarketPriceCustomPercent;
                 if (num > 0.005f)
                 {
@@ -198,16 +198,16 @@ namespace WankulCrazyPlugin.patch
         {
             __instance.m_CurrentScaleLineIndex = 0;
             WankulCardData wankulCardData = wankulCardsSet[cardIndex];
-            List<float> list = new List<float>();
+            List<float> pricesList = new List<float>();
 
-            for (int i = 0; i < wankulCardData.PastPrices.Count; i++)
+            for (int i = 0; i < wankulCardData.PastPercent.Count; i++)
             {
-                list.Add(wankulCardData.PastPrices[i]);
+                pricesList.Add(wankulCardData.nonPercentMarketPrice * (wankulCardData.PastPercent[i])/100);
             }
 
 
             MethodInfo EvaluatePriceChartMethod = __instance.GetType().GetMethod("EvaluatePriceChart", BindingFlags.Instance | BindingFlags.NonPublic);
-            EvaluatePriceChartMethod.Invoke(__instance, new object[] { list });
+            EvaluatePriceChartMethod.Invoke(__instance, new object[] { pricesList });
 
             CardData cardData = WankulCardsData.Instance.GetCardDataFromWankulCardData(wankulCardData);
             if (cardData == null)

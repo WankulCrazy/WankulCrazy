@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using HarmonyLib;
+using UnityEngine;
 using WankulCrazyPlugin.cards;
 
 namespace WankulCrazyPlugin.patch
@@ -7,7 +8,7 @@ namespace WankulCrazyPlugin.patch
     public class CardPrice
     {
 
-        public static void UpdateMarketPrice(WankulCardData wankulCardData)
+        public static float generateMarketPrice(WankulCardData wankulCardData)
         {
             // Augmenter la plage de variation aléatoire entre -2% et +2%
             float variation = UnityEngine.Random.Range(-0.02f, 0.02f);
@@ -80,7 +81,50 @@ namespace WankulCrazyPlugin.patch
             // Calculer le prix avec la variation aléatoire (influencée par le prix max du segment)
             float minPrice = priceRangeMin * (1 + variation);
             float maxPrice = priceRangeMax * (1 + variation);
-            wankulCardData.MarketPrice = UnityEngine.Random.Range(minPrice, maxPrice);
+            return UnityEngine.Random.Range(minPrice, maxPrice);
+        }
+
+        public static void UpdateCardPricePercent(WankulCardData wankulCardData)
+        {
+            
+            var m_PriceChangeMin = (float)AccessTools.Field(PriceChangeManager.Instance.GetType(), "m_PriceChangeMin").GetValue(PriceChangeManager.Instance);
+            var m_PriceChangeMax = (float)AccessTools.Field(PriceChangeManager.Instance.GetType(), "m_PriceChangeMax").GetValue(PriceChangeManager.Instance);
+
+            float percentChange = Random.Range(m_PriceChangeMin, m_PriceChangeMax);
+
+
+            wankulCardData.Percentage += percentChange;
+            if (wankulCardData.Percentage < -80f)
+            {
+                wankulCardData.Percentage = -80f;
+            }
+
+            if (wankulCardData.Percentage > 200f)
+            {
+                wankulCardData.Percentage = 200f;
+            }
+
+            wankulCardData.PastPercent.Add(wankulCardData.Percentage);
+            if (wankulCardData.PastPercent.Count > 30)
+            {
+                wankulCardData.PastPercent.RemoveAt(0);
+            }
+        }
+
+
+        public static void UpdateAllCardsMarketPrice()
+        {
+            WankulCardsData wankulCardsData = WankulCardsData.Instance;
+
+            foreach (WankulCardData wankulCardData in wankulCardsData.cards)
+            {
+                UpdateCardPricePercent(wankulCardData);
+            }
+        }
+
+        public static void OnDayStarted()
+        {
+            UpdateAllCardsMarketPrice();
         }
 
         public static void Postfix_GetCardMarketPrice_CardData(CardData cardData, ref float __result)

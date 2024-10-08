@@ -7,8 +7,6 @@ namespace WankulCrazyPlugin.cards
 {
     public class WankulCardData
     {
-        public static float timeToUpdatePrice = 20f;
-
         public int Index;
 
         public string Number;
@@ -29,34 +27,25 @@ namespace WankulCrazyPlugin.cards
 
         public float Drop;
 
-        public List<float> PastPrices = new List<float>();
+        public List<float> PastPercent = new List<float>();
+        public float Percentage = 100;
 
-        private DateTime lastPriceUpdate;
-
-        private float marketPrice;
+        public float nonPercentMarketPrice;
 
         public float MarketPrice
         {
             get
             {
-                // Met à jour le prix si plus de 20 minutes se sont écoulées
-                if ((DateTime.Now - lastPriceUpdate).TotalMinutes > WankulCardData.timeToUpdatePrice)
+                if (nonPercentMarketPrice == 0)
                 {
-                    CardPrice.UpdateMarketPrice(this);
+                    nonPercentMarketPrice = CardPrice.generateMarketPrice(this);
                 }
-                return marketPrice;
+
+                return nonPercentMarketPrice * (Percentage / 100);
             }
             set
             {
-                // Permet également de définir manuellement le prix du marché
-                PastPrices.Add(marketPrice);
-                if (PastPrices.Count > 30)
-                {
-                    PastPrices.RemoveAt(0);
-                }
-
-                marketPrice = value;
-                lastPriceUpdate = DateTime.Now;
+                nonPercentMarketPrice = value;
             }
         }
 
