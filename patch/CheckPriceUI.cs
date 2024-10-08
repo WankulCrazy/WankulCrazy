@@ -144,7 +144,7 @@ namespace WankulCrazyPlugin.patch
             List<float> pastCardPricePercentChange = wankulCardData.PastPercent;
             if (pastCardPricePercentChange.Count > 1)
             {
-                float cardMarketPriceCustomPercent = wankulCardData.nonPercentMarketPrice *( pastCardPricePercentChange[pastCardPricePercentChange.Count - 2]/100);
+                float cardMarketPriceCustomPercent = wankulCardData.generatedMarketPrice * ( pastCardPricePercentChange[pastCardPricePercentChange.Count - 2]/100);
                 float num = m_TotalPrice - cardMarketPriceCustomPercent;
                 if (num > 0.005f)
                 {
@@ -202,7 +202,7 @@ namespace WankulCrazyPlugin.patch
 
             for (int i = 0; i < wankulCardData.PastPercent.Count; i++)
             {
-                pricesList.Add(wankulCardData.nonPercentMarketPrice * (wankulCardData.PastPercent[i])/100);
+                pricesList.Add(wankulCardData.generatedMarketPrice * (wankulCardData.PastPercent[i])/100);
             }
 
 

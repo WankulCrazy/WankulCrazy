@@ -12,10 +12,10 @@ namespace WankulCrazyPlugin.utils
 {
     public class Save
     {
-        public Dictionary<string, (int WankulCardIndex, List<float> pastPercent)> associationsWithPercents = [];
+        public Dictionary<string, (int WankulCardIndex, List<float> pastPercent, float generatedMarketPrice)> associationsWithPercents = [];
         public Dictionary<int, (int WankulCardIndex, string cardkey, int amount)> wankulCards = [];
         public bool savedebug = false;
-        public Save(Dictionary<string, (int WankulCardIndex, List<float> pastPercent)> associationsWithPercents, Dictionary<int, (int WankulCardIndex, string cardkey, int amount)> wankulCards, bool savedebug = false)
+        public Save(Dictionary<string, (int WankulCardIndex, List<float> pastPercent, float generatedMarketPrice)> associationsWithPercents, Dictionary<int, (int WankulCardIndex, string cardkey, int amount)> wankulCards, bool savedebug = false)
         {
             this.associationsWithPercents = associationsWithPercents;
             this.wankulCards = wankulCards;
@@ -37,11 +37,11 @@ namespace WankulCrazyPlugin.utils
 
             string path = pluginPath + "/data/save_" + saveIndex + ".json";
 
-            Dictionary<string, (int WankulCardIndex, List<float> pastPercent)> knewAssociations = new Dictionary<string, (int WankulCardIndex, List<float> pastPercent)>();
+            Dictionary<string, (int WankulCardIndex, List<float> pastPercent, float generatedMarketPrice)> knewAssociations = new Dictionary<string, (int WankulCardIndex, List<float> pastPercent, float generatedMarketPrice)>();
             foreach (var association in associations)
             {
                 Plugin.Logger.LogInfo("Saving association: " + association.Key + " => " + association.Value.Index);
-                knewAssociations.Add(association.Key, (association.Value.Index, association.Value.PastPercent));
+                knewAssociations.Add(association.Key, (association.Value.Index, association.Value.PastPercent, association.Value.generatedMarketPrice));
             }
 
             Dictionary<int, (int WankulCardIndex, string cardkey, int amount)> wankulCards = [];
@@ -117,11 +117,13 @@ namespace WankulCrazyPlugin.utils
                 return;
             }
 
-            Dictionary<string, (int WankulCardIndex, List<float> pastPercent)> associationsWithPercents = save.associationsWithPercents;
+            Dictionary<string, (int WankulCardIndex, List<float> pastPercent, float generatedMarketPrice)> associationsWithPercents = save.associationsWithPercents;
             foreach (var associationWithPercents in associationsWithPercents)
             {
                 WankulCardData card = WankulCardsData.Instance.cards.Find(card => card.Index == associationWithPercents.Value.WankulCardIndex);
                 card.PastPercent = associationWithPercents.Value.pastPercent;
+                card.Percentage = card.PastPercent[card.PastPercent.Count - 1];
+                card.MarketPrice = associationWithPercents.Value.generatedMarketPrice;
                 WankulCardsData.Instance.association[associationWithPercents.Key] = card;
             }
 

@@ -30,22 +30,22 @@ namespace WankulCrazyPlugin.cards
         public List<float> PastPercent = new List<float>();
         public float Percentage = 100;
 
-        public float nonPercentMarketPrice;
+        public float generatedMarketPrice;
 
         public float MarketPrice
         {
             get
             {
-                if (nonPercentMarketPrice == 0)
+                if (generatedMarketPrice == 0)
                 {
-                    nonPercentMarketPrice = CardPrice.generateMarketPrice(this);
+                    generatedMarketPrice = CardPrice.generateMarketPrice(this);
                 }
 
-                return nonPercentMarketPrice * (Percentage / 100);
+                return generatedMarketPrice * (Percentage / 100);
             }
             set
             {
-                nonPercentMarketPrice = value;
+                generatedMarketPrice = value;
             }
         }
 
