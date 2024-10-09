@@ -24,6 +24,7 @@ namespace WankulCrazyPlugin.utils
         public bool savedebug = false;
 
         // Constructeur pour la nouvelle version
+        [JsonConstructor]
         public Save(Dictionary<string, (int WankulCardIndex, List<float> pastPercent, float generatedMarketPrice)> associationsWithPercents, Dictionary<int, (int WankulCardIndex, string cardkey, int amount)> wankulCards, bool savedebug = false)
         {
             this.associationsWithPercents = associationsWithPercents;
@@ -116,12 +117,22 @@ namespace WankulCrazyPlugin.utils
             try
             {
                 save = JsonConvert.DeserializeObject<Save>(json);
+                Plugin.Logger.LogInfo("Deserialized Save object successfully.");
             }
-            catch (JsonSerializationException)
+            catch (JsonSerializationException ex)
             {
+                Plugin.Logger.LogError("Failed to deserialize Save object: " + ex.Message);
                 // Tentative de désérialisation de l'ancienne version
-                var oldSave = JsonConvert.DeserializeObject<OldSave>(json);
-                save = new Save(oldSave.associations, oldSave.wankulCards, oldSave.savedebug);
+                try
+                {
+                    var oldSave = JsonConvert.DeserializeObject<OldSave>(json);
+                    Plugin.Logger.LogInfo("Deserialized OldSave object successfully.");
+                    save = new Save(oldSave.associations, oldSave.wankulCards, oldSave.savedebug);
+                }
+                catch (JsonSerializationException exOld)
+                {
+                    Plugin.Logger.LogError("Failed to deserialize OldSave object: " + exOld.Message);
+                }
             }
 
             if (save == null)
@@ -197,6 +208,16 @@ namespace WankulCrazyPlugin.utils
                     {
                         card.MarketPrice = associationWithPercents.Value.generatedMarketPrice;
                     }
+
+                    int currentDay = CSaveLoad.m_SavedGame.m_CurrentDay;
+                    if (card.PastPercent.Count < currentDay)
+                    {
+                        while(card.PastPercent.Count < currentDay)
+                        {
+                            CardPrice.UpdateCardPricePercent(card);
+                        }
+                    }
+
                     WankulCardsData.Instance.association[associationWithPercents.Key] = card;
                 }
                 else
