@@ -253,7 +253,8 @@ namespace WankulCrazyPlugin.utils
         private static void UpdateCardPriceIfNeeded(WankulCardData card)
         {
             int currentDay = CSaveLoad.m_SavedGame.m_CurrentDay + 1;
-            while (card.PastPercent.Count < currentDay)
+            int maxDayHistory = 30;
+            while (card.PastPercent.Count < currentDay && card.PastPercent.Count < maxDayHistory)
             {
                 CardPrice.UpdateCardPricePercent(card);
             }
