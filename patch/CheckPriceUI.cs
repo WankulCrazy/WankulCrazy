@@ -50,7 +50,20 @@ namespace WankulCrazyPlugin.patch
                     continue;
                 }
 
-                wankulCardsSet.Insert(cardIndexOffset, wankulCards[cardIndexOffset]);
+                // Assurez-vous que l'index est valide avant d'insérer
+                if (cardIndexOffset < wankulCardsSet.Count)
+                {
+                    wankulCardsSet[cardIndexOffset] = wankulCards[cardIndexOffset];
+                }
+                else
+                {
+                    // Ajoutez des éléments null jusqu'à ce que l'index soit valide
+                    while (wankulCardsSet.Count <= cardIndexOffset)
+                    {
+                        wankulCardsSet.Add(null);
+                    }
+                    wankulCardsSet[cardIndexOffset] = wankulCards[cardIndexOffset];
+                }
 
                 __instance.m_CheckPricePanelUIList[j].InitCard(__instance, cardIndexOffset, m_CurrentExpansionType, false);
                 __instance.m_CheckPricePanelUIList[j].SetActive(isActive: true);
