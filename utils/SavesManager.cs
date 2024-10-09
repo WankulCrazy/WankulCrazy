@@ -253,7 +253,6 @@ namespace WankulCrazyPlugin.utils
         private static void UpdateCardPriceIfNeeded(WankulCardData card)
         {
             int currentDay = CSaveLoad.m_SavedGame.m_CurrentDay + 1;
-            Plugin.Logger.LogInfo($"Current day: {currentDay}");
             while (card.PastPercent.Count < currentDay)
             {
                 CardPrice.UpdateCardPricePercent(card);
