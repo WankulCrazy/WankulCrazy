@@ -91,9 +91,9 @@ namespace WankulCrazyPlugin.patch
             var m_PriceChangeMax = (float)AccessTools.Field(PriceChangeManager.Instance.GetType(), "m_PriceChangeMax").GetValue(PriceChangeManager.Instance);
 
             float percentChange = Random.Range(m_PriceChangeMin, m_PriceChangeMax);
+            float increaseFactor = UnityEngine.Random.Range(0, 2) == 0 ? -1f : 1f;
 
-
-            wankulCardData.Percentage += percentChange;
+            wankulCardData.Percentage += (percentChange * increaseFactor);
             if (wankulCardData.Percentage < -80f)
             {
                 wankulCardData.Percentage = -80f;

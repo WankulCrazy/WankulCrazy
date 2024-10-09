@@ -59,7 +59,7 @@ namespace WankulCrazyPlugin.utils
     public class SavesManager
     {
         public static bool DebuggingSave = false;
-        public static void SaveCardsAssociations()
+        public static void ModSave()
         {
             Plugin.Logger.LogInfo("Saving cards associations");
             Dictionary<string, WankulCardData> associations = WankulCardsData.Instance.association;
@@ -91,48 +91,32 @@ namespace WankulCrazyPlugin.utils
             System.IO.File.WriteAllText(path, json);
         }
 
-        public static void LoadCardsAssociations()
+        public static void ModLoad()
         {
             SortUI.inited = false;
 
             Plugin.Logger.LogInfo("Loading cards associations");
             string pluginPath = Plugin.GetPluginPath();
-
             int saveIndex = CGameManager.Instance.m_CurrentSaveLoadSlotSelectedIndex;
+            string path = $"{pluginPath}/data/save_{saveIndex}.json";
 
-            Plugin.Logger.LogInfo("Save index: " + saveIndex);
-
-            string path = pluginPath + "/data/save_" + saveIndex + ".json";
-
-            Plugin.Logger.LogInfo("Path: " + path);
+            Plugin.Logger.LogInfo($"Save index: {saveIndex}");
+            Plugin.Logger.LogInfo($"Path: {path}");
 
             if (!System.IO.File.Exists(path))
             {
+                Plugin.Logger.LogError("Save file does not exist.");
                 return;
             }
 
             string json = System.IO.File.ReadAllText(path);
-            Save save = null;
+            Save save = DeserializeSave(json);
 
-            try
+            if (save.associationsWithPercents == null)
             {
-                save = JsonConvert.DeserializeObject<Save>(json);
-                Plugin.Logger.LogInfo("Deserialized Save object successfully.");
-            }
-            catch (JsonSerializationException ex)
-            {
-                Plugin.Logger.LogError("Failed to deserialize Save object: " + ex.Message);
-                // Tentative de désérialisation de l'ancienne version
-                try
-                {
-                    var oldSave = JsonConvert.DeserializeObject<OldSave>(json);
-                    Plugin.Logger.LogInfo("Deserialized OldSave object successfully.");
-                    save = new Save(oldSave.associations, oldSave.wankulCards, oldSave.savedebug);
-                }
-                catch (JsonSerializationException exOld)
-                {
-                    Plugin.Logger.LogError("Failed to deserialize OldSave object: " + exOld.Message);
-                }
+                Plugin.Logger.LogError("Failed to deserialize save file.");
+                Plugin.Logger.LogInfo("Trying to deserialize old save file.");
+                save = DeserializeOldSave(json);
             }
 
             if (save == null)
@@ -141,98 +125,149 @@ namespace WankulCrazyPlugin.utils
                 return;
             }
 
-            bool savedebug = save.savedebug;
-            Plugin.Logger.LogInfo("savedebug: " + savedebug);
-            if (savedebug)
-            { // MODE SANS ECHEC
-                DebuggingSave = true;
-                Plugin.Logger.LogWarning("No associations found in save file");
-                Plugin.Logger.LogInfo("Clearing save");
-                CPlayerData.m_CardCollectedList.Clear();
-                CPlayerData.m_CardCollectedListDestiny.Clear();
-                CPlayerData.m_CardCollectedListGhost.Clear();
-                CPlayerData.m_CardCollectedListGhostBlack.Clear();
-                CPlayerData.m_CardCollectedListMegabot.Clear();
-                CPlayerData.m_CardCollectedListFantasyRPG.Clear();
-                CPlayerData.m_CardCollectedListCatJob.Clear();
-                Dictionary<int, (int WankulCardIndex, string cardkey, int amount)> wankulCardsToDebug = save.wankulCards;
-                List<CardData> debugCardsData = new List<CardData>();
-                int debugIndex = 0;
-                foreach (var item in wankulCardsToDebug)
-                {
-                    if (debugCardsData.Count == 0 || debugIndex >= debugCardsData.Count)
-                    {
-                        debugCardsData = debubPackContent();
-                        debugIndex = 0;
-                    }
+            Plugin.Logger.LogInfo("Deserialized Save object successfully.");
+            Plugin.Logger.LogInfo($"Associations count: {save.associationsWithPercents.Count}");
 
-                    if (debugIndex < debugCardsData.Count)
-                    {
-                        Plugin.Logger.LogInfo($"debugIndex: {debugIndex}");
-                        Plugin.Logger.LogInfo($"debugCardsData Count: {debugCardsData.Count}");
-                        WankulCardData wankulCardData = WankulCardsData.Instance.cards.Find(card => card.Index == item.Value.WankulCardIndex);
-                        if (wankulCardData != null)
-                        {
-                            CardData cardData = debugCardsData[debugIndex];
-                            Plugin.Logger.LogInfo($"DEBUG Adding card: {cardData.monsterType}_{cardData.borderType}_{cardData.expansionType} for {wankulCardData.Title} => {item.Value.amount}");
-                            WankulCardsData.Instance.association[cardData.monsterType + "_" + cardData.borderType + "_" + cardData.expansionType] = wankulCardData;
-                            WankulInventory.Instance.wankulCards[item.Key] = (wankulCardData, cardData, item.Value.amount);
-                            debugIndex++;
-                        }
-                        else
-                        {
-                            Plugin.Logger.LogError($"WankulCardData not found for index: {item.Value.WankulCardIndex}");
-                        }
-                    }
-                    else
-                    {
-                        Plugin.Logger.LogError("Index out of range while accessing debugCardsData.");
-                    }
+            if (save.savedebug)
+            {
+                HandleDebugSave(save);
+            }
+            else
+            {
+                LoadAssociations(save);
+                LoadWankulCards(save);
+            }
+        }
+
+        private static Save DeserializeSave(string json)
+        {
+            try
+            {
+                return JsonConvert.DeserializeObject<Save>(json);
+            }
+            catch (JsonSerializationException ex)
+            {
+                Plugin.Logger.LogError($"Failed to deserialize Save object: {ex.Message}");
+                return DeserializeOldSave(json);
+            }
+        }
+
+        private static Save DeserializeOldSave(string json)
+        {
+            try
+            {
+                var oldSave = JsonConvert.DeserializeObject<OldSave>(json);
+                Plugin.Logger.LogInfo("Deserialized OldSave object successfully.");
+                return new Save(oldSave.associations, oldSave.wankulCards, oldSave.savedebug);
+            }
+            catch (JsonSerializationException ex)
+            {
+                Plugin.Logger.LogError($"Failed to deserialize OldSave object: {ex.Message}");
+                return null;
+            }
+        }
+
+        private static void HandleDebugSave(Save save)
+        {
+            DebuggingSave = true;
+            Plugin.Logger.LogWarning("Debugging Save");
+            Plugin.Logger.LogInfo("Clearing save");
+
+            ClearPlayerData();
+
+            var debugCardsData = debubPackContent();
+            int debugIndex = 0;
+
+            foreach (var item in save.wankulCards)
+            {
+                if (debugIndex >= debugCardsData.Count)
+                {
+                    debugCardsData = debubPackContent();
+                    debugIndex = 0;
                 }
-                DebuggingSave = false;
-                return;
+
+                AddDebugCard(item, debugCardsData, ref debugIndex);
             }
 
-            Dictionary<string, (int WankulCardIndex, List<float> pastPercent, float generatedMarketPrice)> associationsWithPercents = save.associationsWithPercents;
-            foreach (var associationWithPercents in associationsWithPercents)
+            DebuggingSave = false;
+        }
+
+        private static void ClearPlayerData()
+        {
+            CPlayerData.m_CardCollectedList.Clear();
+            CPlayerData.m_CardCollectedListDestiny.Clear();
+            CPlayerData.m_CardCollectedListGhost.Clear();
+            CPlayerData.m_CardCollectedListGhostBlack.Clear();
+            CPlayerData.m_CardCollectedListMegabot.Clear();
+            CPlayerData.m_CardCollectedListFantasyRPG.Clear();
+            CPlayerData.m_CardCollectedListCatJob.Clear();
+        }
+
+        private static void AddDebugCard(KeyValuePair<int, (int WankulCardIndex, string cardkey, int amount)> item, List<CardData> debugCardsData, ref int debugIndex)
+        {
+            Plugin.Logger.LogInfo($"debugIndex: {debugIndex}");
+            Plugin.Logger.LogInfo($"debugCardsData Count: {debugCardsData.Count}");
+
+            var wankulCardData = WankulCardsData.Instance.cards.Find(card => card.Index == item.Value.WankulCardIndex);
+            if (wankulCardData != null)
             {
-                WankulCardData card = WankulCardsData.Instance.cards.Find(card => card.Index == associationWithPercents.Value.WankulCardIndex);
+                var cardData = debugCardsData[debugIndex];
+                Plugin.Logger.LogInfo($"DEBUG Adding card: {cardData.monsterType}_{cardData.borderType}_{cardData.expansionType} for {wankulCardData.Title} => {item.Value.amount}");
+                WankulCardsData.Instance.association[$"{cardData.monsterType}_{cardData.borderType}_{cardData.expansionType}"] = wankulCardData;
+                WankulInventory.Instance.wankulCards[item.Key] = (wankulCardData, cardData, item.Value.amount);
+                debugIndex++;
+            }
+            else
+            {
+                Plugin.Logger.LogError($"WankulCardData not found for index: {item.Value.WankulCardIndex}");
+            }
+        }
+
+        private static void LoadAssociations(Save save)
+        {
+            foreach (var association in save.associationsWithPercents)
+            {
+                var card = WankulCardsData.Instance.cards.Find(c => c.Index == association.Value.WankulCardIndex);
                 if (card != null)
                 {
-                    if (associationWithPercents.Value.pastPercent != null && associationWithPercents.Value.pastPercent.Count > 0)
+                    if (association.Value.pastPercent != null && association.Value.pastPercent.Count > 0)
                     {
-                        card.PastPercent = associationWithPercents.Value.pastPercent;
-                        card.Percentage = card.PastPercent[card.PastPercent.Count - 1];
+                        card.PastPercent = association.Value.pastPercent;
+                        card.Percentage = card.PastPercent[^1];
                     }
-                    if (associationWithPercents.Value.generatedMarketPrice != 0)
+                    if (association.Value.generatedMarketPrice != 0)
                     {
-                        card.MarketPrice = associationWithPercents.Value.generatedMarketPrice;
-                    }
-
-                    int currentDay = CSaveLoad.m_SavedGame.m_CurrentDay;
-                    if (card.PastPercent.Count < currentDay)
-                    {
-                        while(card.PastPercent.Count < currentDay)
-                        {
-                            CardPrice.UpdateCardPricePercent(card);
-                        }
+                        card.MarketPrice = association.Value.generatedMarketPrice;
                     }
 
-                    WankulCardsData.Instance.association[associationWithPercents.Key] = card;
+                    UpdateCardPriceIfNeeded(card);
+                    WankulCardsData.Instance.association[association.Key] = card;
                 }
                 else
                 {
-                    Plugin.Logger.LogError($"WankulCardData not found for index: {associationWithPercents.Value.WankulCardIndex}");
+                    Plugin.Logger.LogError($"WankulCardData not found for index: {association.Value.WankulCardIndex}");
                 }
             }
+        }
 
-            Dictionary<int, (int WankulCardIndex, string cardkey, int amount)> wankulCards = save.wankulCards;
-            foreach (var item in wankulCards)
+        private static void UpdateCardPriceIfNeeded(WankulCardData card)
+        {
+            int currentDay = CSaveLoad.m_SavedGame.m_CurrentDay + 1;
+            Plugin.Logger.LogInfo($"Current day: {currentDay}");
+            while (card.PastPercent.Count < currentDay)
             {
-                WankulCardData wankulCardData = WankulCardsData.Instance.cards.Find(card => card.Index == item.Value.WankulCardIndex);
+                CardPrice.UpdateCardPricePercent(card);
+            }
+        }
+
+        private static void LoadWankulCards(Save save)
+        {
+            foreach (var item in save.wankulCards)
+            {
+                var wankulCardData = WankulCardsData.Instance.cards.Find(card => card.Index == item.Value.WankulCardIndex);
                 if (wankulCardData != null)
                 {
-                    CardData cardData = WankulCardsData.Instance.GetCardDataFromKey(item.Value.cardkey);
+                    var cardData = WankulCardsData.Instance.GetCardDataFromKey(item.Value.cardkey);
                     WankulInventory.Instance.wankulCards[item.Key] = (wankulCardData, cardData, item.Value.amount);
                 }
                 else

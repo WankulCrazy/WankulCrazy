@@ -8,12 +8,12 @@ namespace WankulCrazyPlugin.patch
     {
         public static void Save()
         {
-            SavesManager.SaveCardsAssociations();
+            SavesManager.ModSave();
         }
 
         public static void Load()
         {
-            SavesManager.LoadCardsAssociations();
+            SavesManager.ModLoad();
         }
     }
 }
