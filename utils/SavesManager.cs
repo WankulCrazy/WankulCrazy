@@ -35,15 +35,21 @@ namespace WankulCrazyPlugin.utils
         public Save(Dictionary<string, int> associations, Dictionary<int, (int WankulCardIndex, string cardkey, int amount, List<float> pastPrices)> oldWankulCards, bool savedebug = false)
         {
             this.associationsWithPercents = new Dictionary<string, (int WankulCardIndex, List<float> pastPercent, float generatedMarketPrice)>();
-            foreach (var association in associations)
+            if (associations != null)
             {
-                this.associationsWithPercents[association.Key] = (association.Value, new List<float>(), 0f);
+                foreach (var association in associations)
+                {
+                    this.associationsWithPercents[association.Key] = (association.Value, new List<float>(), 0f);
+                }
             }
 
             this.wankulCards = new Dictionary<int, (int WankulCardIndex, string cardkey, int amount)>();
-            foreach (var card in oldWankulCards)
+            if (oldWankulCards != null)
             {
-                this.wankulCards[card.Key] = (card.Value.WankulCardIndex, card.Value.cardkey, card.Value.amount);
+                foreach (var card in oldWankulCards)
+                {
+                    this.wankulCards[card.Key] = (card.Value.WankulCardIndex, card.Value.cardkey, card.Value.amount);
+                }
             }
 
             this.savedebug = savedebug;
