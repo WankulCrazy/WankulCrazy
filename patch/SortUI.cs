@@ -1,14 +1,10 @@
-﻿using CMF;
-using HarmonyLib;
-using System;
+﻿using HarmonyLib;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using TMPro;
 using UnityEngine;
-using UnityEngine.AI;
 using UnityEngine.UI;
 using WankulCrazyPlugin.cards;
 using WankulCrazyPlugin.inventory;
@@ -392,6 +388,25 @@ namespace WankulCrazyPlugin.patch
 
             if (___m_OpenBinder && !___m_IsBookOpen)
             {
+                switch (currentSortType)
+                {
+                    case SortType.Price:
+                        SortByPriceAmount();
+                        break;
+                    case SortType.Rarity:
+                        SortByRarity();
+                        break;
+                    case SortType.Number:
+                        SortBySeasonAndNumber();
+                        break;
+                    case SortType.Amount:
+                        SortByAmount();
+                        break;
+                    case SortType.Double:
+                        SortByDouble();
+                        break;
+                }
+
                 __instance.m_ShowHideAnim.gameObject.SetActive(value: true);
                 ___m_OpenBinder = false;
                 AccessTools.Field(__instance.GetType(), "m_OpenBinder").SetValue(__instance, ___m_OpenBinder);
