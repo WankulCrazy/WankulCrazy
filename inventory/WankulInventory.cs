@@ -293,5 +293,18 @@ namespace WankulCrazyPlugin.inventory
             }
             return totalPrice;
         }
+
+        public static float GetTotalPriceBySeason(Season season)
+        {
+            float totalPrice = 0f;
+            foreach (var card in Instance.wankulCards)
+            {
+                if (card.Value.Item1.Season == season)
+                {
+                    totalPrice += card.Value.Item1.MarketPrice * card.Value.Item3;
+                }
+            }
+            return totalPrice;
+        }
     }
 }
