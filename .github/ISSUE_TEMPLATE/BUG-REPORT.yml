@@ -22,7 +22,12 @@ body:
       label: Version
       description: Quel version du mod était utilisée ?
       options:
-        - 1.1.0 (Latest)
+        - 1.2.3 (Latest)
+        - 1.2.2
+        - 1.2.1
+        - 1.2.0
+        - 1.1.1
+        - 1.1.0
         - 1.0.4
         - 1.0.3
         - 1.0.2

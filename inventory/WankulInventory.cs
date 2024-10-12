@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using WankulCrazyPlugin.cards;
@@ -267,7 +266,8 @@ namespace WankulCrazyPlugin.inventory
             float maxPrice = 0f;
             foreach (var card in Instance.wankulCards)
             {
-                if (card.Value.Item1.MarketPrice > maxPrice) {
+                if (card.Value.Item1.MarketPrice > maxPrice)
+                {
                     maxPrice = card.Value.wankulcard.MarketPrice;
                 }
             }
@@ -292,6 +292,25 @@ namespace WankulCrazyPlugin.inventory
                 totalPrice += card.Value.Item1.MarketPrice * card.Value.Item3;
             }
             return totalPrice;
+        }
+
+        public static float GetTotalPriceBySeason(Season season)
+        {
+            float totalPrice = 0f;
+            foreach (var card in Instance.wankulCards)
+            {
+                if (card.Value.Item1.Season == season)
+                {
+                    totalPrice += card.Value.Item1.MarketPrice * card.Value.Item3;
+                }
+            }
+            return totalPrice;
+        }
+
+        public static (WankulCardData wankulcard, CardData card, int amount) GetWankulCardFormGameCard(CardData cardData)
+        {
+            string key = $"{cardData.monsterType}_{cardData.borderType}_{cardData.expansionType}";
+            return Instance.wankulCards.Values.FirstOrDefault(card => $"{card.card.monsterType}_{card.card.borderType}_{card.card.expansionType}" == key);
         }
     }
 }

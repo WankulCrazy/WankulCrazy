@@ -91,10 +91,6 @@ public class Plugin : BaseUnityPlugin
         MethodInfo patch_RemoveCard = AccessTools.Method(typeof(Inventory), "RemoveCard");
         harmony.Patch(original_RemoveCard, postfix: new HarmonyMethod(patch_RemoveCard));
 
-        MethodInfo original_SetTotalValue = AccessTools.Method(typeof(CollectionBinderUI), "SetTotalValue");
-        MethodInfo patch_SetCardPriceTotalValue = AccessTools.Method(typeof(Inventory), "SetCardPriceTotalValue");
-        harmony.Patch(original_SetTotalValue, postfix: new HarmonyMethod(patch_SetCardPriceTotalValue));
-
         MethodInfo original_GetIcon = AccessTools.Method(typeof(MonsterData), "GetIcon");
         MethodInfo patch_GetIcon = AccessTools.Method(typeof(ReplacingCards), "GetIcon");
         harmony.Patch(original_GetIcon, prefix: new HarmonyMethod(patch_GetIcon));
@@ -103,6 +99,14 @@ public class Plugin : BaseUnityPlugin
         MethodInfo patch_OpenSortAlbumScreenPrefix = AccessTools.Method(typeof(SortUI), "OpenSortAlbumScreenPrefix");
         MethodInfo patch_OpenSortAlbumScreen = AccessTools.Method(typeof(SortUI), "OpenSortAlbumScreen");
         harmony.Patch(original_OpenSortAlbumScreen, postfix: new HarmonyMethod(patch_OpenSortAlbumScreen), prefix: new HarmonyMethod(patch_OpenSortAlbumScreenPrefix));
+
+        MethodInfo original_UpdateBinder = AccessTools.Method(typeof(CollectionBinderFlipAnimCtrl), "Update");
+        MethodInfo patch_UpdateBinder = AccessTools.Method(typeof(SortUI), "Update");
+        harmony.Patch(original_UpdateBinder, prefix: new HarmonyMethod(patch_UpdateBinder));
+
+        MethodInfo original_OnSortingMethodUpdated = AccessTools.Method(typeof(CollectionBinderFlipAnimCtrl), "OnSortingMethodUpdated");
+        MethodInfo patch_OnSortingMethodUpdated = AccessTools.Method(typeof(SortUI), "OnSortingMethodUpdated");
+        harmony.Patch(original_OnSortingMethodUpdated, prefix: new HarmonyMethod(patch_OnSortingMethodUpdated));
 
         MethodInfo original_ExpansionOpenScreen = AccessTools.Method(typeof(CardExpansionSelectScreen), "OpenScreen");
         MethodInfo patch_ExpansionOpenScreen = AccessTools.Method(typeof(ExpansionScreen), "OpenExpansionScreen");
@@ -135,6 +139,10 @@ public class Plugin : BaseUnityPlugin
         MethodInfo original_RunBundleCardBulkFunction = AccessTools.Method(typeof(WorkbenchUIScreen), "RunBundleCardBulkFunction");
         MethodInfo patch_RunBundleCardBulkFunction = AccessTools.Method(typeof(patch.workbench.WorkbenchPatch), "RunBundleCardBulkFunction");
         harmony.Patch(original_RunBundleCardBulkFunction, prefix: new HarmonyMethod(patch_RunBundleCardBulkFunction));
+
+        MethodInfo original_SetSingleCard = AccessTools.Method(typeof(BinderPageGrp), "SetSingleCard");
+        MethodInfo patch_SetSingleCard = AccessTools.Method(typeof(ReplacingCards), "SetSingleCard");
+        harmony.Patch(original_SetSingleCard, prefix: new HarmonyMethod(patch_SetSingleCard));
     }
 
     public static string GetPluginPath()

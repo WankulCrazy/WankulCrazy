@@ -215,6 +215,30 @@ public class ReplacingCards
         }
     }
 
+    public static bool SetSingleCard(int cardIndex, CardData cardData, int cardCount, ECollectionSortingType sortingType, BinderPageGrp __instance)
+    {
+        if (cardData == null)
+        {
+            __instance.m_CardList[cardIndex].SetVisibility(isVisible: false);
+            return false;
+        }
+        cardCount = WankulInventory.GetWankulCardFormGameCard(cardData).amount;
+        if (sortingType == ECollectionSortingType.DuplicatePrice)
+        {
+            cardCount--;
+        }
+        if (cardCount <= 0)
+        {
+            __instance.m_CardList[cardIndex].SetVisibility(isVisible: false);
+            return false;
+        }
+        __instance.m_CardList[cardIndex].m_CardUI.SetCardUI(cardData);
+        __instance.m_CardList[cardIndex].SetVisibility(isVisible: true);
+        __instance.m_CardList[cardIndex].SetCardCountText(cardCount, sortingType == ECollectionSortingType.DuplicatePrice);
+        __instance.m_CardList[cardIndex].SetCardCountTextVisibility(isVisible: true);
+        return false;
+    }
+
     public static bool GetIcon(ECardExpansionType cardExpansionType, MonsterData __instance, ref Sprite __result)
     {
         WankulCardData aJETER = WankulCardsData.GetAJETER();
