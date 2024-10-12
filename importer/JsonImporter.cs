@@ -88,7 +88,16 @@ public class JsonImporter
             {
                 string pluginPath = Plugin.GetPluginPath();
                 string texturepath = Path.Combine(pluginPath, "data", card.TexturePath);
+                string texturepathmask = Path.Combine(pluginPath, "data/masks", card.TexturePath);
+
                 Texture2D texture = LoadTexture(texturepath);
+                Texture2D texturemask = null;
+
+                if (File.Exists(texturepathmask))
+                {
+                    texturemask = LoadTexture(texturepathmask);
+                }
+
                 if (texture != null)
                 {
                     card.Texture = texture;
@@ -98,7 +107,23 @@ public class JsonImporter
                     Plugin.Logger.LogError("Failed to load texture: " + texturepath);
                 }
 
+                if (texturemask != null)
+                {
+                    card.TextureMask = texturemask;
+                }
+                else if (File.Exists(texturepathmask))
+                {
+                    Plugin.Logger.LogError("Failed to load texture mask: " + texturepathmask);
+                }
+
                 Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
+                Sprite spritemask = null;
+
+                if (texturemask != null)
+                {
+                    spritemask = Sprite.Create(texturemask, new Rect(0, 0, texturemask.width, texturemask.height), Vector2.zero);
+                }
+
                 if (sprite != null)
                 {
                     card.Sprite = sprite;
@@ -106,6 +131,15 @@ public class JsonImporter
                 else
                 {
                     Plugin.Logger.LogError("Failed to create sprite: " + texturepath);
+                }
+
+                if (spritemask != null)
+                {
+                    card.SpriteMask = spritemask;
+                }
+                else if (texturemask != null)
+                {
+                    Plugin.Logger.LogError("Failed to create sprite mask: " + texturepathmask);
                 }
             }
         }

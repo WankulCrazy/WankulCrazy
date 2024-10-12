@@ -91,12 +91,12 @@ public class ReplacingCards
             {
                 gameCardData.isFoil = true;
             }
-
         }
 
         try
         {
             __instance.m_CardBGImage.sprite = wankulCardData.Sprite;
+            __instance.m_CardFoilMaskImage.sprite = wankulCardData.SpriteMask;
         }
         catch (System.Exception e)
         {
@@ -111,6 +111,8 @@ public class ReplacingCards
                 Plugin.Logger.LogError("m_CardBorderImage is null");
             }
         }
+
+        __instance.m_CardFront.transform.localPosition = new Vector3(-4.2517f, 0.3211f, 0.2817f);
 
         __instance.m_FullArtGrp?.gameObject.SetActive(false);
         __instance.m_GhostCard?.gameObject.SetActive(false);
@@ -131,6 +133,28 @@ public class ReplacingCards
         __instance.m_FirstEditionText?.gameObject.SetActive(false);
         __instance.m_ChampionText?.gameObject.SetActive(false);
         __instance.m_EvoGrp?.SetActive(false);
+        __instance.m_MonsterMask?.gameObject.SetActive(false);
+
+        if (__instance.m_NormalGrp != null)
+        {
+            int childCount = __instance.m_NormalGrp.transform.childCount;
+
+            for (int i = 0; i < childCount; i++)
+            {
+                Transform child = __instance.m_NormalGrp.transform.GetChild(i);
+                if (child.gameObject.name == "CardFront")
+                {
+                    for (int j = 0; j < child.childCount; j++)
+                    {
+                        Transform subChild = child.GetChild(j);
+                        if (subChild.gameObject.name == "CardFoilMask")
+                        {
+                            subChild.gameObject.SetActive(false);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     class EnterViewUpCloseState__State
@@ -222,5 +246,4 @@ public class ReplacingCards
         __result = aJETER.Sprite;
         return false;
     }
-
 }
