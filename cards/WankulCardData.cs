@@ -23,7 +23,11 @@ namespace WankulCrazyPlugin.cards
 
         public Texture2D Texture;
 
+        public Texture2D TextureMask;
+
         public Sprite Sprite;
+
+        public Sprite SpriteMask;
 
         public float Drop;
 
