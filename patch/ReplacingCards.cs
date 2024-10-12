@@ -200,7 +200,6 @@ public class ReplacingCards
             return false;
         }
         cardCount = WankulInventory.GetWankulCardFormGameCard(cardData).amount;
-        Plugin.Logger.LogWarning($"SetSingleCard {cardData.monsterType}_{cardData.borderType}_{cardData.expansionType} {cardCount}");
         if (sortingType == ECollectionSortingType.DuplicatePrice)
         {
             cardCount--;
