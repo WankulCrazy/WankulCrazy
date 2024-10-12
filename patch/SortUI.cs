@@ -276,7 +276,7 @@ namespace WankulCrazyPlugin.patch
                 var wankulCardTuple = WankulInventory.Instance.wankulCards[index];
                 WankulCardData wankulCardData = wankulCardTuple.wankulcard;
 
-                CardData cardData = WankulCardsData.Instance.GetCardDataFromWankulCardData(wankulCardData);
+                CardData cardData = wankulCardTuple.card;
 
                 // fixing broken saves
                 if (cardData == null)
