@@ -195,7 +195,6 @@ public class ReplacingCards
     {
         if (cardData == null)
         {
-            Plugin.Logger.LogError("gameCardData is null");
             __instance.m_CardList[cardIndex].SetVisibility(isVisible: false);
             return false;
         }
