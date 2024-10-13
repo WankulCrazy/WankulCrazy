@@ -131,9 +131,18 @@ namespace WankulCrazyPlugin.utils
             Plugin.Logger.LogInfo("Deserialized Save object successfully.");
             Plugin.Logger.LogInfo($"Associations count: {save.associationsWithPercents.Count}");
 
-            if (save.savedebug || save.version == null || save.version != SavesManager.SaveVersion)
+            if (save.savedebug)
             {
                 HandleDebugSave(save);
+            }
+            else if (save.version == null || save.version != SaveVersion)
+            {
+                LoadAssociations(save);
+                LoadWankulCards(save);
+                foreach (var wankulCardData in WankulCardsData.Instance.cards)
+                {
+                    UpdateCardPriceIfNeeded(wankulCardData);
+                }
             }
             else
             {
