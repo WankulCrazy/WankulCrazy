@@ -4,6 +4,6 @@
     {
         public const string PLUGIN_GUID = "WankulCrazyPlugin";
         public const string PLUGIN_NAME = "WankulCrazy";
-        public const string PLUGIN_VERSION = "1.2.3";
+        public const string PLUGIN_VERSION = "1.3.0";
     }
 }

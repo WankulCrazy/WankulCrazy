@@ -239,6 +239,56 @@ public class ReplacingCards
         return false;
     }
 
+    public static bool CollectionBinderFlipAnimCtrlOnRightMouseButtonUp(CollectionBinderFlipAnimCtrl __instance)
+    {
+        ECollectionSortingType m_SortingType = (ECollectionSortingType)AccessTools.Field(__instance.GetType(), "m_SortingType").GetValue(__instance);
+        if ((__instance.m_IsHoldingCardCloseUp || __instance.m_IsExitingCardCloseUp) && __instance.m_IsHoldingCardCloseUp)
+        {
+            _ = __instance.m_IsExitingCardCloseUp;
+        }
+        if (!__instance.m_CurrentRaycastedInteractableCard3d)
+        {
+            return false;
+        }
+        if (!InteractionPlayerController.HasEnoughSlotToHoldCard())
+        {
+            NotEnoughResourceTextPopup.ShowText(ENotEnoughResourceText.HandFull);
+            return false;
+        }
+        Card3dUIGroup cardUI = CSingleton<Card3dUISpawner>.Instance.GetCardUI();
+        __instance.m_CurrentSpawnedInteractableCard3d = ShelfManager.SpawnInteractableObject(EObjectType.Card3d).GetComponent<InteractableCard3d>();
+        cardUI.m_IgnoreCulling = true;
+        cardUI.m_CardUI.SetFoilCullListVisibility(isActive: true);
+        cardUI.m_CardUI.ResetFarDistanceCull();
+        cardUI.m_CardUI.SetFoilMaterialList(CSingleton<Card3dUISpawner>.Instance.m_FoilMaterialWorldView);
+        cardUI.m_CardUI.SetFoilBlendedMaterialList(CSingleton<Card3dUISpawner>.Instance.m_FoilBlendedMaterialWorldView);
+        cardUI.m_CardUI.SetCardUI(__instance.m_CurrentRaycastedInteractableCard3d.m_Card3dUI.m_CardUI.GetCardData());
+        cardUI.transform.position = __instance.m_CurrentRaycastedInteractableCard3d.transform.position;
+        cardUI.transform.rotation = __instance.m_CurrentRaycastedInteractableCard3d.transform.rotation;
+        __instance.m_CurrentSpawnedInteractableCard3d.transform.position = __instance.m_CurrentRaycastedInteractableCard3d.transform.position;
+        __instance.m_CurrentSpawnedInteractableCard3d.transform.rotation = __instance.m_CurrentRaycastedInteractableCard3d.transform.rotation;
+        __instance.m_CurrentSpawnedInteractableCard3d.SetCardUIFollow(cardUI);
+        __instance.m_CurrentSpawnedInteractableCard3d.SetEnableCollision(isEnable: false);
+        CardData cardData = __instance.m_CurrentRaycastedInteractableCard3d.m_Card3dUI.m_CardUI.GetCardData();
+        CPlayerData.ReduceCard(cardData, 1);
+
+        (WankulCardData wankulCardData, CardData cardData, int amount) inventoryCard = WankulInventory.GetWankulCardFormGameCard(cardData);
+        int count = inventoryCard.amount;
+        int m_CurrentRaycastedCardIndex = (int)AccessTools.Field(__instance.GetType(), "m_CurrentRaycastedCardIndex").GetValue(__instance);
+        __instance.m_BinderPageGrpList[0].SetSingleCard(m_CurrentRaycastedCardIndex, cardData, count, m_SortingType);
+        if (count <= 0)
+        {
+            __instance.m_CurrentRaycastedInteractableCard3d.m_Card3dUI.gameObject.SetActive(value: false);
+            __instance.m_CurrentRaycastedInteractableCard3d.gameObject.SetActive(value: false);
+            __instance.m_CurrentRaycastedInteractableCard3d.OnRaycastEnded();
+            __instance.m_CurrentRaycastedInteractableCard3d = null;
+        }
+        InteractionPlayerController.AddHoldCard(__instance.m_CurrentSpawnedInteractableCard3d);
+        InteractionPlayerController.RemoveToolTip(EGameAction.ViewAlbumCard);
+
+        return false;
+    }
+
     public static bool GetIcon(ECardExpansionType cardExpansionType, MonsterData __instance, ref Sprite __result)
     {
         WankulCardData aJETER = WankulCardsData.GetAJETER();

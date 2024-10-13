@@ -13,6 +13,23 @@ namespace WankulCrazyPlugin.patch
             // Augmenter la plage de variation aléatoire entre -2% et +2%
             float variation = UnityEngine.Random.Range(-0.02f, 0.02f);
 
+            float priceFactor = 1f;
+            if (wankulCardData.Season == Season.S01)
+            {
+                priceFactor = 1f;
+            }
+            else if (wankulCardData.Season == Season.S02) {
+                priceFactor = 1.25f;
+            }
+            else if (wankulCardData.Season == Season.S03)
+            {
+                priceFactor = 1.5f;
+            }
+            else if (wankulCardData.Season == Season.HS)
+            {
+                priceFactor = 2f;
+            }
+
             // Calculer le prix maximum en fonction du segment du Drop
             float priceRangeMax;
             float priceRangeMin;
@@ -39,33 +56,33 @@ namespace WankulCrazyPlugin.patch
             }
             else if (wankulCardData.Drop >= 0.0224f) // Ultra rare holo 1
             {
-                priceRangeMin = 50f;
-                priceRangeMax = 150f;
+                priceRangeMin = 10f;
+                priceRangeMax = 50f;
             }
             else if (wankulCardData.Drop >= 0.016f) // Ultra rare holo 2
             {
-                priceRangeMin = 150f;
-                priceRangeMax = 350f;
+                priceRangeMin = 50f;
+                priceRangeMax = 150f;
             }
             else if (wankulCardData.Drop >= 0.008f) // Légendaire Bronze
             {
-                priceRangeMin = 400;
-                priceRangeMax = 900;
+                priceRangeMin = 150;
+                priceRangeMax = 500;
             }
             else if (wankulCardData.Drop >= 0.0028f) // Légendaire Argent
             {
-                priceRangeMin = 1000;
-                priceRangeMax = 2000f;
+                priceRangeMin = 500;
+                priceRangeMax = 1000;
             }
             else if (wankulCardData.Drop >= 0.0008f) // Légendaire Or
             {
-                priceRangeMin = 2000f;
-                priceRangeMax = 4000f;
+                priceRangeMin = 1000;
+                priceRangeMax = 2500f;
             }
             else if (wankulCardData.Drop >= 0.0005f) // Gagnant Ticket Or (les abo ayant gagne)
             {
-                priceRangeMin = 8000f;
-                priceRangeMax = 10000f;
+                priceRangeMin = 2500f;
+                priceRangeMax = 4000f;
             }
             else if (wankulCardData.Drop >= 0.0001f) // LE TICKET D'OR
             {
@@ -81,7 +98,7 @@ namespace WankulCrazyPlugin.patch
             // Calculer le prix avec la variation aléatoire (influencée par le prix max du segment)
             float minPrice = priceRangeMin * (1 + variation);
             float maxPrice = priceRangeMax * (1 + variation);
-            return UnityEngine.Random.Range(minPrice, maxPrice);
+            return UnityEngine.Random.Range(minPrice, maxPrice) * priceFactor;
         }
 
         public static void UpdateCardPricePercent(WankulCardData wankulCardData)

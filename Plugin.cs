@@ -143,6 +143,15 @@ public class Plugin : BaseUnityPlugin
         MethodInfo original_SetSingleCard = AccessTools.Method(typeof(BinderPageGrp), "SetSingleCard");
         MethodInfo patch_SetSingleCard = AccessTools.Method(typeof(ReplacingCards), "SetSingleCard");
         harmony.Patch(original_SetSingleCard, prefix: new HarmonyMethod(patch_SetSingleCard));
+
+        MethodInfo original_EvaluateOpenCardPack = AccessTools.Method(typeof(InteractionPlayerController), "EvaluateOpenCardPack");
+        MethodInfo patch_EvaluateOpenCardPackPrefix = AccessTools.Method(typeof(CardOpening), "EvaluateOpenCardPackPreFix");
+        MethodInfo patch_EvaluateOpenCardPackPostfix = AccessTools.Method(typeof(CardOpening), "EvaluateOpenCardPackPostFix");
+        harmony.Patch(original_EvaluateOpenCardPack, prefix: new HarmonyMethod(patch_EvaluateOpenCardPackPrefix), postfix: new HarmonyMethod(patch_EvaluateOpenCardPackPostfix));
+
+        MethodInfo original_CollectionBinderFlipAnimCtrlOnRightMouseButtonUp = AccessTools.Method(typeof(CollectionBinderFlipAnimCtrl), "OnRightMouseButtonUp");
+        MethodInfo patch_CollectionBinderFlipAnimCtrlOnRightMouseButtonUp = AccessTools.Method(typeof(ReplacingCards), "CollectionBinderFlipAnimCtrlOnRightMouseButtonUp");
+        harmony.Patch(original_CollectionBinderFlipAnimCtrlOnRightMouseButtonUp, prefix: new HarmonyMethod(patch_CollectionBinderFlipAnimCtrlOnRightMouseButtonUp));
     }
 
     public static string GetPluginPath()
