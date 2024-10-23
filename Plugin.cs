@@ -43,8 +43,8 @@ public class Plugin : BaseUnityPlugin
         harmony.Patch(original_CardOpening, postfix: new HarmonyMethod(patch_CardOpening));
 
         MethodInfo original_Update = AccessTools.Method(typeof(CardOpeningSequence), "Update");
-        MethodInfo patch_Update = AccessTools.Method(typeof(CardOpening), "UpdatePostFix");
-        harmony.Patch(original_Update, postfix: new HarmonyMethod(patch_Update));
+        MethodInfo patch_Update = AccessTools.Method(typeof(CardOpening), "UpdatePreFix");
+        harmony.Patch(original_Update, prefix: new HarmonyMethod(patch_Update));
 
         MethodInfo original_binderSetCard = AccessTools.Method(typeof(CollectionBinderFlipAnimCtrl), "UpdateBinderAllCardUI");
         MethodInfo patch_binderSetCard = AccessTools.Method(typeof(SortUI), "UpdateBinderAllCardUI");
@@ -152,6 +152,10 @@ public class Plugin : BaseUnityPlugin
         MethodInfo original_CollectionBinderFlipAnimCtrlOnRightMouseButtonUp = AccessTools.Method(typeof(CollectionBinderFlipAnimCtrl), "OnRightMouseButtonUp");
         MethodInfo patch_CollectionBinderFlipAnimCtrlOnRightMouseButtonUp = AccessTools.Method(typeof(ReplacingCards), "CollectionBinderFlipAnimCtrlOnRightMouseButtonUp");
         harmony.Patch(original_CollectionBinderFlipAnimCtrlOnRightMouseButtonUp, prefix: new HarmonyMethod(patch_CollectionBinderFlipAnimCtrlOnRightMouseButtonUp));
+
+        MethodInfo original_OnPayingDone = AccessTools.Method(typeof(Customer), "OnPayingDone");
+        MethodInfo patch_OnPayingDone = AccessTools.Method(typeof(CardPrice), "OnPayingDone");
+        harmony.Patch(original_OnPayingDone, prefix: new HarmonyMethod(patch_OnPayingDone));
     }
 
     public static string GetPluginPath()

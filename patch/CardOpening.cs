@@ -11,10 +11,11 @@ namespace WankulCrazyPlugin.patch
     {
         public static int totalExpGained = 0;
         public static List<int> LegendaryBoosters = new List<int>();
-        public static void UpdatePostFix(CardOpeningSequence __instance)
+        public static void UpdatePreFix(ref List<CardData> ___m_RolledCardDataList, CardOpeningSequence __instance)
         {
             if (__instance.m_StateIndex == 11 && totalExpGained > 0)
             {
+                ___m_RolledCardDataList.Clear();
                 CEventManager.QueueEvent(new CEventPlayer_AddShopExp(totalExpGained));
                 totalExpGained = 0;
             }
@@ -90,6 +91,7 @@ namespace WankulCrazyPlugin.patch
                 // Ajout de la valeur de la carte dans la liste des prix
                 ___m_CardValueList.Add(wankulCard.MarketPrice);
             }
+            Plugin.Logger.LogInfo($"OpenBooster totalExpGained {totalExpGained}");
         }
 
         public class EvaluateOpenCardPack__State

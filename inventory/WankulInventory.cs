@@ -127,16 +127,16 @@ namespace WankulCrazyPlugin.inventory
                         switch (effigyCard.Rarity)
                         {
                             case Rarity.R:
-                                increaseFactor = 1.5f;
+                                increaseFactor = 0.25f;
                                 break;
                             case Rarity.UR1:
                             case Rarity.UR2:
-                                increaseFactor = 5f;
+                                increaseFactor = 1f;
                                 break;
                             case Rarity.LB:
                             case Rarity.LA:
                             case Rarity.LO:
-                                increaseFactor = 10f;
+                                increaseFactor = 2f;
                                 break;
                             default:
                                 increaseFactor = 1f;
@@ -150,7 +150,7 @@ namespace WankulCrazyPlugin.inventory
                     {
                         if (effigyCard.Rarity >= Rarity.PGW23)
                         {
-                            increaseFactor = 10;
+                            increaseFactor = 2;
                         }
                     }
                 }
@@ -170,16 +170,16 @@ namespace WankulCrazyPlugin.inventory
                         switch (effigyCard.Rarity)
                         {
                             case Rarity.R:
-                                increaseFactor = 1.5f;
+                                increaseFactor = 0.25f;
                                 break;
                             case Rarity.UR1:
                             case Rarity.UR2:
-                                increaseFactor = 5f;
+                                increaseFactor = 1f;
                                 break;
                             case Rarity.LB:
                             case Rarity.LA:
                             case Rarity.LO:
-                                increaseFactor = 10f;
+                                increaseFactor = 2f;
                                 break;
                             default:
                                 increaseFactor = 1f;
@@ -193,7 +193,7 @@ namespace WankulCrazyPlugin.inventory
                     {
                         if (effigyCard.Rarity >= Rarity.PGW23)
                         {
-                            increaseFactor = 10;
+                            increaseFactor = 2;
                         }
                     }
                 }

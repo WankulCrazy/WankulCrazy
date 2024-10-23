@@ -1,6 +1,10 @@
 ﻿using HarmonyLib;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using WankulCrazyPlugin.cards;
+using System.Reflection;
+using WankulCrazyPlugin.inventory;
 
 namespace WankulCrazyPlugin.patch
 {
@@ -181,6 +185,86 @@ namespace WankulCrazyPlugin.patch
             }
 
             __result = marketPrice; // Affecte le prix calculé à __result
+        }
+
+        public static IEnumerator DelayRemoveCustomerFromQueue(float waitTime, Customer instance)
+        {
+            yield return new WaitForSeconds(waitTime);
+            InteractableCashierCounter m_CurrentQueueCashierCounter = (InteractableCashierCounter)AccessTools.Field(instance.GetType(), "m_CurrentQueueCashierCounter").GetValue(instance);
+            m_CurrentQueueCashierCounter.RemoveCustomerFromQueue(instance);
+            m_CurrentQueueCashierCounter.RemoveCurrentCustomerFromQueue();
+        }
+
+        public static bool OnPayingDone(Customer __instance)
+        {
+            bool m_IsAtPayingPosition = (bool)AccessTools.Field(__instance.GetType(), "m_IsAtPayingPosition").GetValue(__instance);
+            m_IsAtPayingPosition = false;
+            AccessTools.Field(__instance.GetType(), "m_IsAtPayingPosition").SetValue(__instance, m_IsAtPayingPosition);
+
+            bool m_HasCheckedOut = (bool)AccessTools.Field(__instance.GetType(), "m_HasCheckedOut").GetValue(__instance);
+            m_HasCheckedOut = true;
+            AccessTools.Field(__instance.GetType(), "m_HasCheckedOut").SetValue(__instance, m_HasCheckedOut);
+
+            var m_Path = AccessTools.Field(__instance.GetType(), "m_Path").GetValue(__instance);
+            m_Path = null;
+            AccessTools.Field(__instance.GetType(), "m_Path").SetValue(__instance, m_Path);
+
+            InteractableCashierCounter m_CurrentQueueCashierCounter = (InteractableCashierCounter)AccessTools.Field(__instance.GetType(), "m_CurrentQueueCashierCounter").GetValue(__instance);
+            List<Item> m_ItemInBagList = (List<Item>)AccessTools.Field(__instance.GetType(), "m_ItemInBagList").GetValue(__instance);
+            List<InteractableCard3d> m_CardInBagList = (List<InteractableCard3d>)AccessTools.Field(__instance.GetType(), "m_CardInBagList").GetValue(__instance);
+            if (m_ItemInBagList.Count + m_CardInBagList.Count > 0)
+            {
+                __instance.m_ShoppingBagTransform.gameObject.SetActive(value: true);
+            }
+
+            __instance.m_Anim.SetBool("HoldingBag", value: true);
+            m_CurrentQueueCashierCounter.SetPlsaticBagVisibility(isShow: false);
+            m_CurrentQueueCashierCounter.UpdateCashierCounterState(ECashierCounterState.Idle);
+            m_CurrentQueueCashierCounter.UpdateCurrentCustomer(null);
+            float num = 0f;
+            for (int i = 0; i < m_ItemInBagList.Count; i++)
+            {
+                m_ItemInBagList[i].transform.parent = __instance.m_ShoppingBagTransform;
+                m_ItemInBagList[i].transform.position = __instance.m_ShoppingBagTransform.position;
+                m_ItemInBagList[i].transform.rotation = __instance.m_ShoppingBagTransform.rotation;
+                m_ItemInBagList[i].gameObject.SetActive(value: false);
+                m_ItemInBagList[i].m_Collider.enabled = false;
+                m_ItemInBagList[i].m_Rigidbody.isKinematic = true;
+                m_ItemInBagList[i].m_InteractableScanItem.enabled = false;
+                num += m_ItemInBagList[i].GetItemVolume();
+            }
+
+
+            int totalCardExp = 0;
+            for (int j = 0; j < m_CardInBagList.Count; j++)
+            {
+                m_CardInBagList[j].transform.parent = __instance.m_ShoppingBagTransform;
+                m_CardInBagList[j].transform.position = __instance.m_ShoppingBagTransform.position;
+                m_CardInBagList[j].transform.rotation = __instance.m_ShoppingBagTransform.rotation;
+                m_CardInBagList[j].m_Card3dUI.gameObject.SetActive(value: false);
+                m_CardInBagList[j].gameObject.SetActive(value: false);
+                m_CardInBagList[j].m_Collider.enabled = false;
+                m_CardInBagList[j].m_Rigidbody.isKinematic = true;
+
+                CardUI cardUi = m_CardInBagList[j].m_Card3dUI.m_CardUI;
+                CardData cardData = (CardData)AccessTools.Field(cardUi.GetType(), "m_CardData").GetValue(cardUi);
+                WankulCardData wankulCardData = WankulInventory.GetWankulCardFormGameCard(cardData).wankulcard;
+                int exp = WankulCardsData.GetExperienceFromWankulCard(wankulCardData);
+                totalCardExp += exp;
+
+                Plugin.Logger.LogInfo($"Card exp: {exp} from card: {wankulCardData.Title}");
+            }
+
+            Plugin.Logger.LogInfo($"Total exp from cards: {totalCardExp}");
+
+            __instance.StartCoroutine(DelayRemoveCustomerFromQueue(Random.Range(0.25f, 1f), __instance));
+            MethodInfo DetermineShopAction = __instance.GetType().GetMethod("DetermineShopAction", BindingFlags.Instance | BindingFlags.NonPublic);
+            DetermineShopAction.Invoke(__instance, new object[] {});
+
+
+
+            CEventManager.QueueEvent(new CEventPlayer_AddShopExp(m_ItemInBagList.Count * 4 + Mathf.RoundToInt(num) + totalCardExp));
+            return false;
         }
     }
 }

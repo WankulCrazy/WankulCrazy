@@ -190,71 +190,94 @@ namespace WankulCrazyPlugin.cards
 
         public static int GetExperienceFromWankulCard(WankulCardData wankulCardData)
         {
-            int experience = 1;
+            // Base XP multiplier based on card type and rarity
+            float experienceFloat = 1;
 
+            // Handle different card types and their XP multipliers
             if (wankulCardData is TerrainCardData)
             {
-                experience = 3;
+                // Terrain cards have slightly higher XP
+                experienceFloat = 1.5f;
             }
             else if (wankulCardData is EffigyCardData effigyCardData)
             {
-                if (effigyCardData.Rarity == Rarity.C)
+                // Significant XP boost based on rarity
+                switch (effigyCardData.Rarity)
                 {
-                    experience = 2;
-                } 
-                else if (effigyCardData.Rarity == Rarity.UC)
-                {
-                    experience = 4;
-                }
-                else if (effigyCardData.Rarity == Rarity.R)
-                {
-                    experience = 8;
-                }
-                else if (effigyCardData.Rarity == Rarity.UR1)
-                {
-                    experience = 16;
-                }
-                else if (effigyCardData.Rarity == Rarity.UR2)
-                {
-                    experience = 32;
-                }
-                else if (effigyCardData.Rarity == Rarity.LB)
-                {
-                    experience = 64;
-                }
-                else if (effigyCardData.Rarity == Rarity.LA)
-                {
-                    experience = 128;
-                }
-                else if (effigyCardData.Rarity == Rarity.LO)
-                {
-                    experience = 256;
-                }
-                else if (
-                    effigyCardData.Rarity == Rarity.PGW23 ||
-                    effigyCardData.Rarity == Rarity.NOEL23 ||
-                    effigyCardData.Rarity == Rarity.SPCIV ||
-                    effigyCardData.Rarity == Rarity.SPLEG ||
-                    effigyCardData.Rarity == Rarity.ED ||
-                    effigyCardData.Rarity == Rarity.SPPOP ||
-                    effigyCardData.Rarity == Rarity.GP ||
-                    effigyCardData.Rarity == Rarity.SPTV ||
-                    effigyCardData.Rarity == Rarity.SPJV ||
-                    effigyCardData.Rarity == Rarity.EG ||
-                    effigyCardData.Rarity == Rarity.SPCAR ||
-                    effigyCardData.Rarity == Rarity.TOR
-                    )
-                {
-                    experience = 512;
+                    case Rarity.C:
+                        experienceFloat = 1.0f;  // Common cards - baseline XP
+                        break;
+                    case Rarity.UC:
+                        experienceFloat = 2.0f;  // Uncommon - much higher than common
+                        break;
+                    case Rarity.R:
+                        experienceFloat = 4.0f;  // Rare cards - significantly boosted
+                        break;
+                    case Rarity.UR1:
+                        experienceFloat = 7.0f;  // Ultra Rare 1 - large XP boost
+                        break;
+                    case Rarity.UR2:
+                        experienceFloat = 10.0f;  // Ultra Rare 2 - even larger boost
+                        break;
+                    case Rarity.LB:
+                        experienceFloat = 15.0f;  // Legendary B - very high XP
+                        break;
+                    case Rarity.LA:
+                        experienceFloat = 20.0f;  // Legendary A - extreme XP gain
+                        break;
+                    case Rarity.LO:
+                        experienceFloat = 25.0f;  // Legendary O - maximum XP for this category
+                        break;
+                    // Special event cards with massive XP boosts
+                    case Rarity.PGW23:
+                    case Rarity.NOEL23:
+                    case Rarity.SPCIV:
+                    case Rarity.SPLEG:
+                    case Rarity.ED:
+                    case Rarity.SPPOP:
+                    case Rarity.GP:
+                    case Rarity.SPTV:
+                    case Rarity.SPJV:
+                    case Rarity.EG:
+                    case Rarity.SPCAR:
+                    case Rarity.TOR:
+                        experienceFloat = 50.0f;  // Special event cards with huge XP
+                        break;
+                    default:
+                        experienceFloat = 1.0f;  // Default XP for unrecognized rarities
+                        break;
                 }
             }
             else if (wankulCardData is SpecialCardData)
             {
-                experience = 1000;
+                // Special cards give a massive amount of XP
+                experienceFloat = 100f;
             }
+
+            // Factor of XP based on the shop's level (dynamically adjusted)
+            int shopLevel = CPlayerData.m_ShopLevel;
+
+            // New formula to calculate XP factor based on the shop level
+            float shopXpFactor = 1f + shopLevel + (shopLevel * shopLevel * 0.001f);
+
+            // Ensuring a minimum shop factor of 1
+            if (shopXpFactor < 1)
+            {
+                shopXpFactor = 1;
+            }
+
+            // Logging for debugging purposes
+            Plugin.Logger.LogInfo($"Experience before shop factor: {experienceFloat}");
+            Plugin.Logger.LogInfo($"shop factor: {shopXpFactor}");
+
+            // Final experience calculation
+            int experience = Mathf.CeilToInt(experienceFloat * shopXpFactor);
+
+            Plugin.Logger.LogInfo($"Experience after shop factor: {experience}");
 
             return experience;
         }
+
 
         public static int GetTotalCardsCount()
         {
