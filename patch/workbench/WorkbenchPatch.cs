@@ -122,6 +122,7 @@ namespace WankulCrazyPlugin.patch.workbench
 
             Dictionary<int, (WankulCardData wankulcard, CardData card, int amount)> SelectedCards = new Dictionary<int, (WankulCardData wankulcard, CardData card, int amount)>();
             List<CardData> selectedCardsData = new List<CardData>();
+            float totalPrice = 0;
 
             if ((isTerrain && totalTerrainAmount < 10) || (!isTerrain && totalEffigyAmount < 10))
             {
@@ -143,6 +144,7 @@ namespace WankulCrazyPlugin.patch.workbench
                     selectedCardsData.Add(randomTerrain.Value.card);
                     CPlayerData.ReduceCard(randomTerrain.Value.card, 1);
                     totalSelectedAmount += 1;
+                    totalPrice += randomTerrain.Value.wankulcard.MarketPrice;
                 }
                 else
                 {
@@ -154,6 +156,7 @@ namespace WankulCrazyPlugin.patch.workbench
                         selectedCardsData.Add(randomCard.Value.card);
                         CPlayerData.ReduceCard(randomCard.Value.card, 1);
                         totalSelectedAmount += 1;
+                        totalPrice += randomCard.Value.wankulcard.MarketPrice;
                     }
                 }
 
@@ -170,7 +173,7 @@ namespace WankulCrazyPlugin.patch.workbench
                 }
             }
 
-            currentInteractableWorkbench.PlayBundlingCardBoxSequence(selectedCardsData, currentCardExpansionType);
+            currentInteractableWorkbench.PlayBundlingCardBoxSequence(selectedCardsData, currentCardExpansionType, totalPrice);
 
             AccessTools.Field(__instance.GetType(), "m_IsWorkingOnTask").SetValue(__instance, true);
 
