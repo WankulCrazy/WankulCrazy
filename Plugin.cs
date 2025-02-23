@@ -5,6 +5,7 @@ using System.IO;
 using System.Reflection;
 using WankulCrazyPlugin.patch;
 using UnityEngine;
+using System;
 
 namespace WankulCrazyPlugin;
 
@@ -41,6 +42,14 @@ public class Plugin : BaseUnityPlugin
         MethodInfo original_CardOpening = AccessTools.Method(typeof(CardOpeningSequence), "GetPackContent");
         MethodInfo patch_CardOpening = AccessTools.Method(typeof(CardOpening), "OpenBooster");
         harmony.Patch(original_CardOpening, postfix: new HarmonyMethod(patch_CardOpening));
+
+        MethodInfo original_CardOpeningSequenceUpdate = AccessTools.Method(typeof(CardOpeningSequence), "Update");
+        MethodInfo patch_CardOpeningSequenceUpdate = AccessTools.Method(typeof(CardOpening), "Update");
+        harmony.Patch(original_CardOpeningSequenceUpdate, prefix: new HarmonyMethod(patch_CardOpeningSequenceUpdate));
+
+        MethodInfo original_CardOpeningSequenceStart = AccessTools.Method(typeof(CardOpeningSequence), "Start");
+        MethodInfo patch_CardOpeningSequenceStart = AccessTools.Method(typeof(CardOpening), "Start");
+        harmony.Patch(original_CardOpeningSequenceStart, postfix: new HarmonyMethod(patch_CardOpeningSequenceStart));
 
         MethodInfo original_Update = AccessTools.Method(typeof(CardOpeningSequence), "Update");
         MethodInfo patch_Update = AccessTools.Method(typeof(CardOpening), "UpdatePreFix");
@@ -161,5 +170,69 @@ public class Plugin : BaseUnityPlugin
     public static string GetPluginPath()
     {
         return Path.Combine(Application.dataPath, "../BepInEx/plugins", PluginInfo.PLUGIN_NAME);
+    }
+
+    public static object GetPProperty(object __instance, string fieldName) {
+        Type type = __instance.GetType();
+        BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Instance;
+
+        FieldInfo field = type.GetField(fieldName, flags);
+        if (field == null)
+        {
+            Plugin.Logger.LogError($"Field {fieldName} not found");
+            return null;
+        }
+        object value = field.GetValue(__instance);
+        return value;
+    }
+
+    public static void SetPProperty(object __instance, string fieldName, object value)
+    {
+        Type type = __instance.GetType();
+        BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Instance;
+
+        FieldInfo field = type.GetField(fieldName, flags);
+        if (field == null)
+        {
+            Plugin.Logger.LogError($"Field {fieldName} not found");
+            return;
+        }
+        field.SetValue(__instance, value);
+    }
+
+    public static string GetGameObjectPath(GameObject obj)
+    {
+        string path = obj.name;
+        Transform current = obj.transform;
+
+        while (current.parent != null)
+        {
+            current = current.parent;
+            path = current.name + "/" + path;
+        }
+
+        return path;
+    }
+
+    public static Transform FindChildByPath(Transform parent, string path)
+    {
+        string[] segments = path.Split('/');
+        Transform current = parent;
+
+        foreach (string segment in segments)
+        {
+            current = current.Find(segment);
+            if (current == null)
+            {
+                return null;
+            }
+        }
+
+        return current;
+    }
+
+    public static Transform GetByPath(string path)
+    {
+        return FindChildByPath(GameObject.Find("CanvasWorldspace").transform, path);
     }
 }
