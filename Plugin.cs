@@ -165,6 +165,10 @@ public class Plugin : BaseUnityPlugin
         MethodInfo original_OnPayingDone = AccessTools.Method(typeof(Customer), "OnPayingDone");
         MethodInfo patch_OnPayingDone = AccessTools.Method(typeof(CardPrice), "OnPayingDone");
         harmony.Patch(original_OnPayingDone, prefix: new HarmonyMethod(patch_OnPayingDone));
+
+        MethodInfo original_WindowsPoster = AccessTools.Method(typeof(UnlockRoomManager), "Init");
+        MethodInfo patch_WindowsPoster = AccessTools.Method(typeof(WindowsPosters), "Init");
+        harmony.Patch(original_WindowsPoster, postfix: new HarmonyMethod(patch_WindowsPoster));
     }
 
     public static string GetPluginPath()
@@ -235,4 +239,10 @@ public class Plugin : BaseUnityPlugin
     {
         return FindChildByPath(GameObject.Find("CanvasWorldspace").transform, path);
     }
+
+    public static Transform GetByPathIn(string source, string path)
+    {
+        return FindChildByPath(GameObject.Find(source).transform, path);
+    }
+
 }
