@@ -165,6 +165,39 @@ public class Plugin : BaseUnityPlugin
         MethodInfo original_OnPayingDone = AccessTools.Method(typeof(Customer), "OnPayingDone");
         MethodInfo patch_OnPayingDone = AccessTools.Method(typeof(CardPrice), "OnPayingDone");
         harmony.Patch(original_OnPayingDone, prefix: new HarmonyMethod(patch_OnPayingDone));
+
+        MethodInfo original_WindowsPoster = AccessTools.Method(typeof(UnlockRoomManager), "Init");
+        MethodInfo patch_WindowsPoster = AccessTools.Method(typeof(WindowsPosters), "Init");
+        harmony.Patch(original_WindowsPoster, postfix: new HarmonyMethod(patch_WindowsPoster));
+
+
+        MethodInfo original_EvaluateTakeItemFromShelf = AccessTools.Method(typeof(InteractionPlayerController), "EvaluateTakeItemFromShelf");
+        MethodInfo patch_EvaluateTakeItemFromShelf = AccessTools.Method(typeof(WankulCrazyPlugin.patch.InteractionPlayerControllerPatch), "EvaluateTakeItemFromShelfTranspiler");
+        harmony.Patch(original_EvaluateTakeItemFromShelf, transpiler: new HarmonyMethod(patch_EvaluateTakeItemFromShelf));
+
+        MethodInfo original_HasEnoughSlotToHoldCard = AccessTools.Method(typeof(InteractionPlayerController), "HasEnoughSlotToHoldCard");
+        MethodInfo patch_HasEnoughSlotToHoldCard = AccessTools.Method(typeof(WankulCrazyPlugin.patch.InteractionPlayerControllerPatch), "HasEnoughSlotToHoldCardTranspiler");
+        harmony.Patch(original_HasEnoughSlotToHoldCard, transpiler: new HarmonyMethod(patch_HasEnoughSlotToHoldCard));
+
+        MethodInfo original_Awake = AccessTools.Method(typeof(InteractionPlayerController), "Awake");
+        MethodInfo patch_AwakePostfix = AccessTools.Method(typeof(WankulCrazyPlugin.patch.InteractionPlayerControllerPatch), "AwakePostfix");
+        harmony.Patch(original_Awake, postfix: new HarmonyMethod(patch_AwakePostfix));
+
+        MethodInfo original_EvaluateOpenCardPackV2 = AccessTools.Method(typeof(InteractionPlayerController), "EvaluateOpenCardPack");
+        MethodInfo patch_EvaluateOpenCardPack = AccessTools.Method(typeof(WankulCrazyPlugin.patch.InteractionPlayerControllerPatch), "EvaluateOpenCardPack");
+        harmony.Patch(original_EvaluateOpenCardPackV2, prefix: new HarmonyMethod(patch_EvaluateOpenCardPack));
+
+        MethodInfo original_AddHoldCard = AccessTools.Method(typeof(InteractionPlayerController), "AddHoldCard");
+        MethodInfo patch_AddHoldCard = AccessTools.Method(typeof(WankulCrazyPlugin.patch.InteractionPlayerControllerPatch), "AddHoldCard");
+        harmony.Patch(original_AddHoldCard, postfix: new HarmonyMethod(patch_AddHoldCard));
+
+        MethodInfo original_RemoveToolTip = AccessTools.Method(typeof(InteractionPlayerController), "RemoveToolTip");
+        MethodInfo patch_RemoveToolTip = AccessTools.Method(typeof(WankulCrazyPlugin.patch.InteractionPlayerControllerPatch), "RemoveToolTip");
+        harmony.Patch(original_RemoveToolTip, postfix: new HarmonyMethod(patch_RemoveToolTip));
+
+        MethodInfo original_DelayLerpSpawnedCardPackToHand = AccessTools.Method(typeof(InteractionPlayerController), "DelayLerpSpawnedCardPackToHand");
+        MethodInfo patch_DelayLerpSpawnedCardPackToHandPostfix = AccessTools.Method(typeof(WankulCrazyPlugin.patch.InteractionPlayerControllerPatch), "DelayLerpSpawnedCardPackToHandPostfix");
+        harmony.Patch(original_DelayLerpSpawnedCardPackToHand, postfix: new HarmonyMethod(patch_DelayLerpSpawnedCardPackToHandPostfix));
     }
 
     public static string GetPluginPath()
