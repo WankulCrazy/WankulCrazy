@@ -237,20 +237,16 @@ namespace WankulCrazyPlugin.patch
 
                 CardUI cardUi = __instance.m_CardInBagList[j].m_Card3dUI.m_CardUI;
                 CardData cardData = (CardData)AccessTools.Field(cardUi.GetType(), "m_CardData").GetValue(cardUi);
-                WankulCardData wankulCardData = WankulInventory.GetWankulCardFormGameCard(cardData).wankulcard;
+                WankulCardData wankulCardData = WankulCardsData.Instance.GetFromMonster(cardData, false);
                 int exp = WankulCardsData.GetExperienceFromWankulCard(wankulCardData);
                 totalCardExp += exp;
 
-                Plugin.Logger.LogInfo($"Card exp: {exp} from card: {wankulCardData.Title}");
             }
-
-            Plugin.Logger.LogInfo($"Total exp from cards: {totalCardExp}");
 
             __instance.StartCoroutine(DelayRemoveCustomerFromQueue(Random.Range(0.25f, 1f), __instance));
             MethodInfo DetermineShopAction = __instance.GetType().GetMethod("DetermineShopAction", BindingFlags.Instance | BindingFlags.NonPublic);
             DetermineShopAction.Invoke(__instance, new object[] { });
             CEventManager.QueueEvent(new CEventPlayer_AddShopExp(__instance.m_ItemInBagList.Count * 4 + Mathf.RoundToInt(num) + num2 / 2 + totalCardExp));
-
             return false;
         }
     }
