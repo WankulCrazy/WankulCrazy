@@ -166,11 +166,6 @@ public class Plugin : BaseUnityPlugin
         MethodInfo patch_OnPayingDone = AccessTools.Method(typeof(CardPrice), "OnPayingDone");
         harmony.Patch(original_OnPayingDone, prefix: new HarmonyMethod(patch_OnPayingDone));
 
-        MethodInfo original_WindowsPoster = AccessTools.Method(typeof(UnlockRoomManager), "Init");
-        MethodInfo patch_WindowsPoster = AccessTools.Method(typeof(WindowsPosters), "Init");
-        harmony.Patch(original_WindowsPoster, postfix: new HarmonyMethod(patch_WindowsPoster));
-
-
         MethodInfo original_EvaluateTakeItemFromShelf = AccessTools.Method(typeof(InteractionPlayerController), "EvaluateTakeItemFromShelf");
         MethodInfo patch_EvaluateTakeItemFromShelf = AccessTools.Method(typeof(WankulCrazyPlugin.patch.InteractionPlayerControllerPatch), "EvaluateTakeItemFromShelfTranspiler");
         harmony.Patch(original_EvaluateTakeItemFromShelf, transpiler: new HarmonyMethod(patch_EvaluateTakeItemFromShelf));
