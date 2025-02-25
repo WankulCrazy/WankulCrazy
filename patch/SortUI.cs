@@ -33,28 +33,91 @@ namespace WankulCrazyPlugin.patch
 
             if (!inited)
             {
-                // Position et texte des boutons initiaux
-                __instance.m_ExpansionBtnList[0].GetParent().GetComponentInParent<RectTransform>().anchoredPosition = new Vector2(
+                Transform Expansion_AnimGrp_Transform = Plugin.GetByPathIn("Canvas", "CollectionBinderUI/ScreenGrp/SortingSelectScreen/Screen_Grp/Expansion_AnimGrp");
+                Transform Expansion_BG_Transform = Plugin.GetByPathIn("Canvas", "CollectionBinderUI/ScreenGrp/SortingSelectScreen/Screen_Grp/Expansion_AnimGrp/BG");
+                Transform Expansion_Title_BG_Transform = Plugin.GetByPathIn("Canvas", "CollectionBinderUI/ScreenGrp/SortingSelectScreen/Screen_Grp/Expansion_AnimGrp/TitleBG");
+                Transform Expansion_Title_Text_Transform = Plugin.GetByPathIn("Canvas", "CollectionBinderUI/ScreenGrp/SortingSelectScreen/Screen_Grp/Expansion_AnimGrp/TitleText");
+                Transform Expansion_Mask_Transform = Plugin.GetByPathIn("Canvas", "CollectionBinderUI/ScreenGrp/SortingSelectScreen/Screen_Grp/Expansion_AnimGrp/Mask");
+
+                ((RectTransform)Expansion_BG_Transform).anchoredPosition = new Vector2(
                     0,
-                    75
+                    - 1.5f
+                );
+                ((RectTransform)Expansion_BG_Transform).anchoredPosition3D = new Vector3(
+                    0,
+                    -1.5f,
+                    0
+                );
+                ((RectTransform)Expansion_AnimGrp_Transform).sizeDelta = new Vector2(
+                    934,
+                    1800
                 );
 
-                __instance.m_ExpansionBtnList[0].GetComponentInChildren<TextMeshProUGUI>().text = "Tout";
-                __instance.m_ExpansionBtnList[1].GetComponentInChildren<TextMeshProUGUI>().text = SeasonsContainer.Seasons[Season.S01];
-                __instance.m_ExpansionBtnList[2].GetComponentInChildren<TextMeshProUGUI>().text = SeasonsContainer.Seasons[Season.S02];
-                __instance.m_ExpansionBtnList[3].gameObject.SetActive(true);
-                __instance.m_ExpansionBtnList[3].GetComponentInChildren<TextMeshProUGUI>().text = SeasonsContainer.Seasons[Season.S03];
+                ((RectTransform)Expansion_Mask_Transform).offsetMin = new Vector2(
+                    85,
+                    370
+                );
 
-                // Utiliser un facteur pour espacer (par exemple 1.5x la hauteur du bouton)
                 float verticalSpacing = __instance.m_ExpansionBtnList[2].GetComponent<RectTransform>().anchoredPosition.y - __instance.m_ExpansionBtnList[3].GetComponent<RectTransform>().anchoredPosition.y;
-                // Positionner le 5ème bouton en dessous du 4ème, avec un espacement cohérent
-                __instance.m_ExpansionBtnList[4].GetComponent<RectTransform>().anchoredPosition = new Vector2(
+
+                __instance.m_ExpansionBtnList[0].gameObject.name = "ALL_Button";
+                __instance.m_ExpansionBtnList[0].GetComponentInChildren<TextMeshProUGUI>().text = "Tout";
+                __instance.m_ExpansionBtnList[0].GetComponentInChildren<RectTransform>().anchoredPosition = new Vector2(
+                    0,
+                    380
+                );
+
+                __instance.m_ExpansionBtnList[1].gameObject.name = "S01_Button";
+                __instance.m_ExpansionBtnList[1].GetComponentInChildren<TextMeshProUGUI>().text = SeasonsContainer.Seasons[Season.S01];
+                __instance.m_ExpansionBtnList[1].GetComponent<RectTransform>().anchoredPosition = new Vector2(
+                    __instance.m_ExpansionBtnList[0].GetComponent<RectTransform>().anchoredPosition.x,
+                    __instance.m_ExpansionBtnList[0].GetComponent<RectTransform>().anchoredPosition.y - verticalSpacing
+                );
+
+                __instance.m_ExpansionBtnList[2].gameObject.name = "S02_Button";
+                __instance.m_ExpansionBtnList[2].GetComponentInChildren<TextMeshProUGUI>().text = SeasonsContainer.Seasons[Season.S02];
+                __instance.m_ExpansionBtnList[2].GetComponent<RectTransform>().anchoredPosition = new Vector2(
+                    __instance.m_ExpansionBtnList[1].GetComponent<RectTransform>().anchoredPosition.x,
+                    __instance.m_ExpansionBtnList[1].GetComponent<RectTransform>().anchoredPosition.y - verticalSpacing
+                );
+
+                __instance.m_ExpansionBtnList[3].gameObject.SetActive(true);
+                __instance.m_ExpansionBtnList[3].gameObject.name = "S03_Button";
+                __instance.m_ExpansionBtnList[3].GetComponentInChildren<TextMeshProUGUI>().text = SeasonsContainer.Seasons[Season.S03];
+                __instance.m_ExpansionBtnList[3].GetComponent<RectTransform>().anchoredPosition = new Vector2(
+                    __instance.m_ExpansionBtnList[2].GetComponent<RectTransform>().anchoredPosition.x,
+                    __instance.m_ExpansionBtnList[2].GetComponent<RectTransform>().anchoredPosition.y - verticalSpacing
+                );
+
+                GameObject s04GameObject = GameObject.Instantiate(__instance.m_ExpansionBtnList[0].gameObject);
+                s04GameObject.name = "S04_Button";
+                s04GameObject.AddComponent<RectTransform>();
+                s04GameObject.transform.SetParent(__instance.m_ExpansionBtnList[0].GetParent().transform);
+                s04GameObject.transform.localScale = __instance.m_ExpansionBtnList[0].localScale;
+                s04GameObject.transform.localPosition = __instance.m_ExpansionBtnList[0].localPosition;
+                s04GameObject.transform.localRotation = __instance.m_ExpansionBtnList[0].localRotation;
+                s04GameObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(
                     __instance.m_ExpansionBtnList[3].GetComponent<RectTransform>().anchoredPosition.x,
                     __instance.m_ExpansionBtnList[3].GetComponent<RectTransform>().anchoredPosition.y - verticalSpacing  // Espacement vertical
                 );
-                // Changer le texte du 5ème bouton
-                __instance.m_ExpansionBtnList[4].gameObject.SetActive(true);
-                __instance.m_ExpansionBtnList[4].GetComponentInChildren<TextMeshProUGUI>().text = SeasonsContainer.Seasons[Season.HS];
+                s04GameObject.GetComponentInChildren<TextMeshProUGUI>().text = SeasonsContainer.Seasons[Season.S04];
+                __instance.m_ExpansionBtnList[4] = s04GameObject.transform;
+
+
+                GameObject hsGameObject = GameObject.Instantiate(__instance.m_ExpansionBtnList[0].gameObject);
+                hsGameObject.name = "HS_Button";
+                hsGameObject.AddComponent<RectTransform>();
+                hsGameObject.transform.SetParent(__instance.m_ExpansionBtnList[0].GetParent().transform);
+                hsGameObject.transform.localScale = __instance.m_ExpansionBtnList[0].localScale;
+                hsGameObject.transform.localPosition = __instance.m_ExpansionBtnList[0].localPosition;
+                hsGameObject.transform.localRotation = __instance.m_ExpansionBtnList[0].localRotation;
+                hsGameObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(
+                    __instance.m_ExpansionBtnList[4].GetComponent<RectTransform>().anchoredPosition.x,
+                    __instance.m_ExpansionBtnList[4].GetComponent<RectTransform>().anchoredPosition.y - verticalSpacing  // Espacement vertical
+                );
+                hsGameObject.GetComponentInChildren<TextMeshProUGUI>().text = SeasonsContainer.Seasons[Season.HS];
+                __instance.m_ExpansionBtnList.Add(hsGameObject.transform);
+
 
                 __instance.m_SortAlbumBtnList[2].GetComponentInChildren<TextMeshProUGUI>().text = "Prix";
                 __instance.m_SortAlbumBtnList[1].GetComponentInChildren<TextMeshProUGUI>().text = "Rareté";
@@ -102,9 +165,15 @@ namespace WankulCrazyPlugin.patch
                 });
                 __instance.m_ExpansionBtnList[4].GetComponentInChildren<Button>().onClick.AddListener(() =>
                 {
-                    currentSeason = SortSeasonType.HS;
+                    currentSeason = SortSeasonType.S04;
                     __instance.OnPressSwitchExpansion(4);
                     currentGameExpansionIndex = 4;
+                });
+                __instance.m_ExpansionBtnList[5].GetComponentInChildren<Button>().onClick.AddListener(() =>
+                {
+                    currentSeason = SortSeasonType.HS;
+                    __instance.OnPressSwitchExpansion(5);
+                    currentGameExpansionIndex = 5;
                 });
 
                 __instance.m_SortAlbumBtnList[2].GetComponentInChildren<Button>().onClick.AddListener(() =>
