@@ -27,6 +27,8 @@ public class GameStarting
             {
                 Plugin.Logger.LogInfo("JSON data already imported");
             }
+
+            ExpansionScreen.inited = false;
         }
     }
 }

@@ -231,8 +231,8 @@ public class Plugin : BaseUnityPlugin
         return current;
     }
 
-    public static Transform GetByPath(string path)
+    public static Transform GetByPathIn(string source, string path)
     {
-        return FindChildByPath(GameObject.Find("CanvasWorldspace").transform, path);
+        return FindChildByPath(GameObject.Find(source).transform, path);
     }
 }

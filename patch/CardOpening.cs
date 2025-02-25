@@ -56,7 +56,7 @@ namespace WankulCrazyPlugin.patch
             {
 
 
-                Transform CardOpeningSequence_WorldUIGrp_Transform = Plugin.GetByPath("CanvasGrp/CardOpeningSequence_WorldUIGrp/CardOpeningGrp");
+                Transform CardOpeningSequence_WorldUIGrp_Transform = Plugin.GetByPathIn("CanvasWorldspace", "CanvasGrp/CardOpeningSequence_WorldUIGrp/CardOpeningGrp");
 
                 Card3dUIGroup existingCard3dUIGroup = __instance.m_Card3dUIList[__instance.m_Card3dUIList.Count - 1];
                 Card3dUIGroup newCard3dUIGroup = Card3dUISpawner.m_Instance.GetCardUI();
@@ -89,7 +89,7 @@ namespace WankulCrazyPlugin.patch
                 __instance.m_CardAnimList.Add(AnimGrp_Animation);
 
 
-                Transform ShowAllCardPosList_Transform = Plugin.GetByPath("CanvasGrp/CardOpeningSequence_WorldUIGrp/ShowAllCardPosList");
+                Transform ShowAllCardPosList_Transform = Plugin.GetByPathIn("CanvasWorldspace", "CanvasGrp/CardOpeningSequence_WorldUIGrp/ShowAllCardPosList");
 
                 RectTransform existingPos = (RectTransform)__instance.m_ShowAllCardPosList[__instance.m_ShowAllCardPosList.Count - 1];
                 GameObject newGameObject = new GameObject($"ShowAllCardPos ({__instance.m_ShowAllCardPosList.Count + 1})");

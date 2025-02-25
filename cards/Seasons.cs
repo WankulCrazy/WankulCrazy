@@ -9,6 +9,7 @@ namespace WankulCrazyPlugin.cards
             { Season.S01, "Origins" },
             { Season.S02, "Campus" },
             { Season.S03, "Battle" },
+            { Season.S04, "Stellar" },
             { Season.HS, "Hors Serie" }
         };
     }

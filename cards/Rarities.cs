@@ -16,6 +16,7 @@ namespace WankulCrazyPlugin.cards
             { Rarity.LO, "Légendaire Or" },
             { Rarity.PGW23, "PGW 2023" },
             { Rarity.NOEL23, "Noël 2023" },
+            { Rarity.PGW24, "PGW 2024" },
             { Rarity.SPCIV, "Starter Pack Civilisations" },
             { Rarity.SPLEG, "Starter Pack Légendes" },
             { Rarity.ED, "Edition Speciale" },

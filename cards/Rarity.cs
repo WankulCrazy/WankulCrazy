@@ -12,6 +12,7 @@
         LO, // Legendary Or
         PGW23, // PGW 23
         NOEL23, // Noel 23 franchement vous abusez avec les rarities
+        PGW24, // PGW 24
         SPCIV, // Starter Pack Civilisations
         SPLEG, // Starter Pack Legendes
         ED, // Edition speciale
