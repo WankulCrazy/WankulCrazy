@@ -9,34 +9,6 @@ namespace WankulCrazyPlugin.patch
 
     public class WindowsPosters
     {
-        //public static void Init()
-        //{
-        //    Transform Windows_Transform = Plugin.GetByPathIn("Level_Environment_Grp", "StoreModel_Group/Windows door");
-
-        //    GameObject poster = new GameObject("Poster");
-
-        //    SpriteRenderer spriteRenderer = poster.AddComponent<SpriteRenderer>();
-
-        //    string texturePath = Path.Combine(Plugin.GetPluginPath(), "data", "sprites", "Affiche_Pack_Commun.png");
-        //    Texture2D texture = LoadPNG(texturePath);
-
-        //    if (texture != null)
-        //    {
-        //        spriteRenderer.sprite = TextureToSprite(texture);
-
-        //        Plugin.Logger.LogInfo("Sprite créé avec succès");
-        //    }
-        //    else
-        //    {
-        //        Plugin.Logger.LogInfo("Échec du chargement de la texture");
-        //    }
-
-        //    poster.transform.SetParent(Windows_Transform, false);
-
-        //    poster.transform.localPosition = new Vector3(-0.4545f, 0.7963f, 0.5f);
-        //    poster.transform.localScale = new Vector2(0.05f, 0.05f);
-        //    poster.transform.localRotation = Quaternion.Euler(0, 180, 0);
-        //}
         public static void Init()
         {
             Transform Windows_Transform = Plugin.GetByPathIn("Level_Environment_Grp", "StoreModel_Group/Windows door");
