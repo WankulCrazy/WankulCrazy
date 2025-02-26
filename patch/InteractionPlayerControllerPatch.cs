@@ -3,6 +3,7 @@ using HarmonyLib;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -327,7 +328,6 @@ namespace WankulCrazyPlugin.patch
                     {
                         Plugin.Logger.LogInfo("Index : " + index);
                         ItemMeshData itemMeshData2 = InventoryBase.GetItemMeshData(cardPack);
-
                         Item obj = ItemSpawnManager.GetItem(openCardBoxSpawnCardPackPosList[index]);
                         if (obj != null)
                         {
@@ -379,6 +379,25 @@ namespace WankulCrazyPlugin.patch
                                         child.localPosition = new Vector3(-0.001f, 0.1107f - 0.08f, 0);
                                         child.localRotation = Quaternion.Euler(0, 180, 0);
                                         child.localScale = new Vector3(0.15f, 0.15f, 0.0001f);
+                                        Dictionary<EItemType, string> texturePaths = new Dictionary<EItemType, string>
+                                        {
+                                            { EItemType.BasicCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatB.png") },
+                                            { EItemType.RareCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatC.png") },
+                                            { EItemType.EpicCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatD.png") },
+                                            { EItemType.LegendaryCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_Beetle.png") },
+                                            { EItemType.DestinyBasicCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatB.png") },
+                                            { EItemType.DestinyRareCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatC.png") },
+                                            { EItemType.DestinyEpicCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatD.png") },
+                                            { EItemType.DestinyLegendaryCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_Beetle.png") },
+                                        };
+
+                                        // Vérifie si le cardPack a une texture associée dans le dictionnaire
+                                        if (texturePaths.TryGetValue(cardPack, out string texturePath))
+                                        {
+                                            Plugin.Logger.LogError($"{cardPack} détecté, application d'une nouvelle texture.");
+                                            ApplyTextureToChild(child, texturePath);
+                                        }
+
                                         // Coordonnées UV pour les coins du rectangle
                                         Vector2 uvTopLeft = new Vector2(0.029f, 0.509f);       // Haut gauche
                                         Vector2 uvBottomRight = new Vector2(0.490f, 0.099f);   // Bas droite
@@ -390,6 +409,24 @@ namespace WankulCrazyPlugin.patch
                                         child.localPosition = new Vector3(-0.001f, 0.08f - 0.08f, 0);
                                         child.localRotation = Quaternion.Euler(90, 180, 0);
                                         child.localScale = new Vector3(0.15f, 0.15f, 0.15f);
+                                        Dictionary<EItemType, string> texturePaths = new Dictionary<EItemType, string>
+                                        {
+                                            { EItemType.BasicCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatB.png") },
+                                            { EItemType.RareCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatC.png") },
+                                            { EItemType.EpicCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatD.png") },
+                                            { EItemType.LegendaryCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_Beetle.png") },
+                                            { EItemType.DestinyBasicCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatB.png") },
+                                            { EItemType.DestinyRareCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatC.png") },
+                                            { EItemType.DestinyEpicCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatD.png") },
+                                            { EItemType.DestinyLegendaryCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_Beetle.png") },
+                                        };
+
+                                        // Vérifie si le cardPack a une texture associée dans le dictionnaire
+                                        if (texturePaths.TryGetValue(cardPack, out string texturePath))
+                                        {
+                                            Plugin.Logger.LogError($"{cardPack} détecté, application d'une nouvelle texture.");
+                                            ApplyTextureToChild(child, texturePath);
+                                        }
                                     }
                                 }
                             }
@@ -509,6 +546,47 @@ namespace WankulCrazyPlugin.patch
             else
             {
                 Debug.LogError("Le GameObject n'a pas de Renderer.");
+            }
+        }
+        public static Texture2D LoadTexture(string path)
+        {
+            // Exemple de chargement d'une texture à partir d'un fichier (ajuste selon ton projet)
+            byte[] fileData = System.IO.File.ReadAllBytes(path);
+            Texture2D tex = new Texture2D(2, 2);
+            if (tex.LoadImage(fileData))
+                return tex;
+            return null;
+        }
+        public static void ApplyTextureToChild(Transform child, string texturePath)
+        {
+            Texture2D newTexture = LoadTexture(texturePath);
+
+            if (newTexture != null)
+            {
+                Renderer renderer = child.GetComponent<Renderer>();
+                if (renderer != null)
+                {
+                    if (renderer.material != null && renderer.material.mainTexture == newTexture)
+                    {
+                        Plugin.Logger.LogError("Texture déjà appliquée, aucune modification nécessaire.");
+                        return;
+                    }
+
+                    // Réutilise un matériau existant si possible
+                    Material material = renderer.material ?? new Material(renderer.sharedMaterial);
+                    material.mainTexture = newTexture;
+                    renderer.material = material;
+
+                    Plugin.Logger.LogError("Texture appliquée avec succès !");
+                }
+                else
+                {
+                    Plugin.Logger.LogError("Impossible de récupérer le Renderer.");
+                }
+            }
+            else
+            {
+                Plugin.Logger.LogError("Échec du chargement de la texture.");
             }
         }
     }

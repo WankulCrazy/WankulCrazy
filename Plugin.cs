@@ -193,6 +193,10 @@ public class Plugin : BaseUnityPlugin
         MethodInfo original_DelayLerpSpawnedCardPackToHand = AccessTools.Method(typeof(InteractionPlayerController), "DelayLerpSpawnedCardPackToHand");
         MethodInfo patch_DelayLerpSpawnedCardPackToHandPostfix = AccessTools.Method(typeof(WankulCrazyPlugin.patch.InteractionPlayerControllerPatch), "DelayLerpSpawnedCardPackToHandPostfix");
         harmony.Patch(original_DelayLerpSpawnedCardPackToHand, postfix: new HarmonyMethod(patch_DelayLerpSpawnedCardPackToHandPostfix));
+
+        MethodInfo original_SetMesh = AccessTools.Method(typeof(Item), "SetMesh");
+        MethodInfo patch_SetMeshPatch = AccessTools.Method(typeof(WankulCrazyPlugin.importer.PatchTexturesImporter), "ItemPostfix");
+        harmony.Patch(original_SetMesh, postfix: new HarmonyMethod(patch_SetMeshPatch));
     }
 
     public static string GetPluginPath()
