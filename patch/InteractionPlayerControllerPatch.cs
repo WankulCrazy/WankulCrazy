@@ -381,14 +381,14 @@ namespace WankulCrazyPlugin.patch
                                         child.localScale = new Vector3(0.15f, 0.15f, 0.0001f);
                                         Dictionary<EItemType, string> texturePaths = new Dictionary<EItemType, string>
                                         {
-                                            { EItemType.BasicCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatB.png") },
-                                            { EItemType.RareCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatC.png") },
-                                            { EItemType.EpicCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatD.png") },
-                                            { EItemType.LegendaryCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_Beetle.png") },
-                                            { EItemType.DestinyBasicCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatB.png") },
-                                            { EItemType.DestinyRareCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatC.png") },
-                                            { EItemType.DestinyEpicCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatD.png") },
-                                            { EItemType.DestinyLegendaryCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_Beetle.png") },
+                                            { EItemType.BasicCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "Texture_Display_S1.png") },
+                                            { EItemType.RareCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "Texture_Display_S2.png") },
+                                            { EItemType.EpicCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "Texture_Display_S3.png") },
+                                            { EItemType.LegendaryCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "Texture_Display_HS.png") },
+                                            { EItemType.DestinyBasicCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "Texture_Display_S1_TauxDrop.png") },
+                                            { EItemType.DestinyRareCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "Texture_Display_S2_TauxDrop.png") },
+                                            { EItemType.DestinyEpicCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "Texture_Display_S3_TauxDrop.png") },
+                                            { EItemType.DestinyLegendaryCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "Texture_Display_HS_TauxDrop.png") },
                                         };
 
                                         // Vérifie si le cardPack a une texture associée dans le dictionnaire
@@ -411,14 +411,14 @@ namespace WankulCrazyPlugin.patch
                                         child.localScale = new Vector3(0.15f, 0.15f, 0.15f);
                                         Dictionary<EItemType, string> texturePaths = new Dictionary<EItemType, string>
                                         {
-                                            { EItemType.BasicCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatB.png") },
-                                            { EItemType.RareCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatC.png") },
-                                            { EItemType.EpicCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatD.png") },
-                                            { EItemType.LegendaryCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_Beetle.png") },
-                                            { EItemType.DestinyBasicCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatB.png") },
-                                            { EItemType.DestinyRareCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatC.png") },
-                                            { EItemType.DestinyEpicCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatD.png") },
-                                            { EItemType.DestinyLegendaryCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_Beetle.png") },
+                                            { EItemType.BasicCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "Texture_Display_S1.png") },
+                                            { EItemType.RareCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "Texture_Display_S2.png") },
+                                            { EItemType.EpicCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "Texture_Display_S3.png") },
+                                            { EItemType.LegendaryCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "Texture_Display_HS.png") },
+                                            { EItemType.DestinyBasicCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "Texture_Display_S1_TauxDrop.png") },
+                                            { EItemType.DestinyRareCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "Texture_Display_S2_TauxDrop.png") },
+                                            { EItemType.DestinyEpicCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "Texture_Display_S3_TauxDrop.png") },
+                                            { EItemType.DestinyLegendaryCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "Texture_Display_HS_TauxDrop.png") },
                                         };
 
                                         // Vérifie si le cardPack a une texture associée dans le dictionnaire
