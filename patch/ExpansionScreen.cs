@@ -26,11 +26,24 @@ namespace WankulCrazyPlugin.patch
 
             inited = true;
 
+            Transform AnimGroupTranform = Plugin.GetByPathIn("Canvas", "CardExpansionSelectScreen/Screen_Grp/AnimGrp");
+            RectTransform AnimGroupRectTransform = AnimGroupTranform.GetComponent<RectTransform>();
+            AnimGroupRectTransform.sizeDelta = new Vector2(AnimGroupRectTransform.sizeDelta.x, 1800);
+
+            Transform BGTranform = Plugin.GetByPathIn("Canvas", "CardExpansionSelectScreen/Screen_Grp/AnimGrp/BG");
+            RectTransform BGRectTransform = BGTranform.GetComponent<RectTransform>();
+            BGRectTransform.sizeDelta = new Vector2(BGRectTransform.sizeDelta.x, 1000);
+
+            Transform MaskTranform = Plugin.GetByPathIn("Canvas", "CardExpansionSelectScreen/Screen_Grp/AnimGrp/Mask");
+            RectTransform MaskRectTransform = MaskTranform.GetComponent<RectTransform>();
+            MaskRectTransform.sizeDelta = new Vector2(MaskRectTransform.sizeDelta.x, 600);
+
+
             Transform tetramonButton = FindChildByPath(CSingleton<CardExpansionSelectScreen>.Instance.m_ScreenGrp.transform, "AnimGrp/Mask/UIGroup/Tetramon_Button");
             tetramonButton.GetComponentInChildren<TextMeshProUGUI>().text = "Origins";
             tetramonButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(
                 0,
-                170
+                220
             );
 
             Transform destinyButton = FindChildByPath(CSingleton<CardExpansionSelectScreen>.Instance.m_ScreenGrp.transform, "AnimGrp/Mask/UIGroup/Destiny_Button");
@@ -73,6 +86,30 @@ namespace WankulCrazyPlugin.patch
                 s04BHHighlight.SetActive(true);
                 Plugin.SetPProperty(CardExpansionSelectScreen.Instance, "m_CurrentIndex", (int)Season.S04);
                 currentExpensionIndex = (int)Season.S04;
+            });
+
+
+
+            GameObject HSGameObject = GameObject.Instantiate(destinyButton.gameObject);
+            HSGameObject.name = "HS_Button";
+            HSGameObject.transform.SetParent(tetramonButton.GetParent().transform);
+            HSGameObject.transform.localScale = tetramonButton.localScale;
+            HSGameObject.transform.localPosition = tetramonButton.localPosition;
+            HSGameObject.transform.localRotation = tetramonButton.localRotation;
+            HSGameObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(
+                s04GameObject.GetComponent<RectTransform>().anchoredPosition.x,
+                s04GameObject.GetComponent<RectTransform>().anchoredPosition.y - verticalSpacing  // Espacement vertical
+            );
+            HSGameObject.GetComponentInChildren<TextMeshProUGUI>().text = SeasonsContainer.Seasons[Season.HS];
+            Button HSButton = Plugin.FindChildByPath(HSGameObject.transform, "AnimGrp/BGBarGrp/BtnRaycast").GetComponent<Button>();
+            GameObject HSBGHighlight = Plugin.FindChildByPath(HSGameObject.transform, "AnimGrp/BGHighlight").gameObject;
+            CardExpansionSelectScreen.Instance.m_BtnHighlightList.Add(HSBGHighlight);
+
+            HSButton.onClick.AddListener(() =>
+            {
+                s04BHHighlight.SetActive(true);
+                Plugin.SetPProperty(CardExpansionSelectScreen.Instance, "m_CurrentIndex", (int)Season.HS);
+                currentExpensionIndex = (int)Season.HS;
             });
         }
 
