@@ -5,6 +5,7 @@ using UnityEngine;
 using WankulCrazyPlugin.cards;
 using System.Reflection;
 using WankulCrazyPlugin.inventory;
+using UnityEngine.UIElements;
 
 namespace WankulCrazyPlugin.patch
 {
@@ -28,6 +29,10 @@ namespace WankulCrazyPlugin.patch
             else if (wankulCardData.Season == Season.S03)
             {
                 priceFactor = 1.5f;
+            }
+            else if (wankulCardData.Season == Season.S04)
+            {
+                priceFactor = 1.75f;
             }
             else if (wankulCardData.Season == Season.HS)
             {
@@ -151,7 +156,7 @@ namespace WankulCrazyPlugin.patch
         public static void Postfix_GetCardMarketPrice_CardData(CardData cardData, ref float __result)
         {
             WankulCardsData wankulCardsData = WankulCardsData.Instance;
-            WankulCardData wankulCardData = wankulCardsData.GetFromMonster(cardData, false);
+            WankulCardData wankulCardData = wankulCardsData.GetFromMonster(cardData, true);
 
             if (wankulCardData != null)
             {
@@ -159,6 +164,7 @@ namespace WankulCrazyPlugin.patch
             }
             else
             {
+                //Plugin.Logger.LogInfo("Postfix_GetCardMarketPrice_CardData Carte non trouvée : " + cardData.monsterType + " " + cardData.borderType + " " + cardData.expansionType);
                 __result = 0; // Valeur par défaut si la carte n'est pas trouvée
             }
         }
@@ -237,9 +243,14 @@ namespace WankulCrazyPlugin.patch
 
                 CardUI cardUi = __instance.m_CardInBagList[j].m_Card3dUI.m_CardUI;
                 CardData cardData = (CardData)AccessTools.Field(cardUi.GetType(), "m_CardData").GetValue(cardUi);
-                WankulCardData wankulCardData = WankulCardsData.Instance.GetFromMonster(cardData, false);
-                int exp = WankulCardsData.GetExperienceFromWankulCard(wankulCardData);
-                totalCardExp += exp;
+                WankulCardData wankulCardData = WankulCardsData.Instance.GetFromMonster(cardData, true);
+                if (wankulCardData != null) {
+                    int exp = WankulCardsData.GetExperienceFromWankulCard(wankulCardData);
+                    totalCardExp += exp;
+                } else
+                {
+                    Plugin.Logger.LogError("OnPayingDone Carte non trouvée : " + cardData.monsterType + " " + cardData.borderType + " " + cardData.expansionType);
+                }
 
             }
 

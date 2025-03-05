@@ -15,6 +15,7 @@ namespace WankulCrazyPlugin.patch
     {
         //public static Dictionary<int, int> indexesAssociation = new();
         public static List<WankulCardData> wankulCardsSet = new List<WankulCardData>();
+        public static bool isFromCheckPriceList = false;
         public static bool EvaluateCardPanelUI(int cardPageIndex, CheckPriceScreen __instance)
         {
             var m_PosX = (float)AccessTools.Field(__instance.GetType(), "m_PosX").GetValue(__instance);
@@ -104,7 +105,12 @@ namespace WankulCrazyPlugin.patch
 
             if (cardData == null)
             {
+                //Plugin.Logger.LogInfo("CardData is null");
                 cardData = WankulCardsData.Instance.GetUnassciatedCardData();
+                if (cardData == null)
+                {
+                    //Plugin.Logger.LogInfo("UnassciatedCardData is null");
+                }
                 WankulCardsData.Instance.SetFromMonster(cardData, wankulCardData);
             }
 
@@ -199,6 +205,7 @@ namespace WankulCrazyPlugin.patch
 
         public static bool OnPressOpenCardPriceGraph(int cardIndex, ECardExpansionType expansionType, bool isDestiny, CheckPriceScreen __instance)
         {
+            isFromCheckPriceList = true;
             __instance.m_ItemPriceGraphScreen.ShowCardPriceChart(cardIndex, expansionType, isDestiny);
 
             MethodInfo openChildScreenMethod = __instance.GetType().GetMethod("OpenChildScreen", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -209,32 +216,88 @@ namespace WankulCrazyPlugin.patch
 
         public static bool ShowCardPriceChart(int cardIndex, ECardExpansionType expansionType, bool isDestiny, ItemPriceGraphScreen __instance)
         {
-            __instance.m_CurrentScaleLineIndex = 0;
-            WankulCardData wankulCardData = wankulCardsSet[cardIndex];
-            List<float> pricesList = new List<float>();
+            if (isFromCheckPriceList) {
+                __instance.m_CurrentScaleLineIndex = 0;
+                WankulCardData wankulCardData = wankulCardsSet[cardIndex];
+                UpdateCardPriceIfNeeded(wankulCardData);
+                List<float> pricesList = new List<float>();
 
-            for (int i = 0; i < wankulCardData.PastPercent.Count; i++)
-            {
-                pricesList.Add(wankulCardData.generatedMarketPrice * (wankulCardData.PastPercent[i])/100);
+                for (int i = 0; i < wankulCardData.PastPercent.Count; i++)
+                {
+                    pricesList.Add(wankulCardData.generatedMarketPrice * (wankulCardData.PastPercent[i])/100);
+                }
+
+
+                MethodInfo EvaluatePriceChartMethod = __instance.GetType().GetMethod("EvaluatePriceChart", BindingFlags.Instance | BindingFlags.NonPublic);
+                EvaluatePriceChartMethod.Invoke(__instance, new object[] { pricesList });
+
+                CardData cardData = WankulCardsData.Instance.GetCardDataFromWankulCardData(wankulCardData);
+                if (cardData == null)
+                {
+                    cardData = WankulCardsData.Instance.GetUnassciatedCardData();
+                    WankulCardsData.Instance.SetFromMonster(cardData, wankulCardData);
+                }
+
+                __instance.m_CardName.text = wankulCardData.Title;
+                __instance.m_CardUI.SetCardUI(cardData);
+                __instance.m_ItemGrp.SetActive(value: false);
+                __instance.m_CardGrp.SetActive(value: true);
+
+                isFromCheckPriceList = false;
+                return false;
             }
 
 
-            MethodInfo EvaluatePriceChartMethod = __instance.GetType().GetMethod("EvaluatePriceChart", BindingFlags.Instance | BindingFlags.NonPublic);
-            EvaluatePriceChartMethod.Invoke(__instance, new object[] { pricesList });
+            CardData cardDataSaveIndex = new CardData();
+            cardDataSaveIndex.monsterType = CPlayerData.GetMonsterTypeFromCardSaveIndex(cardIndex, expansionType);
+            cardDataSaveIndex.isFoil = cardIndex % CPlayerData.GetCardAmountPerMonsterType(expansionType) >= CPlayerData.GetCardAmountPerMonsterType(expansionType, includeFoilCount: false);
+            cardDataSaveIndex.borderType = (ECardBorderType)(cardIndex % CPlayerData.GetCardAmountPerMonsterType(expansionType, includeFoilCount: false));
+            cardDataSaveIndex.isDestiny = isDestiny;
+            cardDataSaveIndex.expansionType = expansionType;
 
-            CardData cardData = WankulCardsData.Instance.GetCardDataFromWankulCardData(wankulCardData);
-            if (cardData == null)
+            WankulCardData wankulCardDataSaveIndex = WankulCardsData.Instance.GetFromMonster(cardDataSaveIndex, true);
+            if (wankulCardDataSaveIndex != null)
             {
-                cardData = WankulCardsData.Instance.GetUnassciatedCardData();
-                WankulCardsData.Instance.SetFromMonster(cardData, wankulCardData);
+                UpdateCardPriceIfNeeded(wankulCardDataSaveIndex);
+                __instance.m_CurrentScaleLineIndex = 0;
+                List<float> pricesList = new List<float>();
+
+                for (int i = 0; i < wankulCardDataSaveIndex.PastPercent.Count; i++)
+                {
+                    pricesList.Add(wankulCardDataSaveIndex.generatedMarketPrice * (wankulCardDataSaveIndex.PastPercent[i]) / 100);
+                }
+
+                MethodInfo EvaluatePriceChartMethod = __instance.GetType().GetMethod("EvaluatePriceChart", BindingFlags.Instance | BindingFlags.NonPublic);
+                EvaluatePriceChartMethod.Invoke(__instance, new object[] { pricesList });
+
+                CardData cardData = WankulCardsData.Instance.GetCardDataFromWankulCardData(wankulCardDataSaveIndex);
+                if (cardData == null)
+                {
+                    cardData = WankulCardsData.Instance.GetUnassciatedCardData();
+                    WankulCardsData.Instance.SetFromMonster(cardData, wankulCardDataSaveIndex);
+                }
+
+                __instance.m_CardName.text = wankulCardDataSaveIndex.Title;
+                __instance.m_CardUI.SetCardUI(cardData);
+                __instance.m_ItemGrp.SetActive(value: false);
+                __instance.m_CardGrp.SetActive(value: true);
+
+                return false;
             }
+            else
+            {
+                return true;
+            }
+        }
 
-            __instance.m_CardName.text = wankulCardData.Title;
-            __instance.m_CardUI.SetCardUI(cardData);
-            __instance.m_ItemGrp.SetActive(value: false);
-            __instance.m_CardGrp.SetActive(value: true);
-
-            return false;
+        private static void UpdateCardPriceIfNeeded(WankulCardData card)
+        {
+            int currentDay = CSaveLoad.m_SavedGame.m_CurrentDay + 1;
+            int maxDayHistory = 30;
+            while (card.PastPercent.Count < currentDay && card.PastPercent.Count < maxDayHistory)
+            {
+                CardPrice.UpdateCardPricePercent(card);
+            }
         }
     }
 }

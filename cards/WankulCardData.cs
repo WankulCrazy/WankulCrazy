@@ -44,7 +44,6 @@ namespace WankulCrazyPlugin.cards
                 {
                     generatedMarketPrice = CardPrice.generateMarketPrice(this);
                 }
-
                 return generatedMarketPrice * (Percentage / 100);
             }
             set

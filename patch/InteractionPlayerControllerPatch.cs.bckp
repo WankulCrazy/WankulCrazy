@@ -1,0 +1,690 @@
+﻿using CMF;
+using HarmonyLib;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
+using UnityEngine;
+using WankulCrazyPlugin.utils;
+
+
+namespace WankulCrazyPlugin.patch
+{
+    public static class InteractionPlayerControllerPatch
+    {
+        const int MaxPacks = 24;
+        const int PacksPerColumn = 12;
+
+        [HarmonyPatch(typeof(InteractionPlayerController), "Awake")]
+        [HarmonyPostfix]
+        public static void AwakePostfix(InteractionPlayerController __instance)
+        {
+
+            if (__instance.m_HoldCardPackPosList == null)
+                return;
+
+            while (__instance.m_HoldCardPackPosList.Count < MaxPacks)
+            {
+                Transform lastTransform = __instance.m_HoldCardPackPosList.Last();
+                Vector3 newPosition = lastTransform.localPosition;
+
+                if (__instance.m_HoldCardPackPosList.Count >= PacksPerColumn)
+                {
+                    // Seconde Colonne
+                    newPosition.x = -0.07f;
+                    newPosition.z = __instance.m_HoldCardPackPosList[__instance.m_HoldCardPackPosList.Count % PacksPerColumn].localPosition.z;
+                }
+                else
+                {
+                    newPosition.z -= 0.02f;
+                }
+
+                GameObject newPackPos = new GameObject($"CardPackPos_{__instance.m_HoldCardPackPosList.Count}");
+                newPackPos.transform.SetParent(lastTransform.parent);
+                newPackPos.transform.localPosition = newPosition;
+                newPackPos.transform.localRotation = lastTransform.localRotation;
+                newPackPos.transform.localScale = Vector3.one; // Echelle des packs (1, 1, 1)
+
+                __instance.m_HoldCardPackPosList.Add(newPackPos.transform);
+            }
+
+            // Position final des packs
+            for (int i = 0; i < __instance.m_HoldCardPackPosList.Count; i++)
+            {
+                Transform packTransform = __instance.m_HoldCardPackPosList[i];
+                Plugin.Logger.LogInfo($"Pack {i + 1} final position: {packTransform.localPosition}, rotation: {packTransform.localRotation}, scale: {packTransform.localScale}");
+            }
+
+            Plugin.Logger.LogInfo($"You can now hold: {MaxPacks} packs (in 2 columns).");
+        }
+
+        [HarmonyTranspiler]
+        [HarmonyPatch(typeof(InteractionPlayerController), "EvaluateTakeItemFromShelf")]
+        public static IEnumerable<CodeInstruction> EvaluateTakeItemFromShelfTranspiler(
+          IEnumerable<CodeInstruction> instructions)
+        {
+            List<CodeInstruction> list = instructions.ToList<CodeInstruction>();
+            int num = 0;
+            for (int index = 0; index < list.Count; ++index)
+            {
+                if (list[index].opcode == OpCodes.Ldc_I4_8 && index + 1 < list.Count && list[index + 1].opcode != OpCodes.Call)
+                {
+                    list[index] = new CodeInstruction(OpCodes.Ldc_I4, MaxPacks);
+                    ++num;
+                    Plugin.Logger.LogDebug("Matching limit patched.");
+                }
+            }
+            if (num == 2)
+                Plugin.Logger.LogDebug("Success! Both limits patched.");
+            else
+                Plugin.Logger.LogWarning($"Warning! Expected 2 limits patched, but found {num}.");
+            return list.AsEnumerable<CodeInstruction>();
+        }
+
+        [HarmonyTranspiler]
+        [HarmonyPatch(typeof(InteractionPlayerController), "HasEnoughSlotToHoldCard")]
+        public static IEnumerable<CodeInstruction> HasEnoughSlotToHoldCardTranspiler(
+          IEnumerable<CodeInstruction> instructions)
+        {
+            List<CodeInstruction> list = instructions.ToList<CodeInstruction>();
+            bool flag = false;
+            for (int index = 0; index < list.Count; ++index)
+            {
+                if (list[index].opcode == OpCodes.Ldc_I4_8 && !flag)
+                {
+                    list[index] = new CodeInstruction(OpCodes.Ldc_I4, MaxPacks);
+                    flag = true;
+                    Plugin.Logger.LogDebug("Patched HasEnoughSlotToHoldCard.");
+                }
+            }
+            return list.AsEnumerable<CodeInstruction>();
+        }
+
+        public static bool CanOpenCardBox(InteractionPlayerController __instance)
+        {
+            List<Item> m_HoldItemList = (List<Item>)AccessTools.Field(typeof(InteractionPlayerController), "m_HoldItemList").GetValue(__instance);
+            bool flag = false;
+            if (m_HoldItemList.Count > 0)
+            {
+                Item holdItem = m_HoldItemList[0];
+                flag = holdItem.GetItemType() == EItemType.BasicCardBox || holdItem.GetItemType() == EItemType.RareCardBox || holdItem.GetItemType() == EItemType.EpicCardBox || holdItem.GetItemType() == EItemType.LegendaryCardBox || holdItem.GetItemType() == EItemType.DestinyBasicCardBox || holdItem.GetItemType() == EItemType.DestinyRareCardBox || holdItem.GetItemType() == EItemType.DestinyEpicCardBox || holdItem.GetItemType() == EItemType.DestinyLegendaryCardBox;
+            }
+            return flag;
+        }
+
+        // Nouvelle méthode AddHoldCard
+        public static void AddHoldCard(InteractableCard3d card3d)
+        {
+            if (!(bool)(UnityEngine.Object)card3d)
+                return;
+
+            card3d.m_Card3dUI.m_IgnoreCulling = true;
+            card3d.m_Card3dUI.m_CardUI.ResetFarDistanceCull();
+            card3d.m_Card3dUI.m_CardUIAnimGrp.gameObject.SetActive(true);
+            card3d.m_Card3dUI.m_CardUI.SetFoilMaterialList(CSingleton<Card3dUISpawner>.Instance.m_FoilMaterialWorldView);
+            card3d.m_Card3dUI.m_CardUI.SetFoilBlendedMaterialList(CSingleton<Card3dUISpawner>.Instance.m_FoilBlendedMaterialWorldView);
+
+            var currentHoldingCard3dListField = AccessTools.Field(typeof(InteractionPlayerController), "m_CurrentHoldingCard3dList");
+            var currentHoldingCard3dList = currentHoldingCard3dListField.GetValue(CSingleton<InteractionPlayerController>.Instance) as List<InteractableCard3d>;
+
+            var holdCardPosListField = AccessTools.Field(typeof(InteractionPlayerController), "m_HoldCardPosList");
+            var holdCardPosList = holdCardPosListField.GetValue(CSingleton<InteractionPlayerController>.Instance) as List<Transform>;
+
+            card3d.LerpToTransform(holdCardPosList[currentHoldingCard3dList.Count], holdCardPosList[currentHoldingCard3dList.Count]);
+
+            var holdCardGrpTargetRotationField = AccessTools.Field(typeof(InteractionPlayerController), "m_HoldCardGrpTargetRotation");
+            var holdCardGrpTargetRotation = (Quaternion)holdCardGrpTargetRotationField.GetValue(CSingleton<InteractionPlayerController>.Instance);
+
+            holdCardGrpTargetRotation = Quaternion.Euler(0.0f, 0.0f, Mathf.Lerp(0.0f, 15f, (float)currentHoldingCard3dList.Count / 7f));
+            holdCardGrpTargetRotationField.SetValue(CSingleton<InteractionPlayerController>.Instance, holdCardGrpTargetRotation);
+
+            currentHoldingCard3dList.Add(card3d);
+            CPlayerData.m_HoldCardDataList.Add(card3d.m_Card3dUI.m_CardUI.GetCardData());
+        }
+
+        // Nouvelle méthode RemoveToolTip
+        public static void RemoveToolTip(EGameAction action)
+        {
+            var inputTooltipListDisplayField = AccessTools.Field(typeof(InteractionPlayerController), "m_InputTooltipListDisplay");
+            var inputTooltipListDisplay = inputTooltipListDisplayField.GetValue(CSingleton<InteractionPlayerController>.Instance) as InputTooltipListDisplay;
+
+            inputTooltipListDisplay.RemoveTooltip(action);
+        }
+
+        //// Nouvelle méthode EvaluateOpenCardPack
+        //[HarmonyPatch(typeof(InteractionPlayerController), "EvaluateOpenCardPack")]
+        //public static bool EvaluateOpenCardPack(InteractionPlayerController __instance)
+        //{
+
+        //    List<Item> m_HoldItemList = (List<Item>)AccessTools.Field(__instance.GetType(), "m_HoldItemList").GetValue(__instance);
+        //    var canOpenPackMethod = AccessTools.Method(__instance.GetType(), "CanOpenPack");
+        //    bool canOpenPack = (bool)canOpenPackMethod.Invoke(__instance, null);
+
+        //    if (canOpenPack)
+        //    {
+        //        Item holdItem = m_HoldItemList[0];
+        //        var removeHoldItemMethod = AccessTools.Method(__instance.GetType(), "RemoveHoldItem");
+        //        removeHoldItemMethod.Invoke(__instance, new object[] { holdItem });
+
+        //        CSingleton<CardOpeningSequence>.Instance.ReadyingCardPack(holdItem);
+
+        //        AccessTools.Field(__instance.GetType(), "m_IsHoldingMouseDown").SetValue(__instance, false);
+        //        AccessTools.Field(__instance.GetType(), "m_IsHoldingRightMouseDown").SetValue(__instance, false);
+        //    }
+        //    else
+        //    {
+        //        AccessTools.Field(__instance.GetType(), "m_IsOpeningCardBox").SetValue(__instance, true);
+        //        Item holdItem = m_HoldItemList[0];
+        //        EItemType cardPack = (EItemType)AccessTools.Method(__instance.GetType(), "CardBoxToCardPack").Invoke(__instance, new object[] { holdItem.GetItemType() });
+
+        //        ItemMeshData itemMeshData1 = InventoryBase.GetItemMeshData(holdItem.GetItemType());
+
+        //        var openCardBoxMeshFilterField = AccessTools.Field(__instance.GetType(), "m_OpenCardBoxMeshFilter");
+        //        var openCardBoxMeshField = AccessTools.Field(__instance.GetType(), "m_OpenCardBoxMesh");
+
+        //        var openCardBoxMeshFilter = openCardBoxMeshFilterField.GetValue(__instance) as MeshFilter;
+        //        var openCardBoxMesh = openCardBoxMeshField.GetValue(__instance) as MeshRenderer;
+
+        //        openCardBoxMeshFilter.mesh = itemMeshData1.mesh;
+        //        openCardBoxMesh.material = itemMeshData1.material;
+        //        holdItem.gameObject.SetActive(false);
+        //        m_HoldItemList.Clear();
+        //        CPlayerData.m_HoldItemTypeList.Clear();
+        //        AccessTools.Method(typeof(InteractionPlayerController), "RemoveToolTip").Invoke(null, new object[] { EGameAction.OpenCardBox });
+        //        SoundManager.PlayAudio("SFX_OpenCardBox", 0.6f);
+
+        //        var openCardBoxInnerMeshField = AccessTools.Field(__instance.GetType(), "m_OpenCardBoxInnerMesh");
+        //        var openCardBoxInnerMesh = openCardBoxInnerMeshField.GetValue(__instance) as Animation;
+        //        openCardBoxInnerMesh.gameObject.SetActive(true);
+
+        //        var openCardBoxSpawnCardPackPosListField = AccessTools.Field(__instance.GetType(), "m_OpenCardBoxSpawnCardPackPosList");
+        //        var openCardBoxSpawnCardPackPosList = openCardBoxSpawnCardPackPosListField.GetValue(__instance) as List<Transform>;
+
+        //        var holdCardPackPosListField = AccessTools.Field(__instance.GetType(), "m_HoldCardPackPosList");
+        //        var holdCardPackPosList = holdCardPackPosListField.GetValue(__instance) as List<Transform>;
+
+        //        if (m_HoldItemList.Count < 24)
+        //        {
+        //            while (m_HoldItemList.Count < 24)
+        //            {
+        //                Item fakeItem = ItemSpawnManager.GetItem(null);
+        //                m_HoldItemList.Add(fakeItem);
+        //            }
+        //        }
+
+
+        //        // Déclarer un parent par défaut si nécessaire (remplacer "SomeParentObject" par un objet réel de votre scène)
+        //        Transform someDefaultParentTransform = GameObject.Find("SomeParentObject")?.transform; // Remplacer "SomeParentObject" par le nom réel de l'objet qui servira de parent par défaut
+
+        //        if (someDefaultParentTransform == null)
+        //        {
+        //            Plugin.Logger.LogError("Le parent par défaut 'SomeParentObject' n'a pas été trouvé dans la scène !");
+        //        }
+
+        //        if (openCardBoxSpawnCardPackPosList.Count < 24)
+        //        {
+        //            // Récupérer le dernier élément valide pour baser les éléments fictifs
+        //            Transform lastValidTransform = openCardBoxSpawnCardPackPosList[openCardBoxSpawnCardPackPosList.Count - 1];
+
+        //            // Vérifier si le dernier élément valide a un parent, sinon définisser un parent par défaut
+        //            Transform defaultParent = lastValidTransform.parent != null ? lastValidTransform.parent : someDefaultParentTransform;
+
+        //            if (lastValidTransform.parent != null)
+        //            {
+        //                Plugin.Logger.LogInfo($"Le parent du dernier élément valide est : {lastValidTransform.parent.name}");
+        //            }
+        //            else
+        //            {
+        //                Plugin.Logger.LogInfo("Aucun parent trouvé pour le dernier élément valide. Utilisation du parent par défaut.");
+        //            }
+
+        //            while (openCardBoxSpawnCardPackPosList.Count < 24)
+        //            {
+        //                Transform fakeTransform = new GameObject("FakeTransform").transform;
+        //                fakeTransform.localPosition = new Vector3(0.02f, 0, 0);
+        //                fakeTransform.localRotation = lastValidTransform.localRotation * Quaternion.Euler(0, 0.5f, 0);
+        //                fakeTransform.localScale = lastValidTransform.localScale;
+        //                fakeTransform.name = $"SpawnCardPackPosLoc ({openCardBoxSpawnCardPackPosList.Count})";
+        //                fakeTransform.parent = defaultParent;
+        //                openCardBoxSpawnCardPackPosList.Add(fakeTransform);
+        //                lastValidTransform = fakeTransform;
+        //            }
+        //        }
+
+        //        // Pour rattacher les éléments sans parent
+        //        for (int i = 0; i < openCardBoxSpawnCardPackPosList.Count; i++)
+        //        {
+        //            if (openCardBoxSpawnCardPackPosList[i].parent == null)
+        //            {
+        //                Plugin.Logger.LogInfo($"L'élément {i} n'a pas de parent. Assignation du parent par défaut.");
+        //                openCardBoxSpawnCardPackPosList[i].parent = someDefaultParentTransform;  // Assigner le parent par défaut
+        //            }
+        //            else
+        //            {
+        //                Plugin.Logger.LogInfo($"L'élément {i} a pour parent : {openCardBoxSpawnCardPackPosList[i].parent.name}");
+        //            }
+        //        }
+        //        // Logger pour afficher le contenu de openCardBoxSpawnCardPackPosList
+        //        Plugin.Logger.LogInfo($"Contenu de openCardBoxSpawnCardPackPosList (nombre d'éléments : {openCardBoxSpawnCardPackPosList.Count}):");
+
+        //        for (int i = 0; i < openCardBoxSpawnCardPackPosList.Count; i++)
+        //        {
+        //            Transform item = openCardBoxSpawnCardPackPosList[i];
+
+        //            if (item != null)
+        //            {
+        //                // Logger les informations importantes de chaque Transform
+        //                Plugin.Logger.LogInfo($"Élément {i} : Position = {item.position}, Rotation = {item.rotation}, Scale = {item.localScale}, Nom = {item.name}");
+        //                Plugin.Logger.LogInfo($"Élément {i} : LocalPosition = {item.localPosition}, LocalRotation = {item.localRotation}, Scale = {item.localScale}, Nom = {item.name}");
+        //            }
+        //            else
+        //            {
+        //                Plugin.Logger.LogInfo($"Élément {i} : NULL");
+        //            }
+        //        }
+
+        //        if (__instance.m_HoldCardPackPosList.Count < 24)
+        //        {
+        //            Plugin.Logger.LogInfo($"__instance.m_HoldCardPackPosList ne contient que {__instance.m_HoldCardPackPosList.Count} éléments. Ajout d'éléments fictifs pour atteindre 24.");
+
+        //            // Récupérer le dernier élément valide pour baser les éléments fictifs
+        //            Transform lastValidTransform = __instance.m_HoldCardPackPosList.Count > 0 ? __instance.m_HoldCardPackPosList[__instance.m_HoldCardPackPosList.Count - 1] : null;
+
+        //            // Déclarer un parent par défaut si nécessaire (remplacer "SomeParentObject" par un objet réel de votre scène)
+        //            Transform someDefaultParentTransformV2 = GameObject.Find("SomeParentObject")?.transform;
+
+        //            // Vérifier si lastValidTransform a un parent, sinon définisser un parent par défaut
+        //            Transform defaultParent = lastValidTransform?.parent != null ? lastValidTransform.parent : someDefaultParentTransformV2;
+
+        //            // Logger pour savoir quel parent est utilisé
+        //            if (lastValidTransform != null && lastValidTransform.parent != null)
+        //            {
+        //                Plugin.Logger.LogInfo($"Le parent du dernier élément valide est : {lastValidTransform.parent.name}");
+        //            }
+        //            else
+        //            {
+        //                Plugin.Logger.LogInfo("Aucun parent trouvé pour le dernier élément valide. Utilisation du parent par défaut.");
+        //            }
+
+
+        //            while (__instance.m_HoldCardPackPosList.Count < 24)
+        //            {
+        //                Transform fakeTransform = new GameObject("FakeTransform").transform;
+        //                fakeTransform.localPosition = lastValidTransform != null ? lastValidTransform.localPosition + new Vector3(0.02f, 0, 0) : Vector3.zero;
+        //                fakeTransform.localRotation = lastValidTransform != null ? lastValidTransform.localRotation * Quaternion.Euler(0, 0.5f, 0) : Quaternion.identity;
+        //                fakeTransform.localScale = lastValidTransform != null ? lastValidTransform.localScale : Vector3.one;
+        //                fakeTransform.name = $"HoldCardPackPosLoc ({__instance.m_HoldCardPackPosList.Count})";
+        //                fakeTransform.parent = defaultParent;
+        //                __instance.m_HoldCardPackPosList.Add(fakeTransform);
+        //                lastValidTransform = fakeTransform;
+        //            }
+        //        }
+
+        //        for (int index = 0; index < openCardBoxSpawnCardPackPosList.Count; ++index)
+        //        {
+        //            if (index < m_HoldItemList.Count)
+        //            {
+        //                Plugin.Logger.LogInfo("Index : " + index);
+        //                ItemMeshData itemMeshData2 = InventoryBase.GetItemMeshData(cardPack);
+        //                Item obj = ItemSpawnManager.GetItem(openCardBoxSpawnCardPackPosList[index]);
+        //                if (obj != null)
+        //                {
+        //                    Transform cardBoxInnerMesh = __instance.m_HoldCardPackPosList[index].Find("CardBoxInnerMesh");
+        //                    if (cardBoxInnerMesh != null)
+        //                    {
+        //                        Vector3[] packPositions = new Vector3[]
+        //                        {
+        //                            new Vector3(-0.05f, 0.1f - 0.08f, 0),
+        //                            new Vector3(0.05f, 0.1f - 0.08f, 0),
+        //                            new Vector3(-0.05f, 0.096f - 0.08f, 0),
+        //                            new Vector3(0.05f, 0.096f - 0.08f, 0),
+        //                            new Vector3(-0.05f, 0.092f - 0.08f, 0),
+        //                            new Vector3(0.05f, 0.092f - 0.08f, 0),
+        //                            new Vector3(-0.05f, 0.088f - 0.08f, 0),
+        //                            new Vector3(0.05f, 0.088f - 0.08f, 0),
+        //                            new Vector3(-0.05f, 0.084f - 0.08f, 0),
+        //                            new Vector3(0.05f, 0.084f - 0.08f, 0),
+        //                            new Vector3(-0.05f, 0.08f - 0.08f, 0),
+        //                            new Vector3(0.05f, 0.08f - 0.08f, 0),
+        //                            new Vector3(-0.05f, 0.076f - 0.08f, 0),
+        //                            new Vector3(0.05f, 0.076f - 0.08f, 0),
+        //                            new Vector3(-0.05f, 0.072f - 0.08f, 0),
+        //                            new Vector3(0.05f, 0.072f - 0.08f, 0),
+        //                            new Vector3(-0.05f, 0.068f - 0.08f, 0),
+        //                            new Vector3(0.05f, 0.068f - 0.08f, 0),
+        //                            new Vector3(-0.05f, 0.064f - 0.08f, 0),
+        //                            new Vector3(0.05f, 0.064f - 0.08f, 0),
+        //                            new Vector3(-0.05f, 0.060f - 0.08f, 0),
+        //                            new Vector3(0.05f, 0.060f - 0.08f, 0),
+        //                            new Vector3(-0.05f, 0.056f - 0.08f, 0),
+        //                            new Vector3(0.05f, 0.056f - 0.08f, 0),
+        //                        };
+        //                        int packIndex = 0;
+        //                        foreach (Transform child in cardBoxInnerMesh)
+        //                        {
+        //                            if (child.name.StartsWith("SpawnCardPackPosLoc"))
+        //                            {
+        //                                if (packIndex < packPositions.Length)
+        //                                {
+        //                                    child.localPosition = packPositions[packIndex];
+        //                                    child.localRotation = Quaternion.Euler(270, 0, 0);
+        //                                    child.localScale = new Vector3(1f, 1f, 1f);
+        //                                    packIndex++;
+        //                                }
+        //                            }
+        //                            else if (child.name.StartsWith("CardBoxStaticMesh"))
+        //                            {
+        //                                child.localPosition = new Vector3(-0.001f, 0.1107f - 0.08f, 0);
+        //                                child.localRotation = Quaternion.Euler(0, 180, 0);
+        //                                child.localScale = new Vector3(0.15f, 0.15f, 0.0001f);
+        //                                Dictionary<EItemType, string> texturePaths = new Dictionary<EItemType, string>
+        //                                {
+        //                                    { EItemType.BasicCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatB.png") },
+        //                                    { EItemType.RareCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatC.png") },
+        //                                    { EItemType.EpicCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatD.png") },
+        //                                    { EItemType.LegendaryCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_Beetle.png") },
+        //                                    { EItemType.DestinyBasicCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatB.png") },
+        //                                    { EItemType.DestinyRareCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatC.png") },
+        //                                    { EItemType.DestinyEpicCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatD.png") },
+        //                                    { EItemType.DestinyLegendaryCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_Beetle.png") },
+        //                                };
+
+        //                                // Vérifie si le cardPack a une texture associée dans le dictionnaire
+        //                                if (texturePaths.TryGetValue(cardPack, out string texturePath))
+        //                                {
+        //                                    Plugin.Logger.LogError($"{cardPack} détecté, application d'une nouvelle texture.");
+        //                                    ApplyTextureToChild(child, texturePath);
+        //                                }
+
+        //                                // Coordonnées UV pour les coins du rectangle
+        //                                Vector2 uvTopLeft = new Vector2(0.029f, 0.509f);       // Haut gauche
+        //                                Vector2 uvBottomRight = new Vector2(0.490f, 0.099f);   // Bas droite
+        //                                ChangeTextureColorInUVRectangle(child.gameObject, uvTopLeft, uvBottomRight, Color.white);
+        //                                StartChildAnimation(child);
+        //                            }
+        //                            else if (child.name.StartsWith("StaticMesh"))
+        //                            {
+        //                                child.localPosition = new Vector3(-0.001f, 0.08f - 0.08f, 0);
+        //                                child.localRotation = Quaternion.Euler(90, 180, 0);
+        //                                child.localScale = new Vector3(0.15f, 0.15f, 0.15f);
+        //                                Dictionary<EItemType, string> texturePaths = new Dictionary<EItemType, string>
+        //                                {
+        //                                    { EItemType.BasicCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatB.png") },
+        //                                    { EItemType.RareCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatC.png") },
+        //                                    { EItemType.EpicCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatD.png") },
+        //                                    { EItemType.LegendaryCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_Beetle.png") },
+        //                                    { EItemType.DestinyBasicCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatB.png") },
+        //                                    { EItemType.DestinyRareCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatC.png") },
+        //                                    { EItemType.DestinyEpicCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_BatD.png") },
+        //                                    { EItemType.DestinyLegendaryCardPack, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "T_Beetle.png") },
+        //                                };
+
+        //                                // Vérifie si le cardPack a une texture associée dans le dictionnaire
+        //                                if (texturePaths.TryGetValue(cardPack, out string texturePath))
+        //                                {
+        //                                    Plugin.Logger.LogError($"{cardPack} détecté, application d'une nouvelle texture.");
+        //                                    ApplyTextureToChild(child, texturePath);
+        //                                }
+        //                            }
+        //                        }
+        //                    }
+
+        //                    obj.SetMesh(itemMeshData2.mesh, itemMeshData2.material, cardPack, itemMeshData2.meshSecondary, itemMeshData2.materialSecondary);
+        //                    obj.transform.position = openCardBoxSpawnCardPackPosList[index].position;
+        //                    obj.transform.rotation = openCardBoxSpawnCardPackPosList[index].rotation;
+        //                    obj.transform.parent = openCardBoxSpawnCardPackPosList[index];
+        //                    obj.transform.localScale = openCardBoxSpawnCardPackPosList[index].localScale;
+        //                    obj.gameObject.SetActive(true);
+        //                    Plugin.Logger.LogInfo("LocalPosition : " + obj.transform.localPosition);
+        //                    Plugin.Logger.LogInfo("Position : " + obj.transform.position);
+
+        //                    m_HoldItemList[index] = obj; // Remplacer l'élément fictif par le véritable objet
+        //                    CPlayerData.m_HoldItemTypeList.Add(obj.GetItemType());
+
+        //                    var delayLerpMethod = AccessTools.Method(__instance.GetType(), "DelayLerpSpawnedCardPackToHand");
+        //                    var enumerator = (IEnumerator)delayLerpMethod.Invoke(__instance, new object[] { index, (float)(1.25 + 0.05 * index), obj, holdCardPackPosList[index], holdItem });
+        //                    DelayLerpSpawnedCardPackToHandPostfix(__instance, index, (1.25f + 0.05f * (float)index), obj, holdCardPackPosList[index], holdItem);
+        //                }
+        //            }
+        //        }
+        //    }
+
+        //    return false;
+        //}
+
+
+        public static bool EvaluateOpenCardPack(InteractionPlayerController __instance)
+        {
+            var canOpenPackMethod = AccessTools.Method(__instance.GetType(), "CanOpenPack");
+            bool canOpenPack = (bool)canOpenPackMethod.Invoke(__instance, null);
+            if (canOpenPack)
+            {
+                Item item = ((List<Item>)Plugin.GetPProperty(__instance,"m_HoldItemList"))[0];
+                var removeHoldItemMethod = AccessTools.Method(__instance.GetType(), "RemoveHoldItem");
+                removeHoldItemMethod.Invoke(__instance, new object[] { item });
+
+                CSingleton<CardOpeningSequence>.Instance.ReadyingCardPack(item);
+                Plugin.SetPProperty(__instance, "m_IsHoldingMouseDown", false);
+                Plugin.SetPProperty(__instance, "m_IsHoldingMouseDown", false);
+            }
+            else
+            {
+                if (!CanOpenCardBox(__instance))
+                {
+                    return false;
+                }
+
+                Plugin.SetPProperty(__instance, "m_IsOpeningCardBox", true);
+                Item item2 = ((List<Item>)Plugin.GetPProperty(__instance, "m_HoldItemList"))[0];
+                EItemType eItemType = (EItemType)AccessTools.Method(__instance.GetType(), "CardBoxToCardPack").Invoke(__instance, new object[] { item2.GetItemType() });
+                if (eItemType != EItemType.None)
+                {
+                    ItemMeshData itemMeshData = InventoryBase.GetItemMeshData(item2.GetItemType());
+                    __instance.m_OpenCardBoxMeshFilter.mesh = itemMeshData.mesh;
+                    __instance.m_OpenCardBoxMesh.material = itemMeshData.material;
+                    item2.gameObject.SetActive(value: false);
+                    ((List<Item>)Plugin.GetPProperty(__instance, "m_HoldItemList")).Clear();
+                    CPlayerData.m_HoldItemTypeList.Clear();
+                    RemoveToolTip(EGameAction.OpenCardBox);
+                    SoundManager.PlayAudio("SFX_OpenCardBox", 0.6f);
+                    __instance.m_OpenCardBoxInnerMesh.gameObject.SetActive(value: true);
+                    __instance.m_OpenCardBoxInnerMesh.Rewind();
+                    __instance.m_OpenCardBoxInnerMesh.Play();
+                    Transform lastValidTransform = __instance.m_OpenCardBoxSpawnCardPackPosList.Count > 0 ? __instance.m_OpenCardBoxSpawnCardPackPosList[0] : null;
+                    while (__instance.m_OpenCardBoxSpawnCardPackPosList.Count < 24)
+                    {
+                        Transform fakeTransform = new GameObject("FakeTransform").transform;
+                        fakeTransform.localPosition = lastValidTransform != null ? lastValidTransform.localPosition + new Vector3(0.02f, 0, 0) : Vector3.zero;
+                        fakeTransform.localRotation = lastValidTransform != null ? lastValidTransform.localRotation * Quaternion.Euler(0, 0.5f, 0) : Quaternion.identity;
+                        fakeTransform.localScale = lastValidTransform != null ? lastValidTransform.localScale : Vector3.one;
+                        fakeTransform.name = $"SpawnCardPackPosLoc ({__instance.m_OpenCardBoxSpawnCardPackPosList.Count})";
+                        //fakeTransform.parent = lastValidTransform.parent;
+                        __instance.m_OpenCardBoxSpawnCardPackPosList.Add(fakeTransform);
+                        lastValidTransform = fakeTransform;
+                    }
+
+                    //while (__instance.m_HoldCardPackPosList.Count < 24)
+                    //{
+                    //    Transform fakeTransform = new GameObject("FakeTransform").transform;
+                    //    fakeTransform.localPosition = lastValidTransform != null ? lastValidTransform.localPosition + new Vector3(0.02f, 0, 0) : Vector3.zero;
+                    //    fakeTransform.localRotation = lastValidTransform != null ? lastValidTransform.localRotation * Quaternion.Euler(0, 0.5f, 0) : Quaternion.identity;
+                    //    fakeTransform.localScale = lastValidTransform != null ? lastValidTransform.localScale : Vector3.one;
+                    //    fakeTransform.name = $"HoldCardPackPosLoc ({__instance.m_HoldCardPackPosList.Count})";
+                    //    fakeTransform.parent = lastValidTransform.parent;
+                    //    __instance.m_HoldCardPackPosList.Add(fakeTransform);
+                    //    lastValidTransform = fakeTransform;
+                    //}
+
+                    for (int i = 0; i < MaxPacks; i++)
+                    {
+                        Plugin.Logger.LogInfo($"ready HERE {i}");
+                        Item item3 = null;
+                        ItemMeshData itemMeshData2 = InventoryBase.GetItemMeshData(eItemType);
+                        item3 = ItemSpawnManager.GetItem(__instance.m_OpenCardBoxSpawnCardPackPosList[i]);
+                        item3.SetMesh(itemMeshData2.mesh, itemMeshData2.material, eItemType, itemMeshData2.meshSecondary, itemMeshData2.materialSecondary);
+                        item3.transform.position = __instance.m_OpenCardBoxSpawnCardPackPosList[i].position;
+                        item3.transform.rotation = __instance.m_OpenCardBoxSpawnCardPackPosList[i].rotation;
+                        item3.transform.parent = __instance.m_OpenCardBoxSpawnCardPackPosList[i];
+                        item3.transform.localScale = __instance.m_OpenCardBoxSpawnCardPackPosList[i].localScale;
+                        item3.gameObject.SetActive(value: true);
+                        ((List<Item>)Plugin.GetPProperty(__instance, "m_HoldItemList")).Add(item3);
+                        CPlayerData.m_HoldItemTypeList.Add(item3.GetItemType());
+                        Plugin.Logger.LogInfo("__instance.m_HoldCardPackPosList count : " + __instance.m_HoldCardPackPosList.Count);
+                        Plugin.Logger.LogInfo("__instance.m_OpenCardBoxSpawnCardPackPosList count : " + __instance.m_OpenCardBoxSpawnCardPackPosList.Count);
+                        __instance.StartCoroutine(DelayLerpSpawnedCardPackToHand(__instance, i, 1.25f + (0.05f * (float)i), item3, __instance.m_HoldCardPackPosList[i], item2));
+                        Plugin.Logger.LogInfo($"OK HERE {i}");
+                    }
+                    Plugin.Logger.LogInfo("OK HERE");
+                }
+            }
+
+            return false;
+        }
+
+        public static IEnumerator DelayLerpSpawnedCardPackToHand(InteractionPlayerController __instance, int index, float waitTime, Item item, Transform targetTransform, Item cardBoxItem)
+        {
+            yield return new WaitForSeconds(waitTime);
+            item.SmoothLerpToTransform(targetTransform, targetTransform);
+            if (index == 7 && (bool)cardBoxItem)
+            {
+                cardBoxItem.DisableItem();
+                __instance.m_OpenCardBoxInnerMesh.gameObject.SetActive(value: false);
+                Plugin.SetPProperty(__instance, "m_IsOpeningCardBox", false);
+            }
+        }
+
+        private static IEnumerator HandleDelayLerpSpawnedCardPackToHand(InteractionPlayerController __instance, int index, float waitTime, Item item, Transform targetTransform, Item cardBoxItem)
+        {
+            var innerMeshField = AccessTools.Field(__instance.GetType(), "m_OpenCardBoxInnerMesh");
+            var m_OpenCardBoxInnerMesh = innerMeshField.GetValue(__instance) as Animation;
+            var isOpeningField = AccessTools.Field(__instance.GetType(), "m_IsOpeningCardBox");
+
+            yield return new WaitForSeconds(waitTime);
+            item.SmoothLerpToTransform(targetTransform, targetTransform);
+
+            if (index == 23 && cardBoxItem != null)
+            {
+                yield return new WaitForSeconds(0.5f);
+                cardBoxItem.DisableItem();
+                if (m_OpenCardBoxInnerMesh != null)
+                {
+                    m_OpenCardBoxInnerMesh.gameObject.SetActive(false);
+                }
+                isOpeningField.SetValue(__instance, false);
+            }
+        }
+
+        private static AnimationOpeningDisplay animationDisplay;
+        public static void InitializeAnimationDisplay()
+        {
+            GameObject animationDisplayObject = new GameObject("AnimationOpeningDisplay");
+            animationDisplay = animationDisplayObject.AddComponent<AnimationOpeningDisplay>();
+        }
+
+        public static void StartChildAnimation(Transform child)
+        {
+            if (animationDisplay == null)
+            {
+                InitializeAnimationDisplay();
+            }
+            animationDisplay.StartAnimation(child);
+        }
+        static void ChangeTextureColorInUVRectangle(GameObject targetObject, Vector2 uvTopLeft, Vector2 uvBottomRight, Color newColor)
+        {
+            Renderer renderer = targetObject.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                Material material = renderer.material;
+                Texture2D texture = material.mainTexture as Texture2D;
+
+                if (texture != null)
+                {
+                    // Rendre la texture modifiable
+                    Texture2D readableTexture = TextureUtils.MakeTextureReadable(texture);
+                    if (readableTexture != null)
+                    {
+                        // Convertir les coordonnées UV en coordonnées de pixels
+                        int pixelXMin = Mathf.FloorToInt(uvTopLeft.x * readableTexture.width);
+                        int pixelYMin = Mathf.FloorToInt(uvBottomRight.y * readableTexture.height);
+                        int pixelXMax = Mathf.FloorToInt(uvBottomRight.x * readableTexture.width);
+                        int pixelYMax = Mathf.FloorToInt(uvTopLeft.y * readableTexture.height);
+
+                        // Boucle sur les pixels compris dans le rectangle
+                        for (int y = pixelYMin; y <= pixelYMax; y++)
+                        {
+                            for (int x = pixelXMin; x <= pixelXMax; x++)
+                            {
+                                // Modifier la couleur de chaque pixel dans la zone
+                                readableTexture.SetPixel(x, y, newColor);
+                            }
+                        }
+
+                        // Appliquer les changements à la texture
+                        readableTexture.Apply();
+
+                        // Réaffecter la texture modifiée au matériau
+                        material.mainTexture = readableTexture;
+
+                        Debug.Log($"Texture modifiée pour la zone UV ({uvTopLeft}, {uvBottomRight}) sur l'objet {targetObject.name}");
+                    }
+                    else
+                    {
+                        Debug.LogError("Impossible de rendre la texture lisible.");
+                    }
+                }
+                else
+                {
+                    Debug.LogError("Le GameObject n'a pas de Texture2D assignée.");
+                }
+            }
+            else
+            {
+                Debug.LogError("Le GameObject n'a pas de Renderer.");
+            }
+        }
+        public static Texture2D LoadTexture(string path)
+        {
+            // Exemple de chargement d'une texture à partir d'un fichier (ajuste selon ton projet)
+            byte[] fileData = System.IO.File.ReadAllBytes(path);
+            Texture2D tex = new Texture2D(2, 2);
+            if (tex.LoadImage(fileData))
+                return tex;
+            return null;
+        }
+        public static void ApplyTextureToChild(Transform child, string texturePath)
+        {
+            Texture2D newTexture = LoadTexture(texturePath);
+
+            if (newTexture != null)
+            {
+                Renderer renderer = child.GetComponent<Renderer>();
+                if (renderer != null)
+                {
+                    if (renderer.material != null && renderer.material.mainTexture == newTexture)
+                    {
+                        Plugin.Logger.LogError("Texture déjà appliquée, aucune modification nécessaire.");
+                        return;
+                    }
+
+                    // Réutilise un matériau existant si possible
+                    Material material = renderer.material ?? new Material(renderer.sharedMaterial);
+                    material.mainTexture = newTexture;
+                    renderer.material = material;
+
+                    Plugin.Logger.LogError("Texture appliquée avec succès !");
+                }
+                else
+                {
+                    Plugin.Logger.LogError("Impossible de récupérer le Renderer.");
+                }
+            }
+            else
+            {
+                Plugin.Logger.LogError("Échec du chargement de la texture.");
+            }
+        }
+    }
+}

@@ -10,6 +10,7 @@ public class GameStarting
         if (__instance.m_IsGameLevel) {
             PatchTexturesImporter.ReplaceGameTextures("shared1");
             OBJImporter.DoReplace();
+            CustomItemsImporter.ImportCustomItems();
         }
         else
         {

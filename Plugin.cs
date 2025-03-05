@@ -6,6 +6,7 @@ using System.Reflection;
 using WankulCrazyPlugin.patch;
 using UnityEngine;
 using System;
+using WankulCrazyPlugin.importer;
 
 namespace WankulCrazyPlugin;
 
@@ -20,6 +21,48 @@ public class Plugin : BaseUnityPlugin
         Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
 
         Harmony harmony = new Harmony(PluginInfo.PLUGIN_GUID);
+
+        //EnumExtensions.GenerateRemappedEnumValues();
+
+        // 🎯 Patch `(int)myitem.type`
+        MethodInfo original_ConvI4 = AccessTools.Method(typeof(EItemType), "ToInt32");
+        MethodInfo patch_ConvI4 = AccessTools.Method(typeof(Patch_Enum_Transpiler), "HandleCustomEnumValue");
+        if (original_ConvI4 != null)
+        {
+            harmony.Patch(original_ConvI4, postfix: new HarmonyMethod(patch_ConvI4));
+        }
+
+        // 🎯 Patch `==` et `!=`
+        MethodInfo original_Comparison = AccessTools.Method(typeof(EItemType), "op_Equality");
+        MethodInfo patch_Comparison = AccessTools.Method(typeof(Patch_Enum_Comparison), "HandleEnumComparison");
+        if (original_Comparison != null)
+        {
+            harmony.Patch(original_Comparison, postfix: new HarmonyMethod(patch_Comparison));
+        }
+
+        // 🎯 Patch `Enum.GetName()`
+        MethodInfo original_GetName = AccessTools.Method(typeof(Enum), "GetName", new Type[] { typeof(Type), typeof(object) });
+        MethodInfo patch_GetName = AccessTools.Method(typeof(Patch_Enum_GetName), "Prefix");
+        if (original_GetName != null)
+        {
+            harmony.Patch(original_GetName, prefix: new HarmonyMethod(patch_GetName));
+        }
+
+        // 🎯 Patch `Enum.IsDefined()`
+        MethodInfo original_IsDefined = AccessTools.Method(typeof(Enum), "IsDefined", new Type[] { typeof(Type), typeof(object) });
+        MethodInfo patch_IsDefined = AccessTools.Method(typeof(Patch_Enum_IsDefined), "Prefix");
+        if (original_IsDefined != null)
+        {
+            harmony.Patch(original_IsDefined, prefix: new HarmonyMethod(patch_IsDefined));
+        }
+
+        // 🎯 Patch `Enum.Parse()`
+        MethodInfo original_Parse = AccessTools.Method(typeof(Enum), "Parse", new Type[] { typeof(Type), typeof(string), typeof(bool) });
+        MethodInfo patch_Parse = AccessTools.Method(typeof(Patch_Enum_Parse), "Prefix");
+        if (original_Parse != null)
+        {
+            harmony.Patch(original_Parse, prefix: new HarmonyMethod(patch_Parse));
+        }
 
         MethodInfo original_OnLevelFinishedLoading = AccessTools.Method(typeof(CGameManager), "OnLevelFinishedLoading");
         MethodInfo patch_OnLevelFinishedLoading = AccessTools.Method(typeof(GameStarting), "OnLevelFinishedLoading");
@@ -165,6 +208,74 @@ public class Plugin : BaseUnityPlugin
         MethodInfo original_OnPayingDone = AccessTools.Method(typeof(Customer), "OnPayingDone");
         MethodInfo patch_OnPayingDone = AccessTools.Method(typeof(CardPrice), "OnPayingDone");
         harmony.Patch(original_OnPayingDone, prefix: new HarmonyMethod(patch_OnPayingDone));
+
+        MethodInfo original_ItemTypeToCollectionPackType = AccessTools.Method(typeof(InventoryBase), "ItemTypeToCollectionPackType");
+        MethodInfo patch_ItemTypeToCollectionPackType = AccessTools.Method(typeof(CustomItemsImporter), "ItemTypeToCollectionPackType");
+        harmony.Patch(original_ItemTypeToCollectionPackType, prefix: new HarmonyMethod(patch_ItemTypeToCollectionPackType));
+
+        MethodInfo original_GetCardExpansionType = AccessTools.Method(typeof(InventoryBase), "GetCardExpansionType");
+        MethodInfo patch_GetCardExpansionType = AccessTools.Method(typeof(CustomItemsImporter), "GetCardExpansionType");
+        harmony.Patch(original_GetCardExpansionType, prefix: new HarmonyMethod(patch_GetCardExpansionType));
+
+        MethodInfo original_CardBoxToCardPack = AccessTools.Method(typeof(InteractionPlayerController), "CardBoxToCardPack");
+        MethodInfo patch_CardBoxToCardPack = AccessTools.Method(typeof(WankulCrazyPlugin.patch.InteractionPlayerControllerPatch), "CardBoxToCardPack");
+        harmony.Patch(original_CardBoxToCardPack, prefix: new HarmonyMethod(patch_CardBoxToCardPack));
+
+        //MethodInfo original_EvaluateTakeItemFromShelf = AccessTools.Method(typeof(InteractionPlayerController), "EvaluateTakeItemFromShelf");
+        //MethodInfo patch_EvaluateTakeItemFromShelf = AccessTools.Method(typeof(WankulCrazyPlugin.patch.InteractionPlayerControllerPatch), "EvaluateTakeItemFromShelfTranspiler");
+        //harmony.Patch(original_EvaluateTakeItemFromShelf, transpiler: new HarmonyMethod(patch_EvaluateTakeItemFromShelf));
+
+        //MethodInfo original_HasEnoughSlotToHoldCard = AccessTools.Method(typeof(InteractionPlayerController), "HasEnoughSlotToHoldCard");
+        //MethodInfo patch_HasEnoughSlotToHoldCard = AccessTools.Method(typeof(WankulCrazyPlugin.patch.InteractionPlayerControllerPatch), "HasEnoughSlotToHoldCardTranspiler");
+        //harmony.Patch(original_HasEnoughSlotToHoldCard, transpiler: new HarmonyMethod(patch_HasEnoughSlotToHoldCard));
+
+        MethodInfo original_Awake = AccessTools.Method(typeof(InteractionPlayerController), "Awake");
+        MethodInfo patch_AwakePostfix = AccessTools.Method(typeof(WankulCrazyPlugin.patch.InteractionPlayerControllerPatch), "AwakePostfix");
+        harmony.Patch(original_Awake, postfix: new HarmonyMethod(patch_AwakePostfix));
+
+        MethodInfo original_EvaluateOpenCardPackV2 = AccessTools.Method(typeof(InteractionPlayerController), "EvaluateOpenCardPack");
+        MethodInfo patch_EvaluateOpenCardPack = AccessTools.Method(typeof(WankulCrazyPlugin.patch.InteractionPlayerControllerPatch), "EvaluateOpenCardPack");
+        harmony.Patch(original_EvaluateOpenCardPackV2, prefix: new HarmonyMethod(patch_EvaluateOpenCardPack));
+
+        //MethodInfo original_AddHoldCard = AccessTools.Method(typeof(InteractionPlayerController), "AddHoldCard");
+        //MethodInfo patch_AddHoldCard = AccessTools.Method(typeof(WankulCrazyPlugin.patch.InteractionPlayerControllerPatch), "AddHoldCard");
+        //harmony.Patch(original_AddHoldCard, postfix: new HarmonyMethod(patch_AddHoldCard));
+
+        MethodInfo original_RemoveToolTip = AccessTools.Method(typeof(InteractionPlayerController), "RemoveToolTip");
+        MethodInfo patch_RemoveToolTip = AccessTools.Method(typeof(WankulCrazyPlugin.patch.InteractionPlayerControllerPatch), "RemoveToolTip");
+        harmony.Patch(original_RemoveToolTip, postfix: new HarmonyMethod(patch_RemoveToolTip));
+
+        MethodInfo original_CanOpenPack = AccessTools.Method(typeof(InteractionPlayerController), "CanOpenPack");
+        MethodInfo patch_CanOpenPack = AccessTools.Method(typeof(WankulCrazyPlugin.patch.InteractionPlayerControllerPatch), "CanOpenPack");
+        harmony.Patch(original_CanOpenPack, prefix: new HarmonyMethod(patch_CanOpenPack));
+
+        MethodInfo original_CanOpenCardBox = AccessTools.Method(typeof(InteractionPlayerController), "CanOpenCardBox");
+        MethodInfo patch_CanOpenCardBox = AccessTools.Method(typeof(WankulCrazyPlugin.patch.InteractionPlayerControllerPatch), "CanOpenCardBox");
+        harmony.Patch(original_CanOpenCardBox, prefix: new HarmonyMethod(patch_CanOpenCardBox));
+
+        MethodInfo original_DelayLerpSpawnedCardPackToHand = AccessTools.Method(typeof(InteractionPlayerController), "DelayLerpSpawnedCardPackToHand");
+        MethodInfo patch_DelayLerpSpawnedCardPackToHandPostfix = AccessTools.Method(typeof(WankulCrazyPlugin.patch.InteractionPlayerControllerPatch), "DelayLerpSpawnedCardPackToHandPostfix");
+        harmony.Patch(original_DelayLerpSpawnedCardPackToHand, postfix: new HarmonyMethod(patch_DelayLerpSpawnedCardPackToHandPostfix));
+
+        MethodInfo original_SetMesh = AccessTools.Method(typeof(Item), "SetMesh");
+        MethodInfo patch_SetMeshPatch = AccessTools.Method(typeof(WankulCrazyPlugin.importer.PatchTexturesImporter), "ItemPostfix");
+        harmony.Patch(original_SetMesh, postfix: new HarmonyMethod(patch_SetMeshPatch));
+
+        MethodInfo original_WindowsPoster = AccessTools.Method(typeof(UnlockRoomManager), "Init");
+        MethodInfo patch_WindowsPoster = AccessTools.Method(typeof(WindowsPosters), "Init");
+        harmony.Patch(original_WindowsPoster, postfix: new HarmonyMethod(patch_WindowsPoster));
+
+        MethodInfo original_SetCustomer = AccessTools.Method(typeof(CustomerTradeCardScreen), "SetCustomer");
+        MethodInfo patch_SetCustomer = AccessTools.Method(typeof(CustomerTradeCardScreenPatch), "SetCustomer");
+        harmony.Patch(original_SetCustomer, prefix: new HarmonyMethod(patch_SetCustomer));
+
+        MethodInfo original_OnCardScanned = AccessTools.Method(typeof(UI_CashCounterScreen), "OnCardScanned");
+        MethodInfo patch_OnCardScanned = AccessTools.Method(typeof(UI_CashCounterScreenPatch), "OnCardScanned");
+        harmony.Patch(original_OnCardScanned, prefix: new HarmonyMethod(patch_OnCardScanned));
+
+        MethodInfo original_GetCardAmount = AccessTools.Method(typeof(CPlayerData), "GetCardAmount");
+        MethodInfo patch_GetCardAmount = AccessTools.Method(typeof(CPlayerDataPatch), "GetCardAmount");
+        harmony.Patch(original_GetCardAmount, prefix: new HarmonyMethod(patch_GetCardAmount));
     }
 
     public static string GetPluginPath()
@@ -186,7 +297,7 @@ public class Plugin : BaseUnityPlugin
         return value;
     }
 
-    public static void SetPProperty(object __instance, string fieldName, object value)
+    public static object SetPProperty(object __instance, string fieldName, object value)
     {
         Type type = __instance.GetType();
         BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Instance;
@@ -195,9 +306,10 @@ public class Plugin : BaseUnityPlugin
         if (field == null)
         {
             Plugin.Logger.LogError($"Field {fieldName} not found");
-            return;
+            return value;
         }
         field.SetValue(__instance, value);
+        return value;
     }
 
     public static string GetGameObjectPath(GameObject obj)

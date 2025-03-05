@@ -116,7 +116,7 @@ namespace WankulCrazyPlugin.patch
             }
         }
 
-        public static void OpenBooster(List<CardData> ___m_RolledCardDataList, List<float> ___m_CardValueList, ECollectionPackType ___m_CollectionPackType, Item ___m_CurrentItem, CardOpeningSequence __instance)
+        public static void OpenBooster(List<CardData> ___m_RolledCardDataList, List<float> ___m_CardValueList, ECollectionPackType ___m_CollectionPackType, Item ___m_CurrentItem, List<CardData> ___m_SecondaryRolledCardDataList, CardOpeningSequence __instance)
         {
             if (SavesManager.DebuggingSave)
             {
@@ -126,6 +126,8 @@ namespace WankulCrazyPlugin.patch
             WankulCardsData wankulCardsData = WankulCardsData.Instance;
             ___m_CardValueList.Clear();
             ___m_RolledCardDataList.Clear();
+            ___m_SecondaryRolledCardDataList.Clear();
+
             totalExpGained = 0;
 
             List<WankulCardData> alreadySelectedCards = new List<WankulCardData>();
@@ -178,6 +180,24 @@ namespace WankulCrazyPlugin.patch
                 else
                 {
                     ___m_RolledCardDataList.Add(associatedCard);
+                }
+
+                if (WankulInventory.isNewWankulCard(wankulCard))
+                {
+                    ((List<CardData>)Plugin.GetPProperty(__instance, "m_RolledCardDataList"))[i].isNew = true;
+                    if (CSingleton<CGameManager>.Instance.m_OpenPackShowNewCard)
+                    {
+                        ((List<bool>)Plugin.GetPProperty(__instance, "m_IsNewlList")).Add(item: true);
+                    }
+                    else
+                    {
+                        ((List<bool>)Plugin.GetPProperty(__instance, "m_IsNewlList")).Add(item: false);
+                    }
+                }
+                else
+                {
+                    ((List<CardData>)Plugin.GetPProperty(__instance, "m_RolledCardDataList"))[i].isNew = false;
+                    ((List<bool>)Plugin.GetPProperty(__instance, "m_IsNewlList")).Add(item: false);
                 }
 
                 // Calcul de l'XP gagnée

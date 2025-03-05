@@ -71,6 +71,7 @@ namespace WankulCrazyPlugin.cards
             // On ne stocke pas dans l'association pour de futures drops
             if (wankulCardData != null)
             {
+                //Plugin.Logger.LogInfo($"GetFromMonster Setting association for {key}");
                 association[key] = wankulCardData;
             }
 
@@ -123,6 +124,7 @@ namespace WankulCrazyPlugin.cards
             // Vérifiez si la clé existe déjà
             if (!association.ContainsKey(key))
             {
+                //Plugin.Logger.LogInfo($"SetFromMonster Setting association for {key}");
                 association[key] = card;  // Créez une nouvelle association
             }
             else
@@ -133,60 +135,179 @@ namespace WankulCrazyPlugin.cards
 
         public CardData GetUnassciatedCardData()
         {
-                
-                foreach (ECardExpansionType expansion in Enum.GetValues(typeof(ECardExpansionType)))
+            int currentTestedCard = 0;
+            foreach (ECardExpansionType expansion in Enum.GetValues(typeof(ECardExpansionType)))
+            {
+                if (
+                            expansion == ECardExpansionType.None ||
+                            expansion == ECardExpansionType.FantasyRPG ||
+                            expansion == ECardExpansionType.Megabot ||
+                            expansion == ECardExpansionType.CatJob ||
+                            expansion == ECardExpansionType.Ghost ||
+                            expansion == ECardExpansionType.FoodieGO ||
+                            expansion == ECardExpansionType.MAX
+                    )
                 {
-                    if (
-                                expansion == ECardExpansionType.None ||
-                                expansion == ECardExpansionType.FantasyRPG ||
-                                expansion == ECardExpansionType.Megabot ||
-                                expansion == ECardExpansionType.CatJob ||
-                                expansion == ECardExpansionType.Ghost ||
-                                expansion == ECardExpansionType.FoodieGO ||
-                                expansion == ECardExpansionType.MAX
-                        )
+                    continue;
+                }
+                foreach (ECardBorderType border in Enum.GetValues(typeof(ECardBorderType)))
+                {
+                    int startMonsterList = GetStartMonsterList(expansion);
+                    int endMonsterList = GetEndMonsterList(expansion);
+                    for (int i = startMonsterList; i <= endMonsterList; i++)
                     {
-                        continue;
-                    }
-                    foreach (ECardBorderType border in Enum.GetValues(typeof(ECardBorderType)))
-                    {
-                        foreach (EMonsterType monster in Enum.GetValues(typeof(EMonsterType)))
+                        EMonsterType monster = (EMonsterType)i;
+                        if (
+                            monster == EMonsterType.EarlyPlayer ||
+                            monster == EMonsterType.START_CATJOB ||
+                            monster == EMonsterType.START_FANTASYRPG ||
+                            monster == EMonsterType.START_MEGABOT ||
+                            monster == EMonsterType.None ||
+                            monster == EMonsterType.MAX ||
+                            monster == EMonsterType.MAX_CATJOB ||
+                            monster == EMonsterType.MAX_FANTASYRPG ||
+                            monster == EMonsterType.MAX_MEGABOT
+                            )
                         {
-                            if (
-                                monster == EMonsterType.EarlyPlayer ||
-                                monster == EMonsterType.START_CATJOB ||
-                                monster == EMonsterType.START_FANTASYRPG ||
-                                monster == EMonsterType.START_MEGABOT ||
-                                monster == EMonsterType.None ||
-                                monster == EMonsterType.MAX ||
-                                monster == EMonsterType.Max ||
-                                monster == EMonsterType.MaxArt ||
-                                monster == EMonsterType.MAX_CATJOB ||
-                                monster == EMonsterType.MAX_FANTASYRPG ||
-                                monster == EMonsterType.MAX_MEGABOT
-                                )
-                            {
-                                continue;
-                            }
-                            // Récupérer les données du monstre
-                            MonsterData monsterData = InventoryBase.GetMonsterData(monster);
+                            continue;
+                        }
+                        // Récupérer les données du monstre
+                        MonsterData monsterData = InventoryBase.GetMonsterData(monster);
 
-                            CardData cardData = new CardData();
-                            cardData.borderType = border;
-                            cardData.expansionType = expansion;
-                            cardData.monsterType = monster;
+                        CardData cardData = new CardData();
+                        cardData.borderType = border;
+                        cardData.expansionType = expansion;
+                        cardData.monsterType = monster;
 
-                            string key = $"{cardData.monsterType.ToString()}_{cardData.borderType.ToString()}_{cardData.expansionType.ToString()}";
-                            if (!association.ContainsKey(key))
-                            {
-                                return cardData; // Retourne le premier CardData manquant trouvé
-                            }
+                        string key = $"{cardData.monsterType.ToString()}_{cardData.borderType.ToString()}_{cardData.expansionType.ToString()}";
+                        currentTestedCard++;
+                        if (!association.ContainsKey(key))
+                        {
+                            return cardData; // Retourne le premier CardData manquant trouvé
+                        } else
+                        {
+                            //Plugin.Logger.LogInfo($"CardData {key} already associated {currentTestedCard}");
                         }
                     }
-
                 }
+
+            }
             return null; // Si aucune CardData manquante n'est trouvée
         }
+
+        private static int GetStartMonsterList(ECardExpansionType cardExpansion) {
+            if (cardExpansion == ECardExpansionType.Tetramon || cardExpansion == ECardExpansionType.Destiny)
+            {
+                return 0;
+            }
+            else if (cardExpansion == ECardExpansionType.Megabot)
+            {
+                return 1000;
+            }
+            else if (cardExpansion == ECardExpansionType.FantasyRPG)
+            {
+                return 2000;
+            }
+            else if (cardExpansion == ECardExpansionType.CatJob)
+            {
+                return 3000;
+            }
+            return 0;
+        }
+
+        private static int GetEndMonsterList(ECardExpansionType cardExpansion)
+        {
+            if (cardExpansion == ECardExpansionType.Tetramon || cardExpansion == ECardExpansionType.Destiny)
+            {
+                return 121;
+            }
+            else if (cardExpansion == ECardExpansionType.Megabot)
+            {
+                return 1112;
+            }
+            else if (cardExpansion == ECardExpansionType.FantasyRPG)
+            {
+                return 2049;
+            }
+            else if (cardExpansion == ECardExpansionType.CatJob)
+            {
+                return 3039;
+            }
+            return 122;
+        }
+
+        public static bool IsKeyValid(string keyToCheck)
+        {
+            // Découper la clé pour récupérer les valeurs
+            string[] parts = keyToCheck.Split('_');
+            if (parts.Length != 3)
+            {
+                //Console.WriteLine($"❌ Format incorrect pour la clé : {keyToCheck}");
+                return false;
+            }
+
+            // Parser les valeurs
+            if (!Enum.TryParse(parts[0], out EMonsterType monster))
+            {
+                //Console.WriteLine($"❌ Type de monstre invalide : {parts[0]}");
+                return false;
+            }
+
+            if (!Enum.TryParse(parts[1], out ECardBorderType border))
+            {
+                //Console.WriteLine($"❌ Type de bordure invalide : {parts[1]}");
+                return false;
+            }
+
+            if (!Enum.TryParse(parts[2], out ECardExpansionType expansion))
+            {
+                //Console.WriteLine($"❌ Type d'expansion invalide : {parts[2]}");
+                return false;
+            }
+
+            // Vérifier que l'expansion est valide
+            if (expansion == ECardExpansionType.None ||
+                expansion == ECardExpansionType.FantasyRPG ||
+                expansion == ECardExpansionType.Megabot ||
+                expansion == ECardExpansionType.CatJob ||
+                expansion == ECardExpansionType.Ghost ||
+                expansion == ECardExpansionType.FoodieGO ||
+                expansion == ECardExpansionType.MAX)
+            {
+                //Console.WriteLine($"❌ Expansion interdite : {expansion}");
+                return false;
+            }
+
+            // Vérifier que le monstre est dans la plage correcte pour l'expansion donnée
+            int startMonsterList = GetStartMonsterList(expansion);
+            int endMonsterList = GetEndMonsterList(expansion);
+
+            if ((int)monster < startMonsterList || (int)monster > endMonsterList)
+            {
+                //Console.WriteLine($"❌ Monstre {monster} hors de la plage [{startMonsterList}, {endMonsterList}] pour l'expansion {expansion}");
+                return false;
+            }
+
+            // Vérifier que le monstre ne fait pas partie des valeurs interdites
+            if (monster == EMonsterType.EarlyPlayer ||
+                monster == EMonsterType.START_CATJOB ||
+                monster == EMonsterType.START_FANTASYRPG ||
+                monster == EMonsterType.START_MEGABOT ||
+                monster == EMonsterType.None ||
+                monster == EMonsterType.MAX ||
+                monster == EMonsterType.MAX_CATJOB ||
+                monster == EMonsterType.MAX_FANTASYRPG ||
+                monster == EMonsterType.MAX_MEGABOT)
+            {
+                //Console.WriteLine($"❌ Monstre interdit : {monster}");
+                return false;
+            }
+
+            // Si tout est bon, la clé est valide
+            //Console.WriteLine($"✅ Clé valide : {keyToCheck}");
+            return true;
+        }
+
 
         public static int GetExperienceFromWankulCard(WankulCardData wankulCardData)
         {
@@ -267,13 +388,13 @@ namespace WankulCrazyPlugin.cards
             }
 
             // Logging for debugging purposes
-            Plugin.Logger.LogInfo($"Experience before shop factor: {experienceFloat}");
-            Plugin.Logger.LogInfo($"shop factor: {shopXpFactor}");
+            //Plugin.Logger.LogInfo($"Experience before shop factor: {experienceFloat}");
+            //Plugin.Logger.LogInfo($"shop factor: {shopXpFactor}");
 
             // Final experience calculation
             int experience = Mathf.CeilToInt(experienceFloat * shopXpFactor);
 
-            Plugin.Logger.LogInfo($"Experience after shop factor: {experience}");
+            //Plugin.Logger.LogInfo($"Experience after shop factor: {experience}");
 
             return experience;
         }

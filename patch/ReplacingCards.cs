@@ -171,7 +171,7 @@ public class ReplacingCards
         {
             __state.ready = true;
             __state.cardData = __instance.m_CurrentRaycastedInteractableCard3d.m_Card3dUI.m_CardUI.GetCardData();
-            __state.wankulCardData = WankulCardsData.Instance.GetFromMonster(__state.cardData, false);
+            __state.wankulCardData = WankulCardsData.Instance.GetFromMonster(__state.cardData, true);
         }
         else
         {
@@ -183,35 +183,40 @@ public class ReplacingCards
     {
         if (__state.ready)
         {
-            WankulCardData wankulCardData = __state.wankulCardData;
-            CardData inGameCard = __state.cardData;
-            ECardExpansionType expansionType = inGameCard.expansionType;
-            MonsterData monsterData = InventoryBase.GetMonsterData(inGameCard.monsterType);
-            EElementIndex elementIndex = monsterData.ElementIndex;
-            ERarity rarity = monsterData.Rarity;
-
-            string key = inGameCard.monsterType.ToString() + "_" + inGameCard.borderType.ToString() + "_" + expansionType.ToString() + "_" + elementIndex.ToString() + "_" + rarity.ToString();
-
-            if (__state.wankulCardData is EffigyCardData effigyCard)
+            if (__state.wankulCardData != null)
             {
-                __instance.m_CollectionBinderUI.m_CardFullRarityNameText.text = RaritiesContainer.Rarities[effigyCard.Rarity];
-                __instance.m_CollectionBinderUI.m_CardNameText.text = effigyCard.Title + "\n" + effigyCard.Effigy;
-            }
-            else if (__state.wankulCardData is SpecialCardData) {
-                __instance.m_CollectionBinderUI.m_CardFullRarityNameText.text = "SPECIAL";
-                __instance.m_CollectionBinderUI.m_CardNameText.text = wankulCardData.Title;
-            }
-            else if(__state.wankulCardData is TerrainCardData)
-            {
-                __instance.m_CollectionBinderUI.m_CardFullRarityNameText.text = "Terrain";
-                __instance.m_CollectionBinderUI.m_CardNameText.text = wankulCardData.Title;
-            }
-            else
-            {
-                __instance.m_CollectionBinderUI.m_CardFullRarityNameText.text = "Erreur";
-                __instance.m_CollectionBinderUI.m_CardNameText.text = "Erreur";
-            }
+                WankulCardData wankulCardData = __state.wankulCardData;
+                CardData inGameCard = __state.cardData;
+                ECardExpansionType expansionType = inGameCard.expansionType;
+                MonsterData monsterData = InventoryBase.GetMonsterData(inGameCard.monsterType);
+                EElementIndex elementIndex = monsterData.ElementIndex;
+                ERarity rarity = monsterData.Rarity;
 
+                string key = inGameCard.monsterType.ToString() + "_" + inGameCard.borderType.ToString() + "_" + expansionType.ToString() + "_" + elementIndex.ToString() + "_" + rarity.ToString();
+
+                if (__state.wankulCardData is EffigyCardData effigyCard)
+                {
+                    __instance.m_CollectionBinderUI.m_CardFullRarityNameText.text = RaritiesContainer.Rarities[effigyCard.Rarity];
+                    __instance.m_CollectionBinderUI.m_CardNameText.text = effigyCard.Title + "\n" + effigyCard.Effigy;
+                }
+                else if (__state.wankulCardData is SpecialCardData) {
+                    __instance.m_CollectionBinderUI.m_CardFullRarityNameText.text = "SPECIAL";
+                    __instance.m_CollectionBinderUI.m_CardNameText.text = wankulCardData.Title;
+                }
+                else if(__state.wankulCardData is TerrainCardData)
+                {
+                    __instance.m_CollectionBinderUI.m_CardFullRarityNameText.text = "Terrain";
+                    __instance.m_CollectionBinderUI.m_CardNameText.text = wankulCardData.Title;
+                }
+                else
+                {
+                    __instance.m_CollectionBinderUI.m_CardFullRarityNameText.text = "Erreur";
+                    __instance.m_CollectionBinderUI.m_CardNameText.text = "Erreur";
+                }
+            } else
+            {
+                Plugin.Logger.LogError("EnterViewUpCloseStatePostfix wankulCardData is null");
+            }
         }
     }
 
