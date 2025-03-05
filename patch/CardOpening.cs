@@ -15,6 +15,7 @@ namespace WankulCrazyPlugin.patch
     {
         public static int totalExpGained = 0;
         public static List<int> LegendaryBoosters = new List<int>();
+        public static List<int> URBoosters = new List<int>();
         public static int boosterSize = 10;
 
         public static void UpdatePreFix(ref List<CardData> ___m_RolledCardDataList, CardOpeningSequence __instance)
@@ -136,6 +137,7 @@ namespace WankulCrazyPlugin.patch
             {
                 bool isTerrain = i == 0;
                 bool isMinRare = i == boosterSize - 1;
+                bool isMinUR = false;
                 bool isMinLegendary = false;
                 int hash = ___m_CurrentItem.GetHashCode();
 
@@ -147,12 +149,26 @@ namespace WankulCrazyPlugin.patch
                         {
                             LegendaryBoosters.Remove(boosterHash);
                             isMinLegendary = true;
+                            isMinUR = false;
+                            isMinRare = false;
+                            break;
+                        }
+                    }
+
+                    foreach (int boosterHash in URBoosters)
+                    {
+                        if (boosterHash == hash)
+                        {
+                            Plugin.Logger.LogInfo("URBooster found: " + boosterHash);
+                            URBoosters.Remove(boosterHash);
+                            isMinLegendary = false;
+                            isMinUR = true;
                             isMinRare = false;
                             break;
                         }
                     }
                 }
-                WankulCardData wankulCard = WankulInventory.DropCard(___m_CollectionPackType, alreadySelectedCards, isTerrain, isMinRare, isMinLegendary);
+                WankulCardData wankulCard = WankulInventory.DropCard(___m_CollectionPackType, alreadySelectedCards, isTerrain, isMinRare, isMinUR, isMinLegendary);
                 CardData associatedCard = wankulCardsData.GetCardDataFromWankulCardData(wankulCard);
 
                 if (associatedCard == null)
@@ -230,11 +246,26 @@ namespace WankulCrazyPlugin.patch
         {
             if (__state.CanOpenCardBox)
             {
+                LegendaryBoosters.Clear();
+                URBoosters.Clear();
                 List<Item> m_HoldItemList = (List<Item>)AccessTools.Field(__instance.GetType(), "m_HoldItemList").GetValue(__instance);
-                int randomIndex = UnityEngine.Random.RandomRangeInt(0, m_HoldItemList.Count);
-                Item item = m_HoldItemList[randomIndex];
-                int hash = item.GetHashCode();
-                LegendaryBoosters.Add(hash);
+                List<int>availableHash = new List<int>();
+                for (int i = 0; i < m_HoldItemList.Count; i++)
+                {
+                    Item uritem = m_HoldItemList[i];
+                    availableHash.Add(uritem.GetHashCode());
+                }
+
+                int randomHash = availableHash[UnityEngine.Random.RandomRangeInt(0, availableHash.Count)];
+                availableHash.Remove(randomHash);
+                LegendaryBoosters.Add(randomHash);
+
+                for (int i = 0; i < 11; i++)
+                {
+                    int urrandomHash = availableHash[UnityEngine.Random.RandomRangeInt(0, availableHash.Count)];
+                    availableHash.Remove(urrandomHash);
+                    URBoosters.Add(urrandomHash);
+                }
             }
         }
 
