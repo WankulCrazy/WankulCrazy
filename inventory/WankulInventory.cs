@@ -30,7 +30,7 @@ namespace WankulCrazyPlugin.inventory
                 return Season.HS;
         }
 
-        public static WankulCardData DropCard(ECollectionPackType packType, List<WankulCardData> alreadySelectedCards, bool isTerrain = false, bool isMinRare = false, bool isMinUR = false, bool isMinLegendary = false)
+        public static WankulCardData DropCard(ECollectionPackType packType, List<WankulCardData> alreadySelectedCards, bool isTerrain = false, bool isMinRare = false, bool isMinUR = false, bool isMinLegendary = false, bool isRare = false)
         {
             ECollectionPackType stellarPackTaux = EnumExtensions.SafeParseECollectionPackType("StellarTaux");
             bool increaseRarity = false;
@@ -69,14 +69,11 @@ namespace WankulCrazyPlugin.inventory
                 seasonalCard = allCards;
             }
 
-            if (!isTerrain && (isMinRare || isMinLegendary || isMinUR))
+            if (!isTerrain && (isMinRare || isMinLegendary || isMinUR || isRare))
             {
                 List<EffigyCardData> effigyCardsData = seasonalCard
                     .FindAll(card => card is EffigyCardData)
                     .ConvertAll(card => (EffigyCardData)card);
-
-                List<WankulCardData> specialCardsData = seasonalCard
-                    .FindAll(card => card is SpecialCardData);
 
                 if (isMinRare)
                 {
@@ -94,7 +91,17 @@ namespace WankulCrazyPlugin.inventory
                         .ConvertAll(card => (WankulCardData)card);
                 }
 
+                if (isRare)
+                {
+                    seasonalCard = effigyCardsData.FindAll(card => card.Rarity == Rarity.R)
+                        .ConvertAll(card => (WankulCardData)card);
+                }
+
+
+                List<WankulCardData> specialCardsData = allCards
+                .FindAll(card => card is SpecialCardData);
                 seasonalCard.AddRange(specialCardsData);
+
             }
             else if (!isTerrain && !isMinRare)
             {
