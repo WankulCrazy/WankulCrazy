@@ -30,7 +30,7 @@ namespace WankulCrazyPlugin.inventory
                 return Season.HS;
         }
 
-        public static WankulCardData DropCard(ECollectionPackType packType, List<WankulCardData> alreadySelectedCards, bool isTerrain = false, bool isMinRare = false, bool isMinLegendary = false)
+        public static WankulCardData DropCard(ECollectionPackType packType, List<WankulCardData> alreadySelectedCards, bool isTerrain = false, bool isMinRare = false, bool isMinUR = false, bool isMinLegendary = false)
         {
             ECollectionPackType stellarPackTaux = EnumExtensions.SafeParseECollectionPackType("StellarTaux");
             bool increaseRarity = false;
@@ -69,7 +69,7 @@ namespace WankulCrazyPlugin.inventory
                 seasonalCard = allCards;
             }
 
-            if (!isTerrain && (isMinRare || isMinLegendary))
+            if (!isTerrain && (isMinRare || isMinLegendary || isMinUR))
             {
                 List<EffigyCardData> effigyCardsData = seasonalCard
                     .FindAll(card => card is EffigyCardData)
@@ -81,6 +81,11 @@ namespace WankulCrazyPlugin.inventory
                 if (isMinRare)
                 {
                     seasonalCard = effigyCardsData.FindAll(card => card.Rarity >= Rarity.R)
+                        .ConvertAll(card => (WankulCardData)card);
+                }
+                else if (isMinUR)
+                {
+                    seasonalCard = effigyCardsData.FindAll(card => card.Rarity >= Rarity.UR1)
                         .ConvertAll(card => (WankulCardData)card);
                 }
                 else if (isMinLegendary)
@@ -379,9 +384,10 @@ namespace WankulCrazyPlugin.inventory
             ECollectionPackType selectedPackType = dropableExpansion[Random.Range(0, dropableExpansion.Count)];
             bool isTerrain = Random.Range(0, 1) == 1;
             bool isMinRare = Random.Range(0, 1) == 1;
-            bool isMinLegendary = Random.Range(0, 100) < 50;
+            bool isMinUR = Random.Range(0, 100) < 50;
+            bool isMinLegendary = Random.Range(0, 200) < 50;
 
-            WankulCardData wankulCardData = DropCard(selectedPackType, new List<WankulCardData>(), isTerrain, isMinRare, isMinLegendary);
+            WankulCardData wankulCardData = DropCard(selectedPackType, new List<WankulCardData>(), isTerrain, isMinRare, isMinUR, isMinLegendary);
 
             CardData cardData = WankulCardsData.Instance.GetCardDataFromWankulCardData(wankulCardData);
             if (cardData == null) {
