@@ -159,7 +159,6 @@ namespace WankulCrazyPlugin.patch
                     {
                         if (boosterHash == hash)
                         {
-                            Plugin.Logger.LogInfo("URBooster found: " + boosterHash);
                             URBoosters.Remove(boosterHash);
                             isMinLegendary = false;
                             isMinUR = true;
