@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 using System;
+using HarmonyLib;
 
 namespace WankulCrazyPlugin.importer
 {
@@ -154,6 +155,78 @@ namespace WankulCrazyPlugin.importer
             }
 
             return fileNames;
+        }
+
+        static void ItemPostfix(Item __instance, Mesh mesh, Material material, EItemType itemType, Mesh meshSecondary, Material materialSecondary)
+        {
+            // Dictionnaire associant chaque type de CardBox à sa texture
+            Dictionary<EItemType, string> texturePaths = new Dictionary<EItemType, string>
+            {
+                { EItemType.BasicCardBox, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "Texture_Display_S1.png") },
+                { EItemType.RareCardBox, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "Texture_Display_S2.png") },
+                { EItemType.EpicCardBox, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "Texture_Display_S3.png") },
+                { EnumExtensions.SafeParseEItemType("DisplayStellar"), Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "Texture_Display_S4.png") },
+                { EItemType.LegendaryCardBox, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "Texture_Display_HS.png") },
+                { EItemType.DestinyBasicCardBox, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "Texture_Display_S1_TauxDrop.png") },
+                { EItemType.DestinyRareCardBox, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "Texture_Display_S2_TauxDrop.png") },
+                { EItemType.DestinyEpicCardBox, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "Texture_Display_S3_TauxDrop.png") },
+                { EItemType.DestinyLegendaryCardBox, Path.Combine(Plugin.GetPluginPath(), "data", "patchtextures", "shared1", "Texture_Display_HS_TauxDrop.png") },
+            };
+
+            if (texturePaths.TryGetValue(itemType, out string texturePath))
+            {
+                //Debug.Log($"{itemType} {__instance.name} {mesh.name} {material.name} détecté ! Application d'une nouvelle texture.");
+                ApplyTextureToItem(__instance, texturePath);
+            }
+        }
+
+        private static Texture2D LoadTexture(string path)
+        {
+            // Exemple de chargement d'une texture à partir d'un fichier (ajuste selon ton projet)
+            byte[] fileData = System.IO.File.ReadAllBytes(path);
+            Texture2D tex = new Texture2D(2, 2);
+            if (tex.LoadImage(fileData))
+                return tex;
+            return null;
+        }
+        private static void ApplyTextureToItem(Item item, string texturePath)
+        {
+            Texture2D newTexture = LoadTexture(texturePath);
+
+            if (newTexture != null)
+            {
+                if (item.m_Mesh != null)
+                {
+                    Renderer renderer = item.m_Mesh.GetComponent<Renderer>();
+                    if (renderer != null)
+                    {
+                        if (renderer.material != null && renderer.material.mainTexture == newTexture)
+                        {
+                            Debug.Log("Texture déjà appliquée, aucune modification nécessaire.");
+                            return;
+                        }
+
+                        // Réutilise un matériau existant si possible
+                        Material material = new Material(Shader.Find("Standard"));
+                        material.mainTexture = newTexture;
+                        renderer.material = material;
+
+                        //Debug.Log("Texture appliquée avec succès !");
+                    }
+                    else
+                    {
+                        Debug.LogError("Impossible de récupérer le Renderer.");
+                    }
+                }
+                else
+                {
+                    Debug.LogError("m_Mesh est null !");
+                }
+            }
+            else
+            {
+                Debug.LogError("Échec du chargement de la texture !");
+            }
         }
     }
 }

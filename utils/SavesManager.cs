@@ -7,6 +7,8 @@ using System;
 using System.Security.Cryptography;
 using System.Transactions;
 using WankulCrazyPlugin.patch;
+using System.Linq;
+using UnityEngine.UIElements;
 
 namespace WankulCrazyPlugin.utils
 {
@@ -61,7 +63,7 @@ namespace WankulCrazyPlugin.utils
     public class SavesManager
     {
         public static bool DebuggingSave = false;
-        public static string SaveVersion = "1.0.0";
+        public static string SaveVersion = "1.1.0";
         public static void ModSave()
         {
             Plugin.Logger.LogInfo("Saving cards associations");
@@ -77,7 +79,7 @@ namespace WankulCrazyPlugin.utils
             Dictionary<string, (int WankulCardIndex, List<float> pastPercent, float generatedMarketPrice)> knewAssociations = new Dictionary<string, (int WankulCardIndex, List<float> pastPercent, float generatedMarketPrice)>();
             foreach (var association in associations)
             {
-                Plugin.Logger.LogInfo("Saving association: " + association.Key + " => " + association.Value.Index);
+                //Plugin.Logger.LogInfo("Saving association: " + association.Key + " => " + association.Value.Index);
                 knewAssociations.Add(association.Key, (association.Value.Index, association.Value.PastPercent, association.Value.generatedMarketPrice));
             }
 
@@ -238,6 +240,16 @@ namespace WankulCrazyPlugin.utils
         {
             foreach (var association in save.associationsWithPercents)
             {
+                if (save.version == "1.0.0" && association.Value.WankulCardIndex == 546 || association.Value.WankulCardIndex == 547)
+                {
+                    continue;
+                }
+                if (WankulCardsData.Instance.association.ContainsKey(association.Key) || WankulCardsData.Instance.association.Values.Any(card => card.Index == association.Value.WankulCardIndex))
+                {
+                    //Plugin.Logger.LogInfo($"Association already exists: {association.Key}");
+                    continue;
+                }
+
                 var card = WankulCardsData.Instance.cards.Find(c => c.Index == association.Value.WankulCardIndex);
                 if (card != null)
                 {
@@ -252,13 +264,23 @@ namespace WankulCrazyPlugin.utils
                     }
 
                     UpdateCardPriceIfNeeded(card);
-                    WankulCardsData.Instance.association[association.Key] = card;
+
+                    if (WankulCardsData.IsKeyValid(association.Key))
+                    {
+                        WankulCardsData.Instance.association[association.Key] = card;
+                    } else
+                    {
+                        CardData cardData = WankulCardsData.Instance.GetUnassciatedCardData();
+                        WankulCardsData.Instance.association[$"{cardData.monsterType}_{cardData.borderType}_{cardData.expansionType}"] = card;
+                    }
                 }
                 else
                 {
                     Plugin.Logger.LogError($"WankulCardData not found for index: {association.Value.WankulCardIndex}");
                 }
             }
+
+            Plugin.Logger.LogInfo($"Associations loaded: {WankulCardsData.Instance.association.Count}");
         }
 
         private static void UpdateCardPriceIfNeeded(WankulCardData card)
@@ -275,11 +297,33 @@ namespace WankulCrazyPlugin.utils
         {
             foreach (var item in save.wankulCards)
             {
+                string cardkey = item.Value.cardkey;
                 var wankulCardData = WankulCardsData.Instance.cards.Find(card => card.Index == item.Value.WankulCardIndex);
                 if (wankulCardData != null)
                 {
-                    var cardData = WankulCardsData.Instance.GetCardDataFromKey(item.Value.cardkey);
-                    WankulInventory.Instance.wankulCards[item.Key] = (wankulCardData, cardData, item.Value.amount);
+                    if (WankulCardsData.IsKeyValid(cardkey))
+                    {
+                        var cardData = WankulCardsData.Instance.GetCardDataFromKey(item.Value.cardkey);
+                        WankulInventory.Instance.wankulCards[item.Key] = (wankulCardData, cardData, item.Value.amount);
+                    }
+                    else 
+                    {
+                        if (WankulInventory.Instance.wankulCards.TryGetValue(item.Key, out var existingCard))
+                        {
+                            existingCard.amount += item.Value.amount;
+                        } else
+                        {
+                            CardData cardData = WankulCardsData.Instance.GetCardDataFromWankulCardData(wankulCardData);
+                            if (cardData != null)
+                            {
+                                WankulInventory.Instance.wankulCards[item.Key] = (wankulCardData, cardData, item.Value.amount);
+                            }
+                            else
+                            {
+                                Plugin.Logger.LogError($"CardData not found for index: {item.Value.WankulCardIndex}");
+                            }
+                        }
+                    }
                 }
                 else
                 {

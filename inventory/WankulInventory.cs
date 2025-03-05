@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UIElements;
 using WankulCrazyPlugin.cards;
 using WankulCrazyPlugin.utils;
 
@@ -13,30 +14,25 @@ namespace WankulCrazyPlugin.inventory
 
         public static Season ConvertPackTypeToSeason(ECollectionPackType packType)
         {
-            switch (packType)
-            {
-                case ECollectionPackType.BasicCardPack:
-                case ECollectionPackType.DestinyBasicCardPack:
-                    return Season.S01;
+            // Récupère la valeur dynamique de "Stellar"
+            ECollectionPackType stellarPack = EnumExtensions.SafeParseECollectionPackType("Stellar");
+            ECollectionPackType stellarPackTaux = EnumExtensions.SafeParseECollectionPackType("StellarTaux");
 
-                case ECollectionPackType.RareCardPack:
-                case ECollectionPackType.DestinyRareCardPack:
-                    return Season.S02;
-
-                case ECollectionPackType.EpicCardPack:
-                case ECollectionPackType.DestinyEpicCardPack:
-                    return Season.S03;
-
-                case ECollectionPackType.LegendaryCardPack:
-                case ECollectionPackType.DestinyLegendaryCardPack:
-                default:
-                    return Season.HS;
-            }
-
+            if (packType == ECollectionPackType.BasicCardPack || packType == ECollectionPackType.DestinyBasicCardPack)
+                return Season.S01;
+            else if (packType == ECollectionPackType.RareCardPack || packType == ECollectionPackType.DestinyRareCardPack)
+                return Season.S02;
+            else if (packType == ECollectionPackType.EpicCardPack || packType == ECollectionPackType.DestinyEpicCardPack)
+                return Season.S03;
+            else if (packType == stellarPack || packType == stellarPackTaux)
+                return Season.S04;
+            else
+                return Season.HS;
         }
 
         public static WankulCardData DropCard(ECollectionPackType packType, List<WankulCardData> alreadySelectedCards, bool isTerrain = false, bool isMinRare = false, bool isMinLegendary = false)
         {
+            ECollectionPackType stellarPackTaux = EnumExtensions.SafeParseECollectionPackType("StellarTaux");
             bool increaseRarity = false;
             Season season = ConvertPackTypeToSeason(packType);
 
@@ -44,7 +40,8 @@ namespace WankulCrazyPlugin.inventory
                 packType == ECollectionPackType.DestinyBasicCardPack ||
                 packType == ECollectionPackType.DestinyRareCardPack ||
                 packType == ECollectionPackType.DestinyEpicCardPack ||
-                packType == ECollectionPackType.DestinyLegendaryCardPack
+                packType == ECollectionPackType.DestinyLegendaryCardPack ||
+                packType == stellarPackTaux
             )
             {
                 increaseRarity = true;
@@ -319,6 +316,115 @@ namespace WankulCrazyPlugin.inventory
         {
             string key = $"{cardData.monsterType}_{cardData.borderType}_{cardData.expansionType}";
             return Instance.wankulCards.Values.FirstOrDefault(card => $"{card.card.monsterType}_{card.card.borderType}_{card.card.expansionType}" == key);
+        }
+
+        public static bool isNewWankulCard(WankulCardData wankulCardData)
+        {
+            Instance.wankulCards.TryGetValue(wankulCardData.Index, out var card);
+            if (card.wankulcard == null)
+            {
+                return true;
+            }
+            return card.amount == 0;
+        }
+
+
+        public static (WankulCardData wankulcard, CardData card, int amount) GetWankulCardDataForTradeOffer() {
+            List<ECollectionPackType> dropableExpansion = [
+                ECollectionPackType.BasicCardPack
+            ];
+
+            EItemType stellarCardPack = EnumExtensions.SafeParseEItemType("BoosterStellar");
+            EItemType stellarCardPackTaux = EnumExtensions.SafeParseEItemType("BoosterStellarTaux");
+            ECollectionPackType stellarCardExpansion = EnumExtensions.SafeParseECollectionPackType("Stellar");
+            ECollectionPackType stellarCardExpansionTaux = EnumExtensions.SafeParseECollectionPackType("StellarTaux");
+
+            if (CPlayerData.m_ShopLevel >= InventoryBase.GetUnlockItemLevelRequired(EItemType.RareCardPack))
+            {
+                dropableExpansion.Add(ECollectionPackType.RareCardPack);
+            }
+            if (CPlayerData.m_ShopLevel >= InventoryBase.GetUnlockItemLevelRequired(EItemType.EpicCardPack))
+            {
+                dropableExpansion.Add(ECollectionPackType.RareCardPack);
+            }
+            if (CPlayerData.m_ShopLevel >= InventoryBase.GetUnlockItemLevelRequired(stellarCardPack))
+            {
+                dropableExpansion.Add(stellarCardExpansion);
+            }
+            if (CPlayerData.m_ShopLevel >= InventoryBase.GetUnlockItemLevelRequired(EItemType.LegendaryCardPack))
+            {
+                dropableExpansion.Add(ECollectionPackType.LegendaryCardPack);
+            }
+            if (CPlayerData.m_ShopLevel >= InventoryBase.GetUnlockItemLevelRequired(EItemType.DestinyBasicCardPack))
+            {
+                dropableExpansion.Add(ECollectionPackType.DestinyBasicCardPack);
+            }
+            if (CPlayerData.m_ShopLevel >= InventoryBase.GetUnlockItemLevelRequired(EItemType.DestinyRareCardPack))
+            {
+                dropableExpansion.Add(ECollectionPackType.DestinyRareCardPack);
+            }
+            if (CPlayerData.m_ShopLevel >= InventoryBase.GetUnlockItemLevelRequired(EItemType.DestinyEpicCardPack))
+            {
+                dropableExpansion.Add(ECollectionPackType.DestinyEpicCardPack);
+            }
+            if (CPlayerData.m_ShopLevel >= InventoryBase.GetUnlockItemLevelRequired(stellarCardPackTaux))
+            {
+                dropableExpansion.Add(stellarCardExpansionTaux);
+            }
+            if (CPlayerData.m_ShopLevel >= InventoryBase.GetUnlockItemLevelRequired(EItemType.DestinyLegendaryCardPack))
+            {
+                dropableExpansion.Add(ECollectionPackType.DestinyLegendaryCardPack);
+            }
+
+            ECollectionPackType selectedPackType = dropableExpansion[Random.Range(0, dropableExpansion.Count)];
+            bool isTerrain = Random.Range(0, 1) == 1;
+            bool isMinRare = Random.Range(0, 1) == 1;
+            bool isMinLegendary = Random.Range(0, 100) < 50;
+
+            WankulCardData wankulCardData = DropCard(selectedPackType, new List<WankulCardData>(), isTerrain, isMinRare, isMinLegendary);
+
+            CardData cardData = WankulCardsData.Instance.GetCardDataFromWankulCardData(wankulCardData);
+            if (cardData == null) {
+                cardData = WankulCardsData.Instance.GetUnassciatedCardData();
+                WankulCardsData.Instance.SetFromMonster(cardData, wankulCardData);
+            }
+            
+            int amount = Instance.wankulCards.ContainsKey(wankulCardData.Index) ? Instance.wankulCards[wankulCardData.Index].amount : 0;
+
+            return (wankulCardData, cardData, amount);
+        }
+
+        public static (WankulCardData wankulcard, CardData card, int amount) GetWankulCardDataForTradeOfferByPrice(CardData fromCardData)
+        {
+            WankulCardData fromWankulCardData = WankulCardsData.Instance.GetFromMonster(fromCardData, true);
+
+            if (fromWankulCardData == null)
+            {
+                Plugin.Logger.LogError("GetWankulCardDataForTradeOfferByPrice: No wankul card found for this card");
+                return GetWankulCardDataForTradeOffer();
+            }
+
+            float minFactor = 0.75f;
+            float maxFactor = 1.25f;
+
+            float minPrice = fromWankulCardData.MarketPrice * minFactor;
+            float maxPrice = fromWankulCardData.MarketPrice * maxFactor;
+
+            List<WankulCardData> inPriceBoundCards = WankulCardsData.Instance.cards.FindAll(card => card.MarketPrice >= minPrice && card.MarketPrice <= maxPrice && card.Index != fromWankulCardData.Index);
+
+            int randomValue = Random.Range(0, inPriceBoundCards.Count);
+            WankulCardData wankulCardData = inPriceBoundCards[randomValue];
+
+            int amount = Instance.wankulCards.ContainsKey(wankulCardData.Index) ? Instance.wankulCards[wankulCardData.Index].amount : 0;
+
+            CardData cardData = WankulCardsData.Instance.GetCardDataFromWankulCardData(wankulCardData);
+            if (cardData == null)
+            {
+                cardData = WankulCardsData.Instance.GetUnassciatedCardData();
+                WankulCardsData.Instance.SetFromMonster(cardData, wankulCardData);
+            }
+
+            return (wankulCardData, cardData, amount);
         }
     }
 }
