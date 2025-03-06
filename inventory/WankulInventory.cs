@@ -220,6 +220,176 @@ namespace WankulCrazyPlugin.inventory
             return null;
         }
 
+        public static WankulCardData DropCardGold(ECollectionPackType packType, List<WankulCardData> alreadySelectedCards)
+        {
+            ECollectionPackType stellarPackTaux = EnumExtensions.SafeParseECollectionPackType("StellarTaux");
+            bool increaseRarity = false;
+            Season season = ConvertPackTypeToSeason(packType);
+
+            if (
+                packType == ECollectionPackType.DestinyBasicCardPack ||
+                packType == ECollectionPackType.DestinyRareCardPack ||
+                packType == ECollectionPackType.DestinyEpicCardPack ||
+                packType == ECollectionPackType.DestinyLegendaryCardPack ||
+                packType == stellarPackTaux
+            )
+            {
+                increaseRarity = true;
+            }
+
+            List<WankulCardData> allCards = WankulCardsData.Instance.cards;
+
+
+            allCards = allCards.FindAll(card => card is not TerrainCardData);
+
+            List<WankulCardData> seasonalCard;
+
+            List<int> BattleGoldCards = [
+                357,
+                358,
+                359,
+                360,
+                361,
+                362,
+                363,
+                364,
+            ];
+
+            List<int> StellardGoldCards = [
+                734,
+                735,
+                736,
+                737,
+                738,
+                739,
+                740,
+                741,
+            ];
+
+            if (season == Season.S03)
+            {
+                seasonalCard = allCards.FindAll(card => BattleGoldCards.Contains(card.Index));
+            }
+            else if (season == Season.S04) {
+                seasonalCard = allCards.FindAll(card => StellardGoldCards.Contains(card.Index));
+            }
+            else
+            {
+                Plugin.Logger.LogError("No available cards to drop");
+                return null;
+            }
+
+
+            if (seasonalCard.Count == 0)
+            {
+                Plugin.Logger.LogError("No available cards to drop");
+                return null;
+            }
+
+            // Filtrer les cartes déjà sélectionnées pour éviter les doublons
+            seasonalCard = seasonalCard.Where(card => !alreadySelectedCards.Contains(card)).ToList();
+
+            if (seasonalCard.Count == 0)
+            {
+                Plugin.Logger.LogError("No available unique cards to drop");
+                return null;
+            }
+
+            float totalDropChance = 0f;
+            foreach (var card in seasonalCard)
+            {
+                float increaseFactor = 1f;
+                if (increaseRarity)
+                {
+                    if (card is EffigyCardData effigyCard)
+                    {
+                        switch (effigyCard.Rarity)
+                        {
+                            case Rarity.R:
+                                increaseFactor = 0.25f;
+                                break;
+                            case Rarity.UR1:
+                            case Rarity.UR2:
+                                increaseFactor = 1f;
+                                break;
+                            case Rarity.LB:
+                            case Rarity.LA:
+                            case Rarity.LO:
+                                increaseFactor = 2f;
+                                break;
+                            default:
+                                increaseFactor = 1f;
+                                break;
+                        }
+                    }
+                }
+                if (season == Season.HS)
+                {
+                    if (card is EffigyCardData effigyCard)
+                    {
+                        if (effigyCard.Rarity >= Rarity.PGW23)
+                        {
+                            increaseFactor = 2;
+                        }
+                    }
+                }
+                totalDropChance += card.Drop * increaseFactor;
+            }
+
+            float randomValue = Random.Range(0f, totalDropChance);
+            float cumulativeDropChance = 0f;
+
+            foreach (var card in seasonalCard)
+            {
+                float increaseFactor = 1f;
+                if (increaseRarity)
+                {
+                    if (card is EffigyCardData effigyCard)
+                    {
+                        switch (effigyCard.Rarity)
+                        {
+                            case Rarity.R:
+                                increaseFactor = 0.25f;
+                                break;
+                            case Rarity.UR1:
+                            case Rarity.UR2:
+                                increaseFactor = 1f;
+                                break;
+                            case Rarity.LB:
+                            case Rarity.LA:
+                            case Rarity.LO:
+                                increaseFactor = 2f;
+                                break;
+                            default:
+                                increaseFactor = 1f;
+                                break;
+                        }
+                    }
+                }
+                if (season == Season.HS)
+                {
+                    if (card is EffigyCardData effigyCard)
+                    {
+                        if (effigyCard.Rarity >= Rarity.PGW23)
+                        {
+                            increaseFactor = 2;
+                        }
+                    }
+                }
+
+                cumulativeDropChance += card.Drop * increaseFactor;
+                if (randomValue <= cumulativeDropChance)
+                {
+                    // Ajouter la carte sélectionnée aux cartes déjà sélectionnées pour éviter un doublon
+                    alreadySelectedCards.Add(card);
+                    return card;
+                }
+            }
+
+            Plugin.Logger.LogError("Failed to drop a card");
+            return null;
+        }
+
 
         public static WankulCardData randFromPackType(ECollectionPackType packType)
         {

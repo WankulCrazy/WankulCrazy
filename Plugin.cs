@@ -90,10 +90,6 @@ public class Plugin : BaseUnityPlugin
         MethodInfo patch_CardOpeningSequenceUpdate = AccessTools.Method(typeof(CardOpening), "Update");
         harmony.Patch(original_CardOpeningSequenceUpdate, prefix: new HarmonyMethod(patch_CardOpeningSequenceUpdate));
 
-        MethodInfo original_CardOpeningSequenceStart = AccessTools.Method(typeof(CardOpeningSequence), "Start");
-        MethodInfo patch_CardOpeningSequenceStart = AccessTools.Method(typeof(CardOpening), "Start");
-        harmony.Patch(original_CardOpeningSequenceStart, postfix: new HarmonyMethod(patch_CardOpeningSequenceStart));
-
         MethodInfo original_Update = AccessTools.Method(typeof(CardOpeningSequence), "Update");
         MethodInfo patch_Update = AccessTools.Method(typeof(CardOpening), "UpdatePreFix");
         harmony.Patch(original_Update, prefix: new HarmonyMethod(patch_Update));

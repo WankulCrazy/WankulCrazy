@@ -2,9 +2,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using UnityEngine;
 using WankulCrazyPlugin.cards;
+using WankulCrazyPlugin.importer;
 using WankulCrazyPlugin.inventory;
 using WankulCrazyPlugin.utils;
 using static UnityEngine.GraphicsBuffer;
@@ -29,93 +31,132 @@ namespace WankulCrazyPlugin.patch
             }
         }
 
-        public static void Start(CardOpeningSequence __instance)
+        public static void CheckBoosterSize(CardOpeningSequence __instance)
         {
-            if (__instance.m_Card3dUIList.Count >= boosterSize)
-            {
+            Item currentItem = (Item)Plugin.GetPProperty(__instance, "m_CurrentItem");
+            if (currentItem == null) {
                 return;
             }
 
-            // Utilisation de l'instance singleton de Card3dUISpawner
-            Card3dUISpawner card3dUISpawnerInstance = Card3dUISpawner.m_Instance;
-
-            if (card3dUISpawnerInstance == null)
+            if (currentItem.GetItemType() == EnumExtensions.SafeParseEItemType("BoosterGoldBattle") || currentItem.GetItemType() == EnumExtensions.SafeParseEItemType("BoosterGoldStellar"))
             {
-                Plugin.Logger.LogError("Card3dUISpawner instance is null.");
-                return;
+                boosterSize = 4;
+            }
+            else { 
+                boosterSize = 10;
             }
 
-            MethodInfo addCardPrefabMethod = typeof(Card3dUISpawner).GetMethod("AddCardPrefab", BindingFlags.Instance | BindingFlags.NonPublic);
-
-            if (addCardPrefabMethod == null)
+            if (__instance.m_Card3dUIList.Count < boosterSize)
             {
-                Plugin.Logger.LogError("Failed to get AddCardPrefab method.");
-                return;
+                // Utilisation de l'instance singleton de Card3dUISpawner
+                Card3dUISpawner card3dUISpawnerInstance = Card3dUISpawner.m_Instance;
+
+                if (card3dUISpawnerInstance == null)
+                {
+                    Plugin.Logger.LogError("Card3dUISpawner instance is null.");
+                    return;
+                }
+
+                MethodInfo addCardPrefabMethod = typeof(Card3dUISpawner).GetMethod("AddCardPrefab", BindingFlags.Instance | BindingFlags.NonPublic);
+
+                if (addCardPrefabMethod == null)
+                {
+                    Plugin.Logger.LogError("Failed to get AddCardPrefab method.");
+                    return;
+                }
+
+                int cardsToAdd = boosterSize - __instance.m_Card3dUIList.Count;
+                for (int i = 0; i < cardsToAdd; i++)
+                {
+
+
+                    Transform CardOpeningSequence_WorldUIGrp_Transform = Plugin.GetByPathIn("CanvasWorldspace", "CanvasGrp/CardOpeningSequence_WorldUIGrp/CardOpeningGrp");
+
+                    Card3dUIGroup existingCard3dUIGroup = __instance.m_Card3dUIList[__instance.m_Card3dUIList.Count - 1];
+                    Card3dUIGroup newCard3dUIGroup = Card3dUISpawner.m_Instance.GetCardUI();
+                    newCard3dUIGroup.gameObject.SetActive(true);
+                    newCard3dUIGroup.transform.SetParent(CardOpeningSequence_WorldUIGrp_Transform);
+                    newCard3dUIGroup.transform.rotation = existingCard3dUIGroup.transform.rotation;
+                    newCard3dUIGroup.transform.localScale = existingCard3dUIGroup.transform.localScale;
+                    newCard3dUIGroup.transform.localPosition = existingCard3dUIGroup.transform.localPosition;
+
+                    RectTransform rectTransform = (RectTransform)newCard3dUIGroup.transform;
+                    Vector3 anchoredPosition3D = rectTransform.anchoredPosition3D;
+                    anchoredPosition3D.z += 0.0001f * (i + 1);
+
+                    rectTransform.anchoredPosition3D = anchoredPosition3D;
+
+                    __instance.m_Card3dUIList.Add(newCard3dUIGroup);
+
+
+                    Transform AnimGrp_Transform = Plugin.FindChildByPath(newCard3dUIGroup.transform, "AnimGrp");
+                    Transform existingAnimGrp_Transform = Plugin.FindChildByPath(existingCard3dUIGroup.transform, "AnimGrp");
+                    Animation existingAnimation = existingAnimGrp_Transform.GetComponent<Animation>();
+
+                    AnimationCopier.CopyAnimation(existingAnimGrp_Transform.gameObject, AnimGrp_Transform.gameObject, "OpenCardNewCard");
+                    AnimationCopier.CopyAnimation(existingAnimGrp_Transform.gameObject, AnimGrp_Transform.gameObject, "OpenCardSlideExit");
+                    AnimationCopier.CopyAnimation(existingAnimGrp_Transform.gameObject, AnimGrp_Transform.gameObject, "OpenCardFinalReveal");
+                    AnimationCopier.CopyAnimation(existingAnimGrp_Transform.gameObject, AnimGrp_Transform.gameObject, "OpenCardDefaultPos");
+
+                    Animation AnimGrp_Animation = AnimGrp_Transform.GetComponent<Animation>();
+
+                    __instance.m_CardAnimList.Add(AnimGrp_Animation);
+
+
+                    Transform ShowAllCardPosList_Transform = Plugin.GetByPathIn("CanvasWorldspace", "CanvasGrp/CardOpeningSequence_WorldUIGrp/ShowAllCardPosList");
+
+                    RectTransform existingPos = (RectTransform)__instance.m_ShowAllCardPosList[__instance.m_ShowAllCardPosList.Count - 1];
+                    GameObject newGameObject = new GameObject($"ShowAllCardPos ({__instance.m_ShowAllCardPosList.Count + 1})");
+                    newGameObject.AddComponent<RectTransform>();
+                    RectTransform newPos = newGameObject.GetComponent<RectTransform>();
+                    newPos.gameObject.SetActive(true);
+                    newPos.SetParent(ShowAllCardPosList_Transform);
+                    newPos.position = existingPos.position;
+                    newPos.rotation = existingPos.rotation;
+                    newPos.localScale = existingPos.localScale;
+                    newPos.localPosition = existingPos.localPosition;
+
+                    __instance.m_ShowAllCardPosList.Add(newPos);
+                }
+
+                for (int i = 0; i < __instance.m_ShowAllCardPosList.Count; i++)
+                {
+                    RectTransform rectTransform = (RectTransform)__instance.m_ShowAllCardPosList[i];
+                    float t = (float)i / (__instance.m_ShowAllCardPosList.Count - 1); // Interpolation linéaire
+                    float xPosition = Mathf.Lerp(-0.1f, 0.11f, t);
+                    Vector3 localPosition = rectTransform.localPosition;
+                    localPosition.x = xPosition;
+                    rectTransform.localPosition = localPosition;
+                }
+            } else if (__instance.m_Card3dUIList.Count > boosterSize)
+            {
+                int cardsToRemove = __instance.m_Card3dUIList.Count - boosterSize;
+
+                for (int i = 0; i < cardsToRemove; i++)
+                {
+                    Card3dUIGroup card3dUIGroup = __instance.m_Card3dUIList[__instance.m_Card3dUIList.Count - 1];
+                    __instance.m_Card3dUIList.RemoveAt(__instance.m_Card3dUIList.Count - 1);
+                    InventoryBase.Destroy(card3dUIGroup.gameObject);
+
+                    RectTransform rectTransform = (RectTransform)__instance.m_ShowAllCardPosList[__instance.m_ShowAllCardPosList.Count - 1];
+                    __instance.m_ShowAllCardPosList.RemoveAt(__instance.m_ShowAllCardPosList.Count - 1);
+                    InventoryBase.Destroy(rectTransform.gameObject);
+
+                    __instance.m_CardAnimList.RemoveAt(__instance.m_CardAnimList.Count - 1);
+                }
+
+                for (int i = 0; i < __instance.m_ShowAllCardPosList.Count; i++)
+                {
+                    RectTransform rectTransform = (RectTransform)__instance.m_ShowAllCardPosList[i];
+                    float t = (float)i / (__instance.m_ShowAllCardPosList.Count - 1); // Interpolation linéaire
+                    float xPosition = Mathf.Lerp(-0.1f, 0.11f, t);
+                    Vector3 localPosition = rectTransform.localPosition;
+                    localPosition.x = xPosition;
+                    rectTransform.localPosition = localPosition;
+                }
+
             }
 
-            int cardsToAdd = boosterSize - __instance.m_Card3dUIList.Count;
-            for (int i = 0; i < cardsToAdd; i++)
-            {
-
-
-                Transform CardOpeningSequence_WorldUIGrp_Transform = Plugin.GetByPathIn("CanvasWorldspace", "CanvasGrp/CardOpeningSequence_WorldUIGrp/CardOpeningGrp");
-
-                Card3dUIGroup existingCard3dUIGroup = __instance.m_Card3dUIList[__instance.m_Card3dUIList.Count - 1];
-                Card3dUIGroup newCard3dUIGroup = Card3dUISpawner.m_Instance.GetCardUI();
-                newCard3dUIGroup.gameObject.SetActive(true);
-                newCard3dUIGroup.transform.SetParent(CardOpeningSequence_WorldUIGrp_Transform);
-                newCard3dUIGroup.transform.rotation = existingCard3dUIGroup.transform.rotation;
-                newCard3dUIGroup.transform.localScale = existingCard3dUIGroup.transform.localScale;
-                newCard3dUIGroup.transform.localPosition = existingCard3dUIGroup.transform.localPosition;
-
-                RectTransform rectTransform = (RectTransform)newCard3dUIGroup.transform;
-                Vector3 anchoredPosition3D = rectTransform.anchoredPosition3D;
-                anchoredPosition3D.z += 0.001f * (i + 1);
-
-                rectTransform.anchoredPosition3D = anchoredPosition3D;
-
-                __instance.m_Card3dUIList.Add(newCard3dUIGroup);
-
-
-                Transform AnimGrp_Transform = Plugin.FindChildByPath(newCard3dUIGroup.transform, "AnimGrp");
-                Transform existingAnimGrp_Transform = Plugin.FindChildByPath(existingCard3dUIGroup.transform, "AnimGrp");
-                Animation existingAnimation = existingAnimGrp_Transform.GetComponent<Animation>();
-
-                AnimationCopier.CopyAnimation(existingAnimGrp_Transform.gameObject, AnimGrp_Transform.gameObject, "OpenCardNewCard");
-                AnimationCopier.CopyAnimation(existingAnimGrp_Transform.gameObject, AnimGrp_Transform.gameObject, "OpenCardSlideExit");
-                AnimationCopier.CopyAnimation(existingAnimGrp_Transform.gameObject, AnimGrp_Transform.gameObject, "OpenCardFinalReveal");
-                AnimationCopier.CopyAnimation(existingAnimGrp_Transform.gameObject, AnimGrp_Transform.gameObject, "OpenCardDefaultPos");
-
-                Animation AnimGrp_Animation = AnimGrp_Transform.GetComponent<Animation>();
-
-                __instance.m_CardAnimList.Add(AnimGrp_Animation);
-
-
-                Transform ShowAllCardPosList_Transform = Plugin.GetByPathIn("CanvasWorldspace", "CanvasGrp/CardOpeningSequence_WorldUIGrp/ShowAllCardPosList");
-
-                RectTransform existingPos = (RectTransform)__instance.m_ShowAllCardPosList[__instance.m_ShowAllCardPosList.Count - 1];
-                GameObject newGameObject = new GameObject($"ShowAllCardPos ({__instance.m_ShowAllCardPosList.Count + 1})");
-                newGameObject.AddComponent<RectTransform>();
-                RectTransform newPos = newGameObject.GetComponent<RectTransform>();
-                newPos.gameObject.SetActive(true);
-                newPos.SetParent(ShowAllCardPosList_Transform);
-                newPos.position = existingPos.position;
-                newPos.rotation = existingPos.rotation;
-                newPos.localScale = existingPos.localScale;
-                newPos.localPosition = existingPos.localPosition;
-
-                __instance.m_ShowAllCardPosList.Add(newPos);
-            }
-
-            for (int i = 0; i < __instance.m_ShowAllCardPosList.Count; i++)
-            {
-                RectTransform rectTransform = (RectTransform)__instance.m_ShowAllCardPosList[i];
-                float t = (float)i / (__instance.m_ShowAllCardPosList.Count - 1); // Interpolation linéaire
-                float xPosition = Mathf.Lerp(-0.1f, 0.11f, t);
-                Vector3 localPosition = rectTransform.localPosition;
-                localPosition.x = xPosition;
-                rectTransform.localPosition = localPosition;
-            }
         }
 
         public static void OpenBooster(List<CardData> ___m_RolledCardDataList, List<float> ___m_CardValueList, ECollectionPackType ___m_CollectionPackType, Item ___m_CurrentItem, List<CardData> ___m_SecondaryRolledCardDataList, CardOpeningSequence __instance)
@@ -182,7 +223,17 @@ namespace WankulCrazyPlugin.patch
                         }
                     }
                 }
-                WankulCardData wankulCard = WankulInventory.DropCard(___m_CollectionPackType, alreadySelectedCards, isTerrain, isMinRare, isMinUR, isMinLegendary, isRare);
+
+                Item currentItem = (Item)Plugin.GetPProperty(__instance, "m_CurrentItem");
+                WankulCardData wankulCard;
+                if (currentItem.GetItemType() == EnumExtensions.SafeParseEItemType("BoosterGoldBattle") || currentItem.GetItemType() == EnumExtensions.SafeParseEItemType("BoosterGoldStellar") && boosterSize == 4)
+                {
+                    wankulCard = WankulInventory.DropCardGold(___m_CollectionPackType, alreadySelectedCards);
+                }
+                else
+                {
+                    wankulCard = WankulInventory.DropCard(___m_CollectionPackType, alreadySelectedCards, isTerrain, isMinRare, isMinUR, isMinLegendary, isRare);
+                }
                 CardData associatedCard = wankulCardsData.GetCardDataFromWankulCardData(wankulCard);
 
                 if (associatedCard == null)
@@ -264,12 +315,50 @@ namespace WankulCrazyPlugin.patch
                 URBoosters.Clear();
                 RareBoosters.Clear();
 
+                bool shouldGenGoldBooster = false;
+                int boosterGoldIndex = -1;
+
                 List<Item> m_HoldItemList = (List<Item>)AccessTools.Field(__instance.GetType(), "m_HoldItemList").GetValue(__instance);
                 List<int>availableHash = new List<int>();
+
+                ECollectionPackType collectionPackType = InventoryBase.ItemTypeToCollectionPackType(m_HoldItemList[0].GetItemType());
+                if (
+                    collectionPackType == ECollectionPackType.EpicCardPack ||
+                    collectionPackType == ECollectionPackType.DestinyEpicCardPack ||
+                    collectionPackType == EnumExtensions.SafeParseECollectionPackType("Stellar") ||
+                    collectionPackType == EnumExtensions.SafeParseECollectionPackType("StellarTaux")
+                )
+                {
+                    shouldGenGoldBooster = UnityEngine.Random.Range(0, 20) == 0;
+                }
+
+                if (shouldGenGoldBooster) {
+                    boosterGoldIndex = UnityEngine.Random.RandomRangeInt(0, m_HoldItemList.Count);
+                }
+
                 for (int i = 0; i < m_HoldItemList.Count; i++)
                 {
                     Item item = m_HoldItemList[i];
-                    availableHash.Add(item.GetHashCode());
+                    if (shouldGenGoldBooster && i == boosterGoldIndex)
+                    {
+                        if (collectionPackType == ECollectionPackType.EpicCardPack || collectionPackType == ECollectionPackType.DestinyEpicCardPack)
+                        {
+                            Plugin.SetPProperty(item, "m_ItemType", EnumExtensions.SafeParseEItemType("BoosterGoldBattle"));
+
+                            ItemMeshData itemMeshData = InventoryBase.GetItemMeshData(item.GetItemType());
+                            item.SetMesh(itemMeshData.mesh, itemMeshData.material, EnumExtensions.SafeParseEItemType("BoosterGoldBattle"));
+                        }
+                        else if (collectionPackType == EnumExtensions.SafeParseECollectionPackType("Stellar") || collectionPackType == EnumExtensions.SafeParseECollectionPackType("StellarTaux"))
+                        {
+                            Plugin.SetPProperty(item, "m_ItemType", EnumExtensions.SafeParseEItemType("BoosterGoldStellar"));
+
+                            ItemMeshData itemMeshData = InventoryBase.GetItemMeshData(item.GetItemType());
+                            item.SetMesh(itemMeshData.mesh, itemMeshData.material, EnumExtensions.SafeParseEItemType("BoosterGoldStellar"));
+                        }
+                    }
+                    else { 
+                        availableHash.Add(item.GetHashCode());
+                    }
                 }
 
                 int randomHash = availableHash[UnityEngine.Random.RandomRangeInt(0, availableHash.Count)];
@@ -300,6 +389,8 @@ namespace WankulCrazyPlugin.patch
 
         public static bool Update(CardOpeningSequence __instance)
         {
+            CheckBoosterSize(__instance);
+
             MethodInfo InitOpenSequence = __instance.GetType().GetMethod("InitOpenSequence", BindingFlags.Instance | BindingFlags.NonPublic);
 
             Plugin.SetPProperty(__instance, "m_IsAutoFire", false);

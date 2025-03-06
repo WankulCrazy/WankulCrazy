@@ -23,7 +23,9 @@ public static class EnumExtensions
                 { 131, "StarterShowtime" },
                 { 132, "TapisS41" },
                 { 133, "TapisS42" },
-                { 134, "ClasseurS4" }
+                { 134, "ClasseurS4" },
+                { 135, "BoosterGoldBattle" },
+                { 136, "BoosterGoldStellar" }
             }
         },
         {
