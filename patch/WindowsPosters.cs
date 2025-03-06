@@ -25,12 +25,12 @@ namespace WankulCrazyPlugin.patch
 
             string[] texturePaths = new string[]
             {
-                Path.Combine(Plugin.GetPluginPath(), "data", "sprites", "Affiche_Pack_Commun.png"),
-                Path.Combine(Plugin.GetPluginPath(), "data", "sprites", "Affiche_Pack_Rare.png"),
-                Path.Combine(Plugin.GetPluginPath(), "data", "sprites", "Affiche_Pack_Shiny.png"),
-                Path.Combine(Plugin.GetPluginPath(), "data", "sprites", "Affiche_Pack_Legendaire.png"),
                 Path.Combine(Plugin.GetPluginPath(), "data", "sprites", "Affiche_Pack_Gold.png"),
-                Path.Combine(Plugin.GetPluginPath(), "data", "sprites", "Affiche_Pack_Gamer.png")
+                Path.Combine(Plugin.GetPluginPath(), "data", "sprites", "Affiche_Pack_Legendaire.png"),
+                Path.Combine(Plugin.GetPluginPath(), "data", "sprites", "Affiche_Pack_Gamer.png"),
+                Path.Combine(Plugin.GetPluginPath(), "data", "sprites", "Affiche_Pack_Shiny.png"),
+                Path.Combine(Plugin.GetPluginPath(), "data", "sprites", "Affiche_Pack_Rare.png"),
+                Path.Combine(Plugin.GetPluginPath(), "data", "sprites", "Affiche_Pack_Commun.png"),
             };
 
             for (int i = 0; i < positions.Length; i++)
