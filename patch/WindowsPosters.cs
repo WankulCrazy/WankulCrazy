@@ -15,9 +15,9 @@ namespace WankulCrazyPlugin.patch
 
             Vector3[] positions = new Vector3[]
             {
-                new Vector3(-0.4545f, 0.7963f, 0.5f),
-                new Vector3(1.7419f, 0.7963f, 0.5f),
-                new Vector3(3.8383f, 0.7963f, 0.5f),
+                new Vector3(-0.454f, 0.7963f, 0.5f),
+                new Vector3(1.7423f, 0.7963f, 0.5f),
+                new Vector3(3.8385f, 0.7963f, 0.5f),
                 new Vector3(5.8347f, 0.7963f, 0.5f),
                 new Vector3(7.86f, 0.7963f, 0.5f),
                 new Vector3(9.85f, 0.7963f, 0.5f)
@@ -36,18 +36,23 @@ namespace WankulCrazyPlugin.patch
             for (int i = 0; i < positions.Length; i++)
             {
                 string posterName = "Poster" + (i + 1);
-                GameObject poster = new GameObject(posterName);
+                GameObject poster = GameObject.CreatePrimitive(PrimitiveType.Quad); // Utiliser un Quad
+                poster.name = posterName;
 
-                SpriteRenderer spriteRenderer = poster.AddComponent<SpriteRenderer>();
+                MeshRenderer meshRenderer = poster.GetComponent<MeshRenderer>();
+                Material material = new Material(Shader.Find("Standard")); // Utiliser un shader existant
+                meshRenderer.material = material;
 
                 string texturePath = texturePaths[i];
                 Texture2D texture = LoadPNG(texturePath);
 
                 if (texture != null)
                 {
-                    spriteRenderer.sprite = TextureToSprite(texture);
-                    spriteRenderer.material.SetInt("_ZWrite", 1);
-                    Plugin.Logger.LogInfo(posterName + " : Sprite créé avec succès");
+                    material.mainTexture = texture;
+                    meshRenderer.material = material;
+                    // 🔹 Ajuster la taille du Quad pour correspondre au ratio de l’image
+                    float aspectRatio = (float)texture.width / texture.height;
+                    poster.transform.localScale = new Vector3(aspectRatio, 1f, 1f);
                 }
                 else
                 {
@@ -56,9 +61,9 @@ namespace WankulCrazyPlugin.patch
 
                 poster.transform.SetParent(Windows_Transform, false);
                 poster.transform.localPosition = positions[i];
-                poster.transform.localScale = new Vector2(0.048f, 0.048f);
                 poster.transform.localRotation = Quaternion.Euler(0, 180, 0);
             }
+
         }
 
         public static Texture2D LoadPNG(string filePath)
