@@ -135,7 +135,7 @@ namespace WankulCrazyPlugin.importer
             return adjustedTexture;
         }
 
-        private static Texture2D LoadTexture2D(string filePath)
+        public static Texture2D LoadTexture2D(string filePath)
         {
             byte[] bytes = File.ReadAllBytes(filePath);
             Texture2D texture = new Texture2D(2, 2, TextureFormat.RGBA32, true);

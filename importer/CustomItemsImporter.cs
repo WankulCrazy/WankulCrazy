@@ -315,6 +315,8 @@ namespace WankulCrazyPlugin.importer
             EItemType displayStellar = EnumExtensions.SafeParseEItemType("DisplayStellar");
             EItemType boosterStellarTaux = EnumExtensions.SafeParseEItemType("BoosterStellarTaux");
             EItemType displayStellarTaux = EnumExtensions.SafeParseEItemType("DisplayStellarTaux");
+            EItemType boosterGoldBattle = EnumExtensions.SafeParseEItemType("BoosterGoldBattle");
+            EItemType boosterGoldStellar = EnumExtensions.SafeParseEItemType("BoosterGoldStellar");
             ECollectionPackType stellarPack = EnumExtensions.SafeParseECollectionPackType("Stellar");
             ECollectionPackType stellarPackTaux = EnumExtensions.SafeParseECollectionPackType("StellarTaux");
 
@@ -322,7 +324,7 @@ namespace WankulCrazyPlugin.importer
                 __result = ECollectionPackType.BasicCardPack;
             else if (itemType == EItemType.RareCardPack || itemType == EItemType.RareCardBox)
                 __result = ECollectionPackType.RareCardPack;
-            else if (itemType == EItemType.EpicCardPack || itemType == EItemType.EpicCardBox)
+            else if (itemType == EItemType.EpicCardPack || itemType == EItemType.EpicCardBox || itemType == boosterGoldBattle)
                 __result = ECollectionPackType.EpicCardPack;
             else if (itemType == EItemType.LegendaryCardPack || itemType == EItemType.LegendaryCardBox)
                 __result = ECollectionPackType.LegendaryCardPack;
@@ -330,7 +332,7 @@ namespace WankulCrazyPlugin.importer
                 __result = ECollectionPackType.DestinyBasicCardPack;
             else if (itemType == EItemType.DestinyRareCardPack || itemType == EItemType.DestinyRareCardBox)
                 __result = ECollectionPackType.DestinyRareCardPack;
-            else if (itemType == EItemType.DestinyEpicCardPack || itemType == EItemType.DestinyEpicCardBox)
+            else if (itemType == EItemType.DestinyEpicCardPack || itemType == EItemType.DestinyEpicCardBox || itemType == boosterGoldBattle)
                 __result = ECollectionPackType.DestinyEpicCardPack;
             else if (itemType == EItemType.DestinyLegendaryCardPack || itemType == EItemType.DestinyLegendaryCardBox)
                 __result = ECollectionPackType.DestinyLegendaryCardPack;
@@ -342,9 +344,9 @@ namespace WankulCrazyPlugin.importer
                 __result = ECollectionPackType.FantasyRPGPack;
             else if (itemType == EItemType.CatJobPack)
                 __result = ECollectionPackType.CatJobPack;
-            else if (itemType == boosterStellar || itemType == displayStellar)
+            else if (itemType == boosterStellar || itemType == displayStellar || itemType == boosterGoldStellar)
                 __result = stellarPack;
-            else if (itemType == boosterStellarTaux || itemType == displayStellarTaux)
+            else if (itemType == boosterStellarTaux || itemType == displayStellarTaux || itemType == boosterGoldStellar)
                 __result = stellarPackTaux;
             else
                 __result = ECollectionPackType.None;
