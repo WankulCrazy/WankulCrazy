@@ -20,6 +20,8 @@ namespace WankulCrazyPlugin.patch
         public static List<int> URBoosters = new List<int>();
         public static List<int> RareBoosters = new List<int>();
         public static int boosterSize = 10;
+        private static readonly int randomGoldBoosterSeedBase = 10;
+        private static int randomGoldBoosterSeed = 10;
 
         public static void UpdatePreFix(ref List<CardData> ___m_RolledCardDataList, CardOpeningSequence __instance)
         {
@@ -329,11 +331,20 @@ namespace WankulCrazyPlugin.patch
                     collectionPackType == EnumExtensions.SafeParseECollectionPackType("StellarTaux")
                 )
                 {
-                    shouldGenGoldBooster = UnityEngine.Random.Range(0, 20) == 0;
+                    int random = UnityEngine.Random.Range(0, randomGoldBoosterSeed);
+                    //Plugin.Logger.LogInfo($"Random Gold booster: {random}");
+                    //Plugin.Logger.LogInfo($"Random Gold booster seed: {randomGoldBoosterSeed}");
+                    shouldGenGoldBooster = random == 0;
                 }
 
-                if (shouldGenGoldBooster) {
+                if (shouldGenGoldBooster)
+                {
                     boosterGoldIndex = UnityEngine.Random.RandomRangeInt(0, m_HoldItemList.Count);
+                    randomGoldBoosterSeed = randomGoldBoosterSeedBase;
+                }
+                else
+                {
+                    randomGoldBoosterSeed--;
                 }
 
                 for (int i = 0; i < m_HoldItemList.Count; i++)
