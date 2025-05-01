@@ -32,13 +32,32 @@ namespace WankulCrazyPlugin.importer
                 }
             }
         }
-
-        private static void ReplaceTexture(Texture2D original, Texture2D replacement)
+        public static Texture2D ReplaceTexture(Texture2D original, Texture2D replacement)
         {
+            // Cas spécial : original est vide → on en recrée une
+            if (original.width == 0 && original.height == 0)
+            {
+                //Plugin.Logger.LogWarning("Texture originale vide (0x0). Création d'une nouvelle texture.");
+
+                Texture2D newTexture = new Texture2D(replacement.width, replacement.height, replacement.format, replacement.mipmapCount > 1);
+                newTexture.name = replacement.name + "_Generated";
+
+                try
+                {
+                    Graphics.CopyTexture(replacement, newTexture);
+                }
+                catch (Exception ex)
+                {
+                    Plugin.Logger.LogError($"Erreur de copie (cas spécial) : {ex.Message}");
+                }
+
+                return newTexture;
+            }
+
             if (original.width != replacement.width || original.height != replacement.height)
             {
-                Plugin.Logger.LogError("Les dimensions des textures ne correspondent pas.");
-                return;
+                Plugin.Logger.LogError($"Dimensions incompatibles. Original: {original.width}x{original.height}, Remplacement: {replacement.width}x{replacement.height}");
+                return original;
             }
 
             if (original.format != replacement.format)
@@ -57,8 +76,10 @@ namespace WankulCrazyPlugin.importer
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Erreur lors du remplacement de la texture : {ex.Message}");
+                Plugin.Logger.LogError($"Erreur lors de la copie : {ex.Message}");
             }
+
+            return original;
         }
 
         private static Texture2D ConvertTextureFormat(Texture2D texture, TextureFormat format, int mipCount)
