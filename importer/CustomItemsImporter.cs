@@ -273,6 +273,7 @@ namespace WankulCrazyPlugin.importer
                                     {
                                     }
                                 }
+                                OBJImporter.tempmesh.gameObject.SetActive(false);
 
                                 string textureRelativePath = itemMeshDataJson.GetValue("texture").Value<string>();
                                 string texturePath = Path.Combine(customItemsPath, "textures", textureRelativePath);
