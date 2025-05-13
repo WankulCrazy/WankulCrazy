@@ -272,6 +272,14 @@ public class Plugin : BaseUnityPlugin
         MethodInfo original_GetCardAmount = AccessTools.Method(typeof(CPlayerData), "GetCardAmount");
         MethodInfo patch_GetCardAmount = AccessTools.Method(typeof(CPlayerDataPatch), "GetCardAmount");
         harmony.Patch(original_GetCardAmount, prefix: new HarmonyMethod(patch_GetCardAmount));
+
+        MethodInfo original_PosterStart = AccessTools.Method(typeof(InteractableObject), "Start");
+        MethodInfo patch_PosterStart = AccessTools.Method(typeof(WankulCrazyPlugin.patch.PosterPosterMeshToColliderPatch), "Postfix");
+        harmony.Patch(original_PosterStart, postfix: new HarmonyMethod(patch_PosterStart));
+
+        MethodInfo original_PosterUpdate = AccessTools.Method(typeof(InteractableObject), "Update");
+        MethodInfo patch_PosterUpdate = AccessTools.Method(typeof(WankulCrazyPlugin.patch.PosterDashedLineHiderPatch), "Postfix");
+        harmony.Patch(original_PosterUpdate, postfix: new HarmonyMethod(patch_PosterUpdate));
     }
 
     public static string GetPluginPath()
