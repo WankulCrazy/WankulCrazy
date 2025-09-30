@@ -66,7 +66,7 @@ namespace WankulCrazyPlugin.patch
                     wankulCardsSet[cardIndexOffset] = wankulCards[cardIndexOffset];
                 }
 
-                __instance.m_CheckPricePanelUIList[j].InitCard(__instance, cardIndexOffset, m_CurrentExpansionType, false);
+                __instance.m_CheckPricePanelUIList[j].InitCard(__instance, cardIndexOffset, m_CurrentExpansionType, false, 0);
                 __instance.m_CheckPricePanelUIList[j].SetActive(isActive: true);
                 __instance.m_ScrollEndParent.transform.parent = __instance.m_CheckPricePanelUIList[j].transform;
                 __instance.m_ScrollEndParent.transform.position = __instance.m_CheckPricePanelUIList[j].transform.position;
@@ -206,7 +206,7 @@ namespace WankulCrazyPlugin.patch
         public static bool OnPressOpenCardPriceGraph(int cardIndex, ECardExpansionType expansionType, bool isDestiny, CheckPriceScreen __instance)
         {
             isFromCheckPriceList = true;
-            __instance.m_ItemPriceGraphScreen.ShowCardPriceChart(cardIndex, expansionType, isDestiny);
+            __instance.m_ItemPriceGraphScreen.ShowCardPriceChart(cardIndex, expansionType, isDestiny, 0);
 
             MethodInfo openChildScreenMethod = __instance.GetType().GetMethod("OpenChildScreen", BindingFlags.Instance | BindingFlags.NonPublic);
             openChildScreenMethod.Invoke(__instance, new object[] { __instance.m_ItemPriceGraphScreen });
